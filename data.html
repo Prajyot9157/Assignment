@@ -607,7 +607,7 @@
                 // Expertise Match
                 if (expertFn !== 'all' && !e.toLowerCase().includes(expertFn)) return false;
                 // Search Match
-                const txt = (app.fullName + app.email + app.college).toLowerCase();
+                const txt = ((app.fullName || '') + (app.email || '') + (app.college || '')).toLowerCase();
                 if (searchFn && !txt.includes(searchFn)) return false;
                 
                 return true;
@@ -662,14 +662,13 @@
 
             const content = document.getElementById('modalContent');
             content.innerHTML = `
-                <div class="detail-item"><label>Full Name</label><p>${app.fullName}</p></div>
-                <div class="detail-item"><label>Email</label><p>${app.email}</p></div>
+                <div class="detail-item"><label>Full Name</label><p>${app.fullName || 'N/A'}</p></div>
+                <div class="detail-item"><label>Email</label><p>${app.email || 'N/A'}</p></div>
                 <div class="detail-item"><label>Phone</label><p>${app.phone || 'N/A'}</p></div>
                 <div class="detail-item"><label>College</label><p>${app.college || 'N/A'}</p></div>
-                <div class="detail-item"><label>Year</label><p>${app.year || 'N/A'}</p></div>
                 <div class="detail-item"><label>Expertise</label><p>${app.expertise || 'N/A'}</p></div>
-                <div class="detail-item full-width"><label>Experience</label><p>${app.experience || 'None'}</p></div>
-                <div class="detail-item full-width"><label>Bio</label><p>${app.bio || 'None'}</p></div>
+                <div class="detail-item"><label>Status</label><p style="text-transform: capitalize;">${app.status || 'Pending'}</p></div>
+                <div class="detail-item full-width"><label>Bio & Experience</label><p>${app.bio || app.experience || 'None provided'}</p></div>
             `;
             
             modal.classList.add('active');
@@ -751,7 +750,8 @@
         document.getElementById('rejectBtn').onclick = () => updateStatus('rejected');
         document.getElementById('emailBtn').onclick = () => {
             const app = allApplications.find(a => a.id === currentId);
-            if(app) window.open(`mailto:${app.email}?subject=Regarding Your Application`);
+            if(app && app.email) window.open(`mailto:${app.email}?subject=Regarding Your Application`);
+            else showToast("No email provided", 'error');
         };
 
         // Filter Events
