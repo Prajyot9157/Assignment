@@ -402,41 +402,47 @@
     <section id="apply" class="container" style="margin-bottom: 100px;">
         <h2 class="section-title" data-aos="fade-up">Join the Team</h2>
         <div class="form-container" data-aos="fade-up">
-            <form onsubmit="handleApply(event)">
+            <form id="partnerForm">
                 <div class="input-group">
                     <label>Full Name</label>
-                    <input type="text" placeholder="e.g. Ayush wadke " required>
+                    <input type="text" id="fullName" placeholder="e.g. Ayush wadke" required>
+                </div>
+                
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="yourname@example.com" required>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="input-group">
                         <label>Phone Number (WhatsApp)</label>
-                        <input type="tel" placeholder="7048×××××8" required>
+                        <input type="tel" id="phone" placeholder="7048×××××8" required>
                     </div>
                     <div class="input-group">
                         <label>College / University</label>
-                        <input type="text" placeholder="e.g. COEP, Pune" required>
+                        <input type="text" id="college" placeholder="e.g. COEP, Pune" required>
                     </div>
                 </div>
 
                 <div class="input-group">
                     <label>Expertise (Select all that apply)</label>
-                    <select required>
+                    <select id="expertise" required>
                         <option value="">Select your skill...</option>
                         <option value="handwriting">Handwriting / Journals</option>
                         <option value="ppt">PPT Making</option>
                         <option value="coding">Coding / Technical Projects</option>
                         <option value="research">Thesis / Report Writing</option>
+                        <option value="math">Mathematics</option>
                     </select>
                 </div>
 
                 <div class="input-group">
                     <label>Short Bio / Experience</label>
-                    <textarea rows="4" placeholder="Tell us why you are a good fit..."></textarea>
+                    <textarea id="bio" rows="4" placeholder="Tell us why you are a good fit..."></textarea>
                 </div>
 
                 <div class="input-group" style="text-align: center;">
-                    <button type="submit" class="btn" style="width: 100%;">Submit Application</button>
+                    <button type="submit" id="submitBtn" class="btn" style="width: 100%;">Submit Application</button>
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px;">
                         By clicking submit, you agree to our quality standards.
                     </p>
@@ -457,11 +463,30 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
     
-    <script>
-        // 1. Init Animations
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+        // Firebase Config (Matches your Data file)
+       const firebaseConfig = {
+  apiKey: "AIzaSyCtBKO-YfypE9rtkYq3O5QKeEPszC8fP6o",
+  authDomain: "studiment.firebaseapp.com",
+  databaseURL: "https://studiment-default-rtdb.firebaseio.com",
+  projectId: "studiment",
+  storageBucket: "studiment.firebasestorage.app",
+  messagingSenderId: "49480809046",
+  appId: "1:49480809046:web:f6abb0bfa13ec1a35299f7"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const appsRef = ref(db, "writer-applications");
+
+        // UI Logic
         AOS.init({ duration: 800, offset: 50 });
 
-        // 2. Typing Effect for Hero
         var typed = new Typed('#typing-text', {
             strings: ['Income 💰', 'Experience 📈', 'Pocket Money 💸'],
             typeSpeed: 60,
@@ -469,31 +494,79 @@
             loop: true
         });
 
-        // 3. Sidebar Toggle Logic
-        function toggleMenu() {
+        // Toggle Sidebar (We attach this to window so onclick works in HTML)
+        window.toggleMenu = function() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
         }
-        document.getElementById('overlay').addEventListener('click', toggleMenu);
+        document.getElementById('overlay').addEventListener('click', window.toggleMenu);
 
-        // 4. Mock Form Submission
-        function handleApply(e) {
+        // REAL Form Submission logic
+        document.getElementById('partnerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
+            const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
-            
+
+            // Get Values
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const college = document.getElementById('college').value;
+            const expertise = document.getElementById('expertise').value;
+            const bio = document.getElementById('bio').value;
+
+            // Simple validation
+            if(!fullName || !phone || !college || !expertise || !email) {
+                alert("Please fill all required fields");
+                return;
+            }
+
+            // Visual Feedback
             btn.innerText = "Sending...";
             btn.style.opacity = "0.7";
-            
-            setTimeout(() => {
-                alert("Application Sent! We will contact you on WhatsApp shortly.");
+            btn.disabled = true;
+
+            const newApp = {
+                fullName,
+                email,
+                phone,
+                college,
+                expertise,
+                bio,
+                status: 'pending',
+                timestamp: Date.now()
+            };
+
+            try {
+                // Send to Firebase
+                await push(appsRef, newApp);
+                
+                // Success State
                 btn.innerText = "Application Submitted ✓";
                 btn.style.background = "var(--success)";
+                btn.style.opacity = "1";
                 e.target.reset();
-            }, 1500);
-        }
+                
+                setTimeout(() => {
+                    alert("Application Sent! We will contact you shortly.");
+                    // Reset button after a delay
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.style.background = "";
+                        btn.disabled = false;
+                    }, 2000);
+                }, 500);
+
+            } catch (error) {
+                console.error("Error sending application:", error);
+                alert("Something went wrong. Please check your connection and try again.");
+                btn.innerText = "Try Again";
+                btn.style.background = "var(--accent)";
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
- </html>
+</html>
