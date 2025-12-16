@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Studiment </title>
+    <title>Admin Dashboard | Studiment</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,6 +34,61 @@
                 radial-gradient(circle at 10% 20%, rgba(99,102,241,0.1) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(14,165,233,0.1) 0%, transparent 40%);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Login Overlay --- */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(99,102,241,0.15) 0%, transparent 60%);
+        }
+
+        .login-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .login-logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--secondary), var(--primary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .login-error {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--accent);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid rgba(244, 63, 94, 0.3);
         }
 
         /* --- Layout & Typography --- */
@@ -42,6 +97,16 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px 0 60px 0;
+            filter: blur(10px); /* Initially blurred until login */
+            opacity: 0;
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+
+        .admin-container.authenticated {
+            filter: blur(0);
+            opacity: 1;
+            pointer-events: all;
         }
 
         h1, h2, h3 { margin: 0; }
@@ -78,7 +143,7 @@
         /* --- Buttons --- */
         .btn {
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 500;
             border: none;
             cursor: pointer;
@@ -86,6 +151,7 @@
             font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             color: white;
             text-decoration: none;
@@ -93,8 +159,11 @@
 
         .btn:active { transform: scale(0.96); }
 
-        .btn-primary { background: var(--primary); }
-        .btn-primary:hover { background: #4f46e5; }
+        .btn-primary { 
+            background: var(--primary); 
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover { background: #4f46e5; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4); }
 
         .btn-danger { background: rgba(244, 63, 94, 0.2); color: var(--accent); border: 1px solid rgba(244, 63, 94, 0.3); }
         .btn-danger:hover { background: rgba(244, 63, 94, 0.3); }
@@ -103,9 +172,9 @@
         .btn-success:hover { background: rgba(16, 185, 129, 0.3); }
 
         .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted); }
-        .btn-outline:hover { border-color: var(--text-main); color: var(--text-main); }
+        .btn-outline:hover { border-color: var(--text-main); color: var(--text-main); background: rgba(255,255,255,0.05); }
         
-        .btn-icon { padding: 10px; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; }
+        .btn-icon { padding: 0; width: 36px; height: 36px; border-radius: 8px; display: flex; justify-content: center; align-items: center; }
 
         /* --- Stats Grid --- */
         .stats-grid {
@@ -126,7 +195,10 @@
             align-items: flex-start;
             position: relative;
             overflow: hidden;
+            transition: transform 0.2s;
         }
+        
+        .stat-card:hover { transform: translateY(-3px); }
 
         .stat-card::after {
             content: '';
@@ -164,17 +236,18 @@
         }
 
         .input-wrapper { display: flex; flex-direction: column; gap: 6px; }
-        .input-wrapper label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-wrapper label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .form-control {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255,255,255,0.1);
             color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 12px 15px;
+            border-radius: 10px;
             outline: none;
             min-width: 160px;
             font-family: inherit;
+            transition: border-color 0.2s;
         }
         .form-control:focus { border-color: var(--primary); }
 
@@ -182,13 +255,13 @@
             display: flex;
             background: rgba(15, 23, 42, 0.6);
             padding: 4px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
         .view-btn {
             padding: 8px 15px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: none;
             background: transparent;
             color: var(--text-muted);
@@ -222,7 +295,9 @@
         .view-mode-table .app-item {
             display: table-row;
             background: var(--glass-bg);
+            transition: background 0.2s;
         }
+        .view-mode-table .app-item:hover { background: rgba(30, 41, 59, 0.9); }
 
         .view-mode-table .app-header {
             display: table-header-group;
@@ -235,6 +310,9 @@
             color: var(--text-muted);
             border-bottom: 1px solid rgba(255,255,255,0.1);
             text-align: left;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
         }
 
         .view-mode-table .app-cell {
@@ -242,6 +320,7 @@
             padding: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             vertical-align: middle;
+            font-size: 0.95rem;
         }
 
         /* Grid/Card View (Mobile Style) */
@@ -284,7 +363,7 @@
         }
         
         /* Specific Cell Styles */
-        .cell-actions { white-space: nowrap; }
+        .cell-actions { white-space: nowrap; gap: 8px; display: flex; }
         
         .status-badge {
             padding: 4px 12px;
@@ -293,6 +372,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: inline-block;
         }
         
         .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
@@ -344,7 +424,10 @@
             border: 1px solid rgba(255,255,255,0.1);
             display: flex; flex-direction: column;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s;
         }
+        .modal-overlay.active .modal { transform: scale(1); }
 
         .modal-header {
             padding: 20px 30px;
@@ -358,12 +441,13 @@
             border-top: 1px solid rgba(255,255,255,0.1);
             display: flex; justify-content: flex-end; gap: 10px;
             border-radius: 0 0 20px 20px;
+            flex-wrap: wrap;
         }
 
         .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .detail-item { margin-bottom: 5px; }
-        .detail-item label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px; }
-        .detail-item p { margin: 0; font-weight: 500; font-size: 1rem; }
+        .detail-item label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; }
+        .detail-item p { margin: 0; font-weight: 500; font-size: 1rem; color: #fff; word-break: break-word; }
         .full-width { grid-column: 1 / -1; }
 
         /* --- Toast Notifications --- */
@@ -381,6 +465,7 @@
             display: flex; align-items: center; gap: 15px;
             animation: slideIn 0.3s ease;
             max-width: 350px;
+            color: #fff;
         }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
@@ -389,29 +474,53 @@
             .admin-header { flex-direction: column; align-items: flex-start; }
             .header-controls { width: 100%; justify-content: space-between; }
             .detail-grid { grid-template-columns: 1fr; }
-            
-            /* Hide the table view on mobile by default if needed, 
-               but our JS will handle the switch to 'grid' mode automatically */
+            .controls-bar { flex-direction: column; align-items: stretch; }
+            .filters-group { flex-direction: column; }
+            .input-wrapper { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="admin-container">
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <div class="login-logo"><i class="fas fa-shield-alt"></i> Studiment</div>
+            <div class="login-subtitle">Secure Admin Access</div>
+            
+            <div class="input-wrapper" style="text-align: left; margin-bottom: 15px;">
+                <label>Email Address</label>
+                <input type="email" id="loginEmail" class="form-control" placeholder="Enter admin email..." value="prajyotgond@gmail.com">
+            </div>
+            
+            <div class="input-wrapper" style="text-align: left; margin-bottom: 25px;">
+                <label>Password</label>
+                <input type="password" id="loginPassword" class="form-control" placeholder="Enter password...">
+            </div>
+
+            <button id="loginBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <div id="loginError" class="login-error">Incorrect Email or Password</div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="admin-container" id="mainDashboard">
         <header class="admin-header">
             <div class="logo">
                 <i class="fas fa-layer-group"></i> Studiment <span style="font-size: 0.8rem; opacity: 0.5; font-weight: 400;">| Admin</span>
             </div>
             <div class="header-controls">
                 <button class="btn btn-outline" id="refreshBtn">
-                    <i class="fas fa-sync-alt"></i> <span class="d-none d-md-inline">Sync</span>
+                    <i class="fas fa-sync-alt"></i> <span class="d-none d-md-inline">Refresh Data</span>
                 </button>
                <button class="btn btn-primary" onclick="window.location.href='https://studiment.live'">
-    <i class="fas fa-home"></i>
-    <span class="d-none d-md-inline">Main Site</span>
-</button>
+                    <i class="fas fa-home"></i>
+                    <span class="d-none d-md-inline">Main Website</span>
+                </button>
 
-                <button class="btn btn-danger" id="logoutBtn" style="padding: 8px 15px;">
+                <button class="btn btn-danger" id="logoutBtn" style="padding: 10px;">
                     <i class="fas fa-power-off"></i>
                 </button>
             </div>
@@ -460,11 +569,11 @@
                 </div>
                 <div class="input-wrapper" style="flex-grow: 1;">
                     <label>Search</label>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, or college...">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by Name, Email, or College...">
                 </div>
             </div>
 
-            <div style="display: flex; gap: 15px; align-items: flex-end;">
+            <div style="display: flex; gap: 15px; align-items: flex-end; margin-top: 15px;">
                 <div class="input-wrapper">
                     <label>View Mode</label>
                     <div class="view-toggles">
@@ -502,10 +611,12 @@
                     <div>Date</div>
                     <div>Actions</div>
                 </div>
-                </div>
+                <!-- Data will be injected here -->
+            </div>
         </div>
     </div>
 
+    <!-- DETAILS MODAL -->
     <div class="modal-overlay" id="applicationModal">
         <div class="modal">
             <div class="modal-header">
@@ -514,12 +625,15 @@
             </div>
             <div class="modal-body">
                 <div class="detail-grid" id="modalContent">
-                    </div>
+                    <!-- Content injected via JS -->
+                </div>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-outline" id="copyEmailBtn"><i class="far fa-copy"></i> Copy Email</button>
+                <div style="flex-grow:1"></div>
                 <button class="btn btn-danger" id="rejectBtn">Reject</button>
                 <button class="btn btn-success" id="approveBtn">Mark Reviewed</button>
-                <button class="btn btn-primary" id="emailBtn"><i class="fas fa-envelope"></i> Email</button>
+                <button class="btn btn-primary" id="emailBtn"><i class="fas fa-envelope"></i> Send Email</button>
             </div>
         </div>
     </div>
@@ -530,7 +644,11 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
-        // Configuration
+        // --- Credentials Config ---
+        const AUTH_EMAIL = "prajyotgond@gmail.com";
+        const AUTH_PASS = "prajyotgond7048";
+
+        // --- Firebase Config ---
         const firebaseConfig = {
             apiKey: "AIzaSyBgo3Ok300QkkHOXdJyEs6HujupcBRrNbA",
             authDomain: "assignment-242bc.firebaseapp.com",
@@ -554,10 +672,57 @@
         const listEl = document.getElementById('applicationsList');
         const modal = document.getElementById('applicationModal');
         const spinner = document.getElementById('loadingSpinner');
+        const loginOverlay = document.getElementById('login-overlay');
+        const mainDashboard = document.getElementById('mainDashboard');
         
-        // --- Initialization ---
+        // --- Authentication & Initialization ---
         
-        function init() {
+        // Check Session on Load
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            grantAccess();
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+        document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') attemptLogin();
+        });
+
+        function attemptLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            const errorMsg = document.getElementById('loginError');
+
+            if (email === AUTH_EMAIL && pass === AUTH_PASS) {
+                errorMsg.style.display = 'none';
+                sessionStorage.setItem('isLoggedIn', 'true');
+                grantAccess();
+            } else {
+                errorMsg.style.display = 'block';
+                // Shake animation effect
+                const card = document.querySelector('.login-card');
+                card.style.transform = 'translateX(10px)';
+                setTimeout(() => card.style.transform = 'translateX(-10px)', 100);
+                setTimeout(() => card.style.transform = 'translateX(0)', 200);
+            }
+        }
+
+        function grantAccess() {
+            loginOverlay.style.opacity = '0';
+            setTimeout(() => {
+                loginOverlay.style.display = 'none';
+                mainDashboard.classList.add('authenticated');
+                initData(); // Start fetching data only after login
+            }, 500);
+        }
+
+        function logout() {
+            if(confirm('Are you sure you want to logout?')) {
+                sessionStorage.removeItem('isLoggedIn');
+                window.location.reload();
+            }
+        }
+
+        function initData() {
             setLoading(true);
             
             // Check screen size for initial view mode
@@ -595,7 +760,14 @@
             const searchFn = document.getElementById('searchInput').value.toLowerCase();
 
             // Clear list (keep header if in table mode)
-            const headerHTML = listEl.querySelector('.app-header').outerHTML;
+            const headerEl = listEl.querySelector('.app-header');
+            let headerHTML = '';
+            if(headerEl) {
+                headerHTML = headerEl.outerHTML;
+            } else {
+                // Restore header if lost
+                headerHTML = `<div class="app-header"><div>Name</div><div>Email</div><div>College</div><div>Expertise</div><div>Status</div><div>Date</div><div>Actions</div></div>`;
+            }
             listEl.innerHTML = headerHTML;
 
             const filtered = allApplications.filter(app => {
@@ -618,8 +790,8 @@
                 empty.style.padding = '40px';
                 empty.style.textAlign = 'center';
                 empty.style.color = 'var(--text-muted)';
-                empty.innerHTML = `<i class="fas fa-inbox fa-3x" style="margin-bottom:15px; opacity:0.5"></i><br>No applications found.`;
-                empty.className = 'full-width'; // For grid layout
+                empty.innerHTML = `<i class="fas fa-inbox fa-3x" style="margin-bottom:15px; opacity:0.5"></i><br>No applications found matching criteria.`;
+                empty.className = 'full-width'; 
                 listEl.appendChild(empty);
                 return;
             }
@@ -629,7 +801,12 @@
                 div.className = 'app-item';
                 
                 const status = app.status || 'pending';
-                const dateStr = app.timestamp ? new Date(app.timestamp).toLocaleDateString() : '-';
+                // Format Date nicely
+                let dateStr = '-';
+                if(app.timestamp) {
+                    const d = new Date(app.timestamp);
+                    dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
 
                 div.innerHTML = `
                     <div class="app-cell" data-label="Name"><strong>${app.fullName || 'Unknown'}</strong></div>
@@ -641,10 +818,10 @@
                     </div>
                     <div class="app-cell" data-label="Date">${dateStr}</div>
                     <div class="app-cell cell-actions" data-label="Actions">
-                        <button class="btn btn-outline btn-icon" style="width:32px; height:32px; font-size:0.8rem" onclick="window.viewApp('${app.id}')">
+                        <button class="btn btn-outline btn-icon" title="View Details" onclick="window.viewApp('${app.id}')">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn btn-outline btn-icon" style="width:32px; height:32px; font-size:0.8rem; color:var(--accent); border-color:rgba(244,63,94,0.3)" onclick="window.deleteApp('${app.id}')">
+                        <button class="btn btn-outline btn-icon" title="Delete" style="color:var(--accent); border-color:rgba(244,63,94,0.3)" onclick="window.deleteApp('${app.id}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -663,21 +840,21 @@
             const content = document.getElementById('modalContent');
             content.innerHTML = `
                 <div class="detail-item"><label>Full Name</label><p>${app.fullName || 'N/A'}</p></div>
-                <div class="detail-item"><label>Email</label><p>${app.email || 'N/A'}</p></div>
+                <div class="detail-item"><label>Email</label><p id="modalEmail">${app.email || 'N/A'}</p></div>
                 <div class="detail-item"><label>Phone</label><p>${app.phone || 'N/A'}</p></div>
                 <div class="detail-item"><label>College</label><p>${app.college || 'N/A'}</p></div>
                 <div class="detail-item"><label>Expertise</label><p>${app.expertise || 'N/A'}</p></div>
-                <div class="detail-item"><label>Status</label><p style="text-transform: capitalize;">${app.status || 'Pending'}</p></div>
-                <div class="detail-item full-width"><label>Bio & Experience</label><p>${app.bio || app.experience || 'None provided'}</p></div>
+                <div class="detail-item"><label>Current Status</label><p style="text-transform: capitalize; color: var(--primary);">${app.status || 'Pending'}</p></div>
+                <div class="detail-item full-width"><label>Bio & Experience</label><p style="line-height: 1.6; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">${app.bio || app.experience || 'None provided'}</p></div>
             `;
             
             modal.classList.add('active');
         };
 
         window.deleteApp = (id) => {
-            if(confirm("Are you sure? This cannot be undone.")) {
+            if(confirm("Are you sure? This action cannot be undone.")) {
                 remove(ref(db, `writer-applications/${id}`))
-                    .then(() => showToast('Application deleted', 'success'))
+                    .then(() => showToast('Application deleted successfully', 'success'))
                     .catch(err => showToast(err.message, 'error'));
             }
         };
@@ -686,7 +863,7 @@
             if(!currentId) return;
             update(ref(db, `writer-applications/${currentId}`), { status: status })
                 .then(() => {
-                    showToast(`Marked as ${status}`, 'success');
+                    showToast(`Application marked as ${status}`, 'success');
                     modal.classList.remove('active');
                 })
                 .catch(err => showToast(err.message, 'error'));
@@ -742,16 +919,27 @@
 
         // --- Event Listeners ---
 
-        document.getElementById('refreshBtn').onclick = () => { init(); showToast('Data refreshed'); };
-        document.getElementById('logoutBtn').onclick = () => { if(confirm('Logout?')) window.location.href='index.html'; };
+        document.getElementById('refreshBtn').onclick = () => { initData(); showToast('Data refreshed successfully'); };
+        document.getElementById('logoutBtn').onclick = logout;
         document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
         
         document.getElementById('approveBtn').onclick = () => updateStatus('reviewed');
         document.getElementById('rejectBtn').onclick = () => updateStatus('rejected');
+        
         document.getElementById('emailBtn').onclick = () => {
             const app = allApplications.find(a => a.id === currentId);
-            if(app && app.email) window.open(`mailto:${app.email}?subject=Regarding Your Application`);
+            if(app && app.email) window.open(`mailto:${app.email}?subject=Regarding Your Studiment Application`);
             else showToast("No email provided", 'error');
+        };
+
+        // Copy Email Feature
+        document.getElementById('copyEmailBtn').onclick = () => {
+             const emailTxt = document.getElementById('modalEmail').innerText;
+             if(emailTxt && emailTxt !== 'N/A') {
+                 navigator.clipboard.writeText(emailTxt).then(() => {
+                     showToast('Email copied to clipboard', 'success');
+                 });
+             }
         };
 
         // Filter Events
@@ -765,19 +953,33 @@
 
         // Export (CSV Logic)
         document.getElementById('exportCSV').onclick = () => {
-             const headers = ['Name', 'Email', 'Phone', 'College', 'Expertise', 'Status'];
+             const headers = ['Name', 'Email', 'Phone', 'College', 'Expertise', 'Status', 'Date'];
              const rows = allApplications.map(a => 
-                 [a.fullName, a.email, a.phone, a.college, a.expertise, a.status || 'pending'].map(f => `"${f || ''}"`).join(',')
+                 [
+                     a.fullName, 
+                     a.email, 
+                     a.phone, 
+                     a.college, 
+                     a.expertise, 
+                     a.status || 'pending',
+                     a.timestamp ? new Date(a.timestamp).toLocaleDateString() : ''
+                 ].map(f => `"${f || ''}"`).join(',')
              );
              const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
              const link = document.createElement("a");
              link.href = encodeURI(csvContent);
-             link.download = "applications.csv";
+             link.download = "Studiment_Applications.csv";
              link.click();
         };
+        
+        document.getElementById('exportJSON').onclick = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allApplications, null, 2));
+            const link = document.createElement("a");
+            link.href = dataStr;
+            link.download = "Studiment_Applications.json";
+            link.click();
+        };
 
-        // Start
-        init();
     </script>
 </body>
 </html>
