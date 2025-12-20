@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Studiment | Place Order</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        input, select { font-size: 16px !important; } /* Prevents iOS zoom on focus */
+    </style>
+</head>
+<body class="p-4 flex items-center justify-center min-h-screen">
+    <div class="glass p-5 md:p-8 rounded-3xl shadow-2xl w-full max-w-md">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-black text-white tracking-tight">New Order</h1>
+            <p class="text-slate-400 text-sm">Fill details to calculate cost</p>
+        </header>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] uppercase font-bold text-slate-500 ml-1 mb-1 block">Customer Details</label>
+                <input type="text" id="name" placeholder="Full Name" class="w-full p-4 bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 border border-slate-700">
+            </div>
+            
+            <input type="tel" id="phone" placeholder="Phone Number" class="w-full p-4 bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 border border-slate-700">
+            
+            <div>
+                <label class="text-[10px] uppercase font-bold text-slate-500 ml-1 mb-1 block">Work Details</label>
+                <select id="service" class="w-full p-4 bg-slate-800 rounded-xl outline-none cursor-pointer border border-slate-700 appearance-none">
+                    <option value="Assignment">Assignment (₹8/pg)</option>
+                    <option value="Project File">Project File (₹15/pg)</option>
+                    <option value="Homework">Homework (₹7/pg)</option>
+                    <option value="Drawing Sheet">Sheet/Drawing (₹50/pg)</option>
+                </select>
+            </div>
+            
+            <input type="number" id="pages" placeholder="Number of Pages" class="w-full p-4 bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 border border-slate-700">
+            
+            <label class="flex items-center space-x-3 bg-slate-800 p-4 rounded-xl border border-slate-700 cursor-pointer active:bg-slate-700 transition-colors">
+                <input type="checkbox" id="urgent" class="w-6 h-6 rounded-md text-indigo-600 bg-slate-900 border-slate-700 focus:ring-0">
+                <span class="text-sm font-medium">Tatkal Mode (1.5x Speed)</span>
+            </label>
+
+            <div id="priceCalc" class="p-4 bg-indigo-900/20 border border-indigo-500/30 rounded-2xl hidden animate-in fade-in duration-300">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-slate-400 text-sm">Total Cost:</span>
+                    <span id="totalText" class="text-xl font-bold text-white">₹0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-indigo-300 text-sm italic">50% Advance:</span>
+                    <span id="advanceText" class="text-lg font-bold text-indigo-400">₹0</span>
+                </div>
+            </div>
+
+            <button onclick="submitOrder()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg shadow-indigo-500/20 text-lg">
+                Confirm Order
+            </button>
+        </div>
+
+        <div id="feedback" class="mt-4 p-4 rounded-xl hidden text-center text-sm font-medium"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
+            authDomain: "studiment-tracking.firebaseapp.com",
+            databaseURL: "https://studiment-tracking-default-rtdb.firebaseio.com",
+            projectId: "studiment-tracking",
+            storageBucket: "studiment-tracking.firebasestorage.app",
+            messagingSenderId: "169609151336",
+            appId: "1:169609151336:web:871736f836c312cd4d4cdd"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const priceInputs = ['service', 'pages', 'urgent'];
+        priceInputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePrice);
+        });
+
+        function updatePrice() {
+            const service = document.getElementById('service').value;
+            const pages = parseInt(document.getElementById('pages').value) || 0;
+            const urgent = document.getElementById('urgent').checked;
+            const priceCalc = document.getElementById('priceCalc');
+
+            if (pages > 0) {
+                let rate = { "Assignment":8, "Project File":15, "Homework":7, "Drawing Sheet":50 }[service];
+                let total = pages * rate; 
+                if(urgent) total *= 1.5;
+                
+                document.getElementById('totalText').innerText = '₹' + Math.ceil(total);
+                document.getElementById('advanceText').innerText = '₹' + Math.ceil(total * 0.5);
+                priceCalc.classList.remove('hidden');
+                return Math.ceil(total);
+            } else {
+                priceCalc.classList.add('hidden');
+                return 0;
+            }
+        }
+
+        function submitOrder() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const totalVal = updatePrice();
+
+            if(!name || !phone || totalVal <= 0) {
+                showFeedback("Fill all fields correctly", "bg-red-500/20 text-red-400 border border-red-500/20");
+                return;
+            }
+
+            const orderId = 'ST-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+            const orderData = {
+                orderId, name, phone,
+                service: document.getElementById('service').value,
+                pages: document.getElementById('pages').value,
+                total: totalVal,
+                advancePaid: 0,
+                status: "Pending Advance",
+                progressNote: "Awaiting advance payment",
+                timestamp: Date.now()
+            };
+
+            db.ref('orders/' + orderId).set(orderData, (error) => {
+                if(error) showFeedback("Error!", "bg-red-500/20 text-red-400");
+                else {
+                    showFeedback(`<b>Order Placed!</b><br>ID: <span class="text-white">${orderId}</span><br>Pay ₹${Math.ceil(totalVal * 0.5)} to start.`, "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20");
+                    document.getElementById('name').value = '';
+                    document.getElementById('pages').value = '';
+                }
+            });
+        }
+
+        function showFeedback(msg, cls) {
+            const f = document.getElementById('feedback');
+            f.innerHTML = msg;
+            f.className = "mt-4 p-4 rounded-xl text-center text-sm " + cls;
+            f.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
