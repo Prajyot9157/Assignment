@@ -13,14 +13,26 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .mobile-card { background: #1e293b; border: 1px solid #334155; border-radius: 1.5rem; padding: 1rem; margin-bottom: 1rem; }
         input, select { font-size: 16px !important; }
+        .btn-outline { border: 1px solid #6366f1; color: #818cf8; transition: all 0.2s; }
+        .btn-outline:hover { background: #6366f1; color: white; }
     </style>
 </head>
 <body class="p-4">
     <div class="max-w-7xl mx-auto pb-10">
         <!-- Dashboard Header -->
         <header class="mb-8">
-            <h1 class="text-3xl font-black text-indigo-400">Admin Panel</h1>
-            <p class="text-slate-500 text-sm">Finances & Project Control</p>
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-indigo-400">Admin Panel</h1>
+                    <p class="text-slate-500 text-sm">Finances & Project Control</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="https://studiment.live" target="_blank" class="px-5 py-2.5 rounded-xl text-sm font-bold btn-outline flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        Main Website
+                    </a>
+                </div>
+            </div>
             
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
@@ -42,16 +54,6 @@
             </div>
         </header>
 
-
-        
- <div class="nav-actions">
-                  <a href="studiment.live" class="btn" style="padding: 10px 25px; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary); box-shadow: none;">Main Site</a>
-            </div>
-
-
-
-
-        
         <!-- Forms Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
             <!-- Material Entry -->
@@ -94,10 +96,7 @@
         <!-- Orders Management -->
         <h3 class="text-xl font-black mb-4 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Projects</h3>
         
-        <!-- Responsive Container: Mobile Cards vs Desktop Table -->
-        <div class="block lg:hidden" id="mobileOrderList">
-            <!-- Mobile cards go here -->
-        </div>
+        <div class="block lg:hidden" id="mobileOrderList"></div>
 
         <div class="hidden lg:block bg-slate-900/40 rounded-3xl p-4 border border-slate-800 overflow-x-auto">
             <table class="w-full text-sm">
@@ -106,7 +105,7 @@
                         <th class="p-3">Client & ID</th>
                         <th class="p-3">User Update</th>
                         <th class="p-3">Stage</th>
-                        <th class="p-3">Payments</th>
+                        <th class="p-3">Finance (Total/Paid)</th>
                         <th class="p-3">Manage</th>
                     </tr>
                 </thead>
@@ -140,35 +139,47 @@
                     const o = data[key];
                     rev += parseFloat(o.total || 0);
                     const paid = parseFloat(o.advancePaid || 0);
-                    const due = o.total - paid;
+                    const totalAmt = parseFloat(o.total || 0);
+                    const due = totalAmt - paid;
 
                     // Desktop View
                     desk.innerHTML += `
                         <tr class="border-b border-slate-800/50">
                             <td class="p-3"><b class="text-indigo-400 font-mono">${key}</b><br><span class="text-white">${o.name}</span></td>
                             <td class="p-3">
-                                <input type="text" value="${o.progressNote || ''}" onchange="updateProgressNote('${key}', this.value)" 
+                                <input type="text" value="${o.progressNote || ''}" onchange="updateField('${key}', 'progressNote', this.value)" 
                                     class="w-full bg-slate-800 p-2 rounded border border-slate-700 outline-none text-xs">
                             </td>
                             <td class="p-3">
-                                <select onchange="updateStatus('${key}', this.value)" class="bg-slate-800 p-2 rounded text-[11px] border border-slate-700">
+                                <select onchange="updateField('${key}', 'status', this.value)" class="bg-slate-800 p-2 rounded text-[11px] border border-slate-700">
                                     <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
                                     <option value="In Progress" ${o.status=='In Progress'?'selected':''}>In Progress</option>
                                     <option value="Completed" ${o.status=='Completed'?'selected':''}>Completed</option>
                                 </select>
                             </td>
                             <td class="p-3">
-                                <input type="number" value="${paid}" onchange="updatePaid('${key}', this.value)" class="w-16 bg-transparent border-b border-slate-700 text-emerald-400">
-                                <p class="text-[10px] text-red-500">Due: ₹${due}</p>
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[9px] text-slate-500 w-8">TOT:</span>
+                                        <input type="number" value="${totalAmt}" onchange="updateField('${key}', 'total', this.value)" class="w-20 bg-transparent border-b border-slate-700 text-white font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[9px] text-slate-500 w-8">PAID:</span>
+                                        <input type="number" value="${paid}" onchange="updateField('${key}', 'advancePaid', this.value)" class="w-20 bg-transparent border-b border-slate-700 text-emerald-400 outline-none">
+                                    </div>
+                                    <p class="text-[10px] ${due > 0 ? 'text-red-500' : 'text-emerald-500'}">Due: ₹${due}</p>
+                                </div>
                             </td>
-                            <td class="p-3 flex gap-1">
-                                <button onclick="markDone('${key}', ${o.total})" class="bg-emerald-600/20 text-emerald-400 p-2 rounded-lg text-[10px]">Paid</button>
-                                <button onclick="deleteOrder('${key}')" class="bg-red-900/20 text-red-500 p-2 rounded-lg text-[10px]">X</button>
+                            <td class="p-3">
+                                <div class="flex flex-col gap-1">
+                                    <button onclick="markDone('${key}', ${totalAmt})" class="bg-emerald-600/20 text-emerald-400 p-2 rounded-lg text-[10px]">Full Paid</button>
+                                    <button onclick="deleteOrder('${key}')" class="bg-red-900/20 text-red-500 p-2 rounded-lg text-[10px]">Delete</button>
+                                </div>
                             </td>
                         </tr>
                     `;
 
-                    // Mobile View (Cards)
+                    // Mobile View
                     mob.innerHTML += `
                         <div class="mobile-card">
                             <div class="flex justify-between items-start border-b border-slate-700/50 pb-2 mb-3">
@@ -176,25 +187,33 @@
                                 <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">${o.status}</span>
                             </div>
                             <div class="space-y-3">
-                                <input type="text" value="${o.progressNote || ''}" onchange="updateProgressNote('${key}', this.value)" placeholder="Status update..." class="w-full bg-slate-900 p-3 rounded-xl border border-slate-700 outline-none text-sm">
+                                <input type="text" value="${o.progressNote || ''}" onchange="updateField('${key}', 'progressNote', this.value)" placeholder="Status update..." class="w-full bg-slate-900 p-3 rounded-xl border border-slate-700 outline-none text-sm">
+                                
                                 <div class="grid grid-cols-2 gap-3">
-                                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
-                                        <p class="text-[9px] uppercase text-slate-500 mb-1">Total: ₹${o.total}</p>
-                                        <div class="flex items-center gap-1">
-                                            <span class="text-xs text-slate-500">Paid:</span>
-                                            <input type="number" value="${paid}" onchange="updatePaid('${key}', this.value)" class="w-full bg-transparent text-emerald-400 font-bold outline-none text-sm">
+                                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[9px] uppercase text-slate-500">Total:</span>
+                                            <input type="number" value="${totalAmt}" onchange="updateField('${key}', 'total', this.value)" class="w-16 bg-transparent text-right text-white font-bold outline-none text-sm">
+                                        </div>
+                                        <div class="flex items-center justify-between border-t border-slate-800 pt-2">
+                                            <span class="text-[9px] uppercase text-slate-500">Paid:</span>
+                                            <input type="number" value="${paid}" onchange="updateField('${key}', 'advancePaid', this.value)" class="w-16 bg-transparent text-right text-emerald-400 font-bold outline-none text-sm">
+                                        </div>
+                                        <div class="text-[10px] text-right ${due > 0 ? 'text-red-500' : 'text-emerald-500'} font-bold">
+                                            DUE: ₹${due}
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
-                                        <select onchange="updateStatus('${key}', this.value)" class="bg-slate-900 p-3 rounded-xl text-xs border border-slate-700 w-full h-full">
+                                        <select onchange="updateField('${key}', 'status', this.value)" class="bg-slate-900 p-3 rounded-xl text-xs border border-slate-700 w-full h-full">
                                             <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
                                             <option value="In Progress" ${o.status=='In Progress'?'selected':''}>In Progress</option>
                                             <option value="Completed" ${o.status=='Completed'?'selected':''}>Completed</option>
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="flex gap-2">
-                                    <button onclick="markDone('${key}', ${o.total})" class="flex-1 bg-emerald-600 p-3 rounded-xl font-bold text-xs">Mark Full Paid</button>
+                                    <button onclick="markDone('${key}', ${totalAmt})" class="flex-1 bg-emerald-600 p-3 rounded-xl font-bold text-xs">Mark Full Paid</button>
                                     <button onclick="deleteOrder('${key}')" class="bg-red-500 p-3 rounded-xl font-bold text-xs">Delete</button>
                                 </div>
                             </div>
@@ -206,12 +225,22 @@
             calculateNet();
         });
 
-        // Backend Helpers
-        function updateProgressNote(id, note) { db.ref('orders/'+id).update({ progressNote: note }); }
-        function updateStatus(id, s) { db.ref('orders/'+id).update({ status: s }); }
-        function updatePaid(id, val) { db.ref('orders/'+id).update({ advancePaid: parseFloat(val)||0 }); }
-        function markDone(id, total) { db.ref('orders/'+id).update({ advancePaid: total, status: 'Completed', progressNote: 'Fully Paid & Delivered' }); }
-        function deleteOrder(id) { if(confirm("Delete this order?")) db.ref('orders/'+id).remove(); }
+        function updateField(id, field, val) {
+            let value = (field === 'total' || field === 'advancePaid') ? parseFloat(val) || 0 : val;
+            db.ref('orders/' + id).update({ [field]: value });
+        }
+
+        function markDone(id, total) {
+            db.ref('orders/' + id).update({ 
+                advancePaid: total, 
+                status: 'Completed', 
+                progressNote: 'Fully Paid & Delivered' 
+            });
+        }
+
+        function deleteOrder(id) {
+            if(confirm("Delete this order?")) db.ref('orders/'+id).remove();
+        }
 
         function addMaterial() {
             const type = document.getElementById('matType').value;
@@ -262,9 +291,14 @@
         });
 
         function calculateNet() {
-            const rev = parseFloat(document.getElementById('totalRevenue').innerText.replace('₹','')) || 0;
-            const mat = parseFloat(document.getElementById('totalMaterials').innerText.replace('₹','')) || 0;
-            const exp = parseFloat(document.getElementById('totalExpenses').innerText.replace('₹','')) || 0;
+            const revText = document.getElementById('totalRevenue').innerText.replace('₹','');
+            const matText = document.getElementById('totalMaterials').innerText.replace('₹','');
+            const expText = document.getElementById('totalExpenses').innerText.replace('₹','');
+            
+            const rev = parseFloat(revText) || 0;
+            const mat = parseFloat(matText) || 0;
+            const exp = parseFloat(expText) || 0;
+            
             document.getElementById('netProfit').innerText = '₹' + (rev - mat - exp);
         }
     </script>
