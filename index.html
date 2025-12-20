@@ -663,7 +663,7 @@
         <!-- NEW: TATKAL MODE -->
         <label class="tatkal-check">
             <input type="checkbox" id="urgentMode">
-            <span>Tatkal Mode (Need within 24hrs? 1.5x)</span>
+            <span>Tatkal Mode (Need within 24hrs? 1.3x)</span>
         </label>
         
         <button class="btn" onclick="calculateCost()" style="margin-top: 10px; width: 200px;">Calculate</button>
@@ -814,7 +814,7 @@
             let msgType = "";
 
             if (isUrgent) {
-                total = Math.ceil(total * 1.5); // 1.5x Multiplier
+                total = Math.ceil(total * 1.3); // 1.3x Multiplier
                 msgType = " [URGENT TATKAL MODE]";
             }
             
@@ -967,5 +967,6 @@
     </script>
 </body>
 </html>
+
 
 
