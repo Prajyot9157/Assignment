@@ -3,77 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studiment | Track Progress</title>
+    <title>Studiment | Live Tracker</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        input { font-size: 16px !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --bg-dark: #020617;
+        }
+
+        body { 
+            background-color: var(--bg-dark);
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent; 
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Fixed High-Performance Background */
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 50%);
+        }
+
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 28px;
+        }
+
+        /* Smooth Mobile Transitions */
+        .track-input {
+            font-size: 16px !important; /* Prevents iOS zoom */
+            transition: all 0.3s ease;
+        }
+
+        .track-input:focus {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Punch Animation Elements */
+        .scanner-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            position: absolute;
+            top: 0;
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .loading-pulse {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.98); }
+        }
+
+        .redirect-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .redirect-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
-<body class="p-4 flex flex-col items-center justify-center min-h-screen">
-    <div class="w-full max-w-md">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-black text-white tracking-tighter">Live <span class="text-indigo-500 font-medium">Tracking</span></h1>
-            <p class="text-slate-400 text-sm mt-1">Real-time status of your work</p>
+<body class="p-4 sm:p-6 flex flex-col items-center">
+    <div class="mesh-bg"></div>
+
+    <div class="w-full max-w-md pb-24">
+        <!-- Logo & Header -->
+        <header class="text-center mt-8 mb-10">
+            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2">
+                STUDI<span class="text-indigo-500">MENT</span>
+            </h1>
+            <p class="text-slate-400 text-sm font-medium">Real-time Project Intelligence</p>
         </header>
 
-        <div class="flex flex-col sm:flex-row gap-2 mb-8">
-            <input type="text" id="trackId" placeholder="Order ID (ST-XXXX)" 
-                class="flex-1 p-4 bg-slate-800 rounded-2xl outline-none border border-slate-700 focus:border-indigo-500 text-white shadow-inner">
-            <button onclick="track()" class="bg-indigo-600 p-4 rounded-2xl font-bold hover:bg-indigo-500 active:scale-95 transition-all shadow-lg shadow-indigo-600/20">Check Status</button>
+        <!-- Search Box -->
+        <div class="glass-card p-3 mb-8">
+            <div class="flex flex-col gap-3">
+                <input type="text" id="trackId" placeholder="Order ID (e.g. ST-101)" 
+                    class="track-input w-full p-4 bg-slate-900/40 rounded-2xl outline-none border border-slate-700/50 text-white placeholder-slate-500 font-semibold">
+                <button onclick="track()" id="mainBtn" class="w-full bg-indigo-600 p-4 rounded-2xl font-bold text-white shadow-lg shadow-indigo-600/30 active:scale-[0.98] transition-all">
+                    Track Status
+                </button>
+            </div>
         </div>
 
-        <div id="statusContainer" class="hidden space-y-4 animate-in slide-in-from-bottom duration-500">
-            <!-- Custom Progress Note -->
-            <div class="bg-indigo-600/10 border border-indigo-500/30 p-5 rounded-3xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-2 opacity-10">
-                    <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                </div>
-                <p class="text-[10px] uppercase text-indigo-400 font-black mb-2 tracking-widest">Writer's Latest Update</p>
-                <p id="progressNote" class="text-xl font-medium text-white italic leading-snug">"Checking status..."</p>
-            </div>
+        <!-- Enhanced Punch Animation (Loader) -->
+        <div id="processingUI" class="hidden glass-card p-8 text-center relative overflow-hidden mb-6">
+            <div class="scanner-line"></div>
+            <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 id="punchMessage" class="text-lg font-bold text-white loading-pulse">SECURE ACCESSING...</h3>
+            <p class="text-slate-500 text-[10px] uppercase tracking-widest mt-2 font-bold">Encrypted Tunnel Established</p>
+        </div>
 
-            <!-- Financials -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="glass p-4 rounded-3xl">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Paid</p>
-                    <p id="paidAmt" class="text-lg font-black text-emerald-400">₹0</p>
-                </div>
-                <div class="glass p-4 rounded-3xl">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Due</p>
-                    <p id="dueAmt" class="text-lg font-black text-red-400">₹0</p>
-                </div>
-            </div>
-
-            <!-- Main Status Card -->
-            <div class="glass p-6 rounded-3xl">
+        <!-- Result Container -->
+        <div id="statusContainer" class="hidden space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            <!-- Main Info -->
+            <div class="glass-card p-6">
                 <div class="flex justify-between items-start mb-6">
                     <div>
-                        <h2 id="clientName" class="text-xl font-black">---</h2>
-                        <p id="serviceType" class="text-xs text-slate-500 font-medium">---</p>
+                        <h2 id="clientName" class="text-xl font-bold text-white mb-1">---</h2>
+                        <span id="serviceType" class="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded-md font-bold uppercase tracking-wider">---</span>
                     </div>
-                    <span id="stageBadge" class="px-3 py-1 bg-indigo-600/20 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase text-indigo-400">Pending</span>
+                    <div class="text-right">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Status</p>
+                        <p id="stageBadge" class="text-sm font-extrabold text-indigo-400">---</p>
+                    </div>
                 </div>
-                
-                <div class="space-y-3">
-                    <div class="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-slate-700/50">
-                        <div id="progBar" class="bg-gradient-to-r from-indigo-600 to-indigo-400 h-full transition-all duration-1000 ease-out" style="width: 10%"></div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <p class="text-xs font-bold text-slate-400">Completion</p>
+                        <p id="percentLabel" class="text-lg font-black text-white">0%</p>
                     </div>
-                    <div class="flex justify-between text-[10px] font-bold text-slate-600 uppercase">
-                        <span>Started</span>
-                        <span>Working</span>
-                        <span>Done</span>
+                    <div class="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-slate-700/30">
+                        <div id="progBar" class="bg-indigo-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(99,102,241,0.4)]" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
+
+            <!-- Financials Table -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass-card p-4 border-l-4 border-l-emerald-500">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Total Paid</p>
+                    <p id="paidAmt" class="text-xl font-extrabold text-emerald-400">₹0</p>
+                </div>
+                <div class="glass-card p-4 border-l-4 border-l-rose-500">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Pending</p>
+                    <p id="dueAmt" class="text-xl font-extrabold text-rose-400">₹0</p>
+                </div>
+            </div>
+
+            <!-- Writer's Note -->
+            <div class="glass-card p-5 bg-indigo-500/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    </span>
+                    <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Latest Update</p>
+                </div>
+                <p id="progressNote" class="text-sm font-medium text-slate-200 leading-relaxed italic">"Syncing project status..."</p>
+            </div>
         </div>
 
-        <div id="errorMsg" class="hidden text-center text-red-400 p-6 glass rounded-3xl mt-4">
-            Order not found. Please verify your ID.
+        <!-- Error State -->
+        <div id="errorMsg" class="hidden glass-card p-6 text-center border-rose-500/20">
+            <p class="text-rose-400 font-bold">Order ID not found</p>
+            <p class="text-slate-500 text-xs mt-1">Please check your receipt or contact support.</p>
         </div>
+    </div>
+
+    <!-- Enhanced Sticky Redirect Button -->
+    <div class="fixed bottom-6 left-0 w-full px-6 flex justify-center pointer-events-none">
+        <button onclick="window.location.href='https://studiment.live'" class="redirect-btn pointer-events-auto px-6 py-4 rounded-full flex items-center gap-3 shadow-2xl">
+            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+            </div>
+            <span class="text-xs font-extrabold text-white tracking-[0.2em] uppercase">Back to Main Site</span>
+        </button>
     </div>
 
     <script>
@@ -89,37 +208,76 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        const punchMessages = [
+            "DECRYPTING PORT...",
+            "FETCHING DATA...",
+            "VERIFYING ID...",
+            "SYNCING STATUS..."
+        ];
+
         function track() {
             const id = document.getElementById('trackId').value.trim().toUpperCase();
             if(!id) return;
 
-            db.ref('orders/' + id).on('value', snap => {
-                const data = snap.val();
-                const container = document.getElementById('statusContainer');
-                const error = document.getElementById('errorMsg');
+            const processing = document.getElementById('processingUI');
+            const container = document.getElementById('statusContainer');
+            const error = document.getElementById('errorMsg');
+            const pMsg = document.getElementById('punchMessage');
+            const mainBtn = document.getElementById('mainBtn');
 
-                if(data) {
-                    container.classList.remove('hidden');
-                    error.classList.add('hidden');
+            // Reset UI
+            mainBtn.disabled = true;
+            mainBtn.innerText = "Processing...";
+            processing.classList.remove('hidden');
+            container.classList.add('hidden');
+            error.classList.add('hidden');
 
-                    document.getElementById('clientName').innerText = data.name;
-                    document.getElementById('serviceType').innerText = data.service + " • " + data.pages + " Pages";
-                    document.getElementById('progressNote').innerText = data.progressNote ? `"${data.progressNote}"` : '"Work will start soon..."';
-                    document.getElementById('paidAmt').innerText = '₹' + (data.advancePaid || 0);
-                    
-                    const due = data.total - (data.advancePaid || 0);
-                    document.getElementById('dueAmt').innerText = '₹' + Math.max(0, due);
-                    document.getElementById('stageBadge').innerText = data.status || 'Pending';
-                    
-                    let p = 15;
-                    if(data.status === 'In Progress') p = 60;
-                    if(data.status === 'Completed') p = 100;
-                    document.getElementById('progBar').style.width = p + '%';
-                } else {
-                    container.classList.add('hidden');
-                    error.classList.remove('hidden');
-                }
-            });
+            let step = 0;
+            const msgInterval = setInterval(() => {
+                pMsg.innerText = punchMessages[step % punchMessages.length];
+                step++;
+            }, 500);
+
+            // Simulation for better UX feel
+            setTimeout(() => {
+                db.ref('orders/' + id).once('value', snap => {
+                    clearInterval(msgInterval);
+                    processing.classList.add('hidden');
+                    mainBtn.disabled = false;
+                    mainBtn.innerText = "Track Status";
+
+                    const data = snap.val();
+                    if(data) {
+                        container.classList.remove('hidden');
+                        
+                        document.getElementById('clientName').innerText = data.name || "Client";
+                        document.getElementById('serviceType').innerText = data.service || "General Project";
+                        document.getElementById('progressNote').innerText = data.progressNote ? `"${data.progressNote}"` : '"Your project is in the drafting phase."';
+                        
+                        const paid = data.advancePaid || 0;
+                        const total = data.total || 0;
+                        const due = total - paid;
+
+                        document.getElementById('paidAmt').innerText = '₹' + paid;
+                        document.getElementById('dueAmt').innerText = '₹' + Math.max(0, due);
+                        document.getElementById('stageBadge').innerText = data.status || 'Received';
+                        
+                        let p = 15;
+                        if(data.status === 'Researching') p = 40;
+                        if(data.status === 'In Progress') p = 70;
+                        if(data.status === 'Completed') p = 100;
+                        
+                        document.getElementById('progBar').style.width = p + '%';
+                        document.getElementById('percentLabel').innerText = p + '%';
+
+                        if(p === 100) {
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#6366f1', '#ffffff'] });
+                        }
+                    } else {
+                        error.classList.remove('hidden');
+                    }
+                });
+            }, 1500);
         }
     </script>
 </body>
