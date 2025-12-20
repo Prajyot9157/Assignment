@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin | Management Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .mobile-card { background: #1e293b; border: 1px solid #334155; border-radius: 1.5rem; padding: 1rem; margin-bottom: 1rem; }
+        input, select { font-size: 16px !important; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-7xl mx-auto pb-10">
+        <!-- Dashboard Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-black text-indigo-400">Admin Panel</h1>
+            <p class="text-slate-500 text-sm">Finances & Project Control</p>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Revenue</p>
+                    <p id="totalRevenue" class="text-lg font-black text-white">₹0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Materials</p>
+                    <p id="totalMaterials" class="text-lg font-black text-orange-400">₹0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Payouts</p>
+                    <p id="totalExpenses" class="text-lg font-black text-red-400">₹0</p>
+                </div>
+                <div class="bg-indigo-600/20 p-4 rounded-2xl border border-indigo-500/20">
+                    <p class="text-[9px] uppercase font-bold text-indigo-400 tracking-wider">Profit</p>
+                    <p id="netProfit" class="text-lg font-black text-emerald-400">₹0</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Forms Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+            <!-- Material Entry -->
+            <div class="bg-slate-800/40 p-5 rounded-3xl border border-slate-700">
+                <h3 class="font-bold text-orange-400 mb-4 text-sm flex items-center gap-2">📦 Material Purchase</h3>
+                <div class="space-y-3">
+                    <select id="matType" class="w-full p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
+                        <option value="Assignment Sheets">Assignment Sheets</option>
+                        <option value="A4 Bundle">A4 Bundle</option>
+                        <option value="Drawing Sheets">Drawing Sheets</option>
+                        <option value="Stationary/Ink">Stationary/Ink</option>
+                    </select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="matQty" placeholder="Qty" class="p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
+                        <input type="number" id="matPrice" placeholder="Price (₹)" class="p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
+                    </div>
+                    <button onclick="addMaterial()" class="w-full bg-orange-600 p-3 rounded-xl font-bold text-sm">Add Cost</button>
+                </div>
+            </div>
+
+            <!-- Salary Entry -->
+            <div class="bg-slate-800/40 p-5 rounded-3xl border border-slate-700">
+                <h3 class="font-bold text-indigo-400 mb-4 text-sm flex items-center gap-2">💰 Employee Salary / Misc</h3>
+                <div class="space-y-3">
+                    <input type="text" id="expNote" placeholder="Employee Name / Reason" class="w-full p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
+                    <input type="number" id="expAmt" placeholder="Amount (₹)" class="w-full p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
+                    <button onclick="addGeneralExpense()" class="w-full bg-indigo-600 p-3 rounded-xl font-bold text-sm">Log Payout</button>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div class="bg-slate-800/40 p-5 rounded-3xl border border-slate-700 h-[260px] flex flex-col">
+                <h3 class="font-bold text-slate-500 mb-4 text-[10px] uppercase">Spending History</h3>
+                <div id="outflowList" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1 text-xs">
+                    <p class="text-slate-600 italic">No history...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Management -->
+        <h3 class="text-xl font-black mb-4 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Projects</h3>
+        
+        <!-- Responsive Container: Mobile Cards vs Desktop Table -->
+        <div class="block lg:hidden" id="mobileOrderList">
+            <!-- Mobile cards go here -->
+        </div>
+
+        <div class="hidden lg:block bg-slate-900/40 rounded-3xl p-4 border border-slate-800 overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="text-slate-500 text-left text-[10px] uppercase">
+                    <tr>
+                        <th class="p-3">Client & ID</th>
+                        <th class="p-3">User Update</th>
+                        <th class="p-3">Stage</th>
+                        <th class="p-3">Payments</th>
+                        <th class="p-3">Manage</th>
+                    </tr>
+                </thead>
+                <tbody id="desktopOrderList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
+            authDomain: "studiment-tracking.firebaseapp.com",
+            databaseURL: "https://studiment-tracking-default-rtdb.firebaseio.com",
+            projectId: "studiment-tracking",
+            storageBucket: "studiment-tracking.firebasestorage.app",
+            messagingSenderId: "169609151336",
+            appId: "1:169609151336:web:871736f836c312cd4d4cdd"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        db.ref('orders').on('value', snap => {
+            const data = snap.val();
+            const desk = document.getElementById('desktopOrderList');
+            const mob = document.getElementById('mobileOrderList');
+            desk.innerHTML = ''; mob.innerHTML = '';
+            let rev = 0;
+
+            if(data) {
+                Object.keys(data).forEach(key => {
+                    const o = data[key];
+                    rev += parseFloat(o.total || 0);
+                    const paid = parseFloat(o.advancePaid || 0);
+                    const due = o.total - paid;
+
+                    // Desktop View
+                    desk.innerHTML += `
+                        <tr class="border-b border-slate-800/50">
+                            <td class="p-3"><b class="text-indigo-400 font-mono">${key}</b><br><span class="text-white">${o.name}</span></td>
+                            <td class="p-3">
+                                <input type="text" value="${o.progressNote || ''}" onchange="updateProgressNote('${key}', this.value)" 
+                                    class="w-full bg-slate-800 p-2 rounded border border-slate-700 outline-none text-xs">
+                            </td>
+                            <td class="p-3">
+                                <select onchange="updateStatus('${key}', this.value)" class="bg-slate-800 p-2 rounded text-[11px] border border-slate-700">
+                                    <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
+                                    <option value="In Progress" ${o.status=='In Progress'?'selected':''}>In Progress</option>
+                                    <option value="Completed" ${o.status=='Completed'?'selected':''}>Completed</option>
+                                </select>
+                            </td>
+                            <td class="p-3">
+                                <input type="number" value="${paid}" onchange="updatePaid('${key}', this.value)" class="w-16 bg-transparent border-b border-slate-700 text-emerald-400">
+                                <p class="text-[10px] text-red-500">Due: ₹${due}</p>
+                            </td>
+                            <td class="p-3 flex gap-1">
+                                <button onclick="markDone('${key}', ${o.total})" class="bg-emerald-600/20 text-emerald-400 p-2 rounded-lg text-[10px]">Paid</button>
+                                <button onclick="deleteOrder('${key}')" class="bg-red-900/20 text-red-500 p-2 rounded-lg text-[10px]">X</button>
+                            </td>
+                        </tr>
+                    `;
+
+                    // Mobile View (Cards)
+                    mob.innerHTML += `
+                        <div class="mobile-card">
+                            <div class="flex justify-between items-start border-b border-slate-700/50 pb-2 mb-3">
+                                <div><b class="text-indigo-400 text-sm font-mono">${key}</b><h4 class="text-white font-bold">${o.name}</h4></div>
+                                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">${o.status}</span>
+                            </div>
+                            <div class="space-y-3">
+                                <input type="text" value="${o.progressNote || ''}" onchange="updateProgressNote('${key}', this.value)" placeholder="Status update..." class="w-full bg-slate-900 p-3 rounded-xl border border-slate-700 outline-none text-sm">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                                        <p class="text-[9px] uppercase text-slate-500 mb-1">Total: ₹${o.total}</p>
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-xs text-slate-500">Paid:</span>
+                                            <input type="number" value="${paid}" onchange="updatePaid('${key}', this.value)" class="w-full bg-transparent text-emerald-400 font-bold outline-none text-sm">
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <select onchange="updateStatus('${key}', this.value)" class="bg-slate-900 p-3 rounded-xl text-xs border border-slate-700 w-full h-full">
+                                            <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
+                                            <option value="In Progress" ${o.status=='In Progress'?'selected':''}>In Progress</option>
+                                            <option value="Completed" ${o.status=='Completed'?'selected':''}>Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="markDone('${key}', ${o.total})" class="flex-1 bg-emerald-600 p-3 rounded-xl font-bold text-xs">Mark Full Paid</button>
+                                    <button onclick="deleteOrder('${key}')" class="bg-red-500 p-3 rounded-xl font-bold text-xs">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('totalRevenue').innerText = '₹' + rev;
+            calculateNet();
+        });
+
+        // Backend Helpers
+        function updateProgressNote(id, note) { db.ref('orders/'+id).update({ progressNote: note }); }
+        function updateStatus(id, s) { db.ref('orders/'+id).update({ status: s }); }
+        function updatePaid(id, val) { db.ref('orders/'+id).update({ advancePaid: parseFloat(val)||0 }); }
+        function markDone(id, total) { db.ref('orders/'+id).update({ advancePaid: total, status: 'Completed', progressNote: 'Fully Paid & Delivered' }); }
+        function deleteOrder(id) { if(confirm("Delete this order?")) db.ref('orders/'+id).remove(); }
+
+        function addMaterial() {
+            const type = document.getElementById('matType').value;
+            const qty = parseFloat(document.getElementById('matQty').value);
+            const price = parseFloat(document.getElementById('matPrice').value);
+            if(!qty || !price) return;
+            db.ref('outflows').push({ category: 'Material', note: `${type} (x${qty})`, amt: qty * price });
+            document.getElementById('matQty').value = '';
+            document.getElementById('matPrice').value = '';
+        }
+
+        function addGeneralExpense() {
+            const note = document.getElementById('expNote').value;
+            const amt = parseFloat(document.getElementById('expAmt').value);
+            if(!note || !amt) return;
+            db.ref('outflows').push({ category: 'Salary/Misc', note, amt });
+            document.getElementById('expNote').value = '';
+            document.getElementById('expAmt').value = '';
+        }
+
+        db.ref('outflows').on('value', snap => {
+            let matT = 0; let expT = 0;
+            const outflowList = document.getElementById('outflowList');
+            outflowList.innerHTML = '';
+            
+            snap.forEach(child => {
+                const v = child.val();
+                const key = child.key;
+                if(v.category === 'Material') matT += v.amt; else expT += v.amt;
+
+                outflowList.innerHTML = `
+                    <div class="flex justify-between items-center bg-slate-900/50 p-2 rounded-xl border border-slate-700/50">
+                        <div class="flex flex-col">
+                            <span class="text-slate-200 font-bold">${v.note}</span>
+                            <span class="text-[8px] uppercase tracking-tighter ${v.category=='Material'?'text-orange-400':'text-indigo-400'}">${v.category}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-red-400 font-black">₹${v.amt}</span>
+                            <button onclick="db.ref('outflows/${key}').remove()" class="text-slate-600 hover:text-red-500 px-1 font-bold">✕</button>
+                        </div>
+                    </div>
+                ` + outflowList.innerHTML;
+            });
+
+            document.getElementById('totalMaterials').innerText = '₹' + matT;
+            document.getElementById('totalExpenses').innerText = '₹' + expT;
+            calculateNet();
+        });
+
+        function calculateNet() {
+            const rev = parseFloat(document.getElementById('totalRevenue').innerText.replace('₹','')) || 0;
+            const mat = parseFloat(document.getElementById('totalMaterials').innerText.replace('₹','')) || 0;
+            const exp = parseFloat(document.getElementById('totalExpenses').innerText.replace('₹','')) || 0;
+            document.getElementById('netProfit').innerText = '₹' + (rev - mat - exp);
+        }
+    </script>
+</body>
+</html>
