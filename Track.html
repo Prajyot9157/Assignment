@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Studiment | Track Progress</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        input { font-size: 16px !important; }
+    </style>
+</head>
+<body class="p-4 flex flex-col items-center justify-center min-h-screen">
+    <div class="w-full max-w-md">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-black text-white tracking-tighter">Live <span class="text-indigo-500 font-medium">Tracking</span></h1>
+            <p class="text-slate-400 text-sm mt-1">Real-time status of your work</p>
+        </header>
+
+        <div class="flex flex-col sm:flex-row gap-2 mb-8">
+            <input type="text" id="trackId" placeholder="Order ID (ST-XXXX)" 
+                class="flex-1 p-4 bg-slate-800 rounded-2xl outline-none border border-slate-700 focus:border-indigo-500 text-white shadow-inner">
+            <button onclick="track()" class="bg-indigo-600 p-4 rounded-2xl font-bold hover:bg-indigo-500 active:scale-95 transition-all shadow-lg shadow-indigo-600/20">Check Status</button>
+        </div>
+
+        <div id="statusContainer" class="hidden space-y-4 animate-in slide-in-from-bottom duration-500">
+            <!-- Custom Progress Note -->
+            <div class="bg-indigo-600/10 border border-indigo-500/30 p-5 rounded-3xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-2 opacity-10">
+                    <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+                <p class="text-[10px] uppercase text-indigo-400 font-black mb-2 tracking-widest">Writer's Latest Update</p>
+                <p id="progressNote" class="text-xl font-medium text-white italic leading-snug">"Checking status..."</p>
+            </div>
+
+            <!-- Financials -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass p-4 rounded-3xl">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Paid</p>
+                    <p id="paidAmt" class="text-lg font-black text-emerald-400">₹0</p>
+                </div>
+                <div class="glass p-4 rounded-3xl">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Due</p>
+                    <p id="dueAmt" class="text-lg font-black text-red-400">₹0</p>
+                </div>
+            </div>
+
+            <!-- Main Status Card -->
+            <div class="glass p-6 rounded-3xl">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 id="clientName" class="text-xl font-black">---</h2>
+                        <p id="serviceType" class="text-xs text-slate-500 font-medium">---</p>
+                    </div>
+                    <span id="stageBadge" class="px-3 py-1 bg-indigo-600/20 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase text-indigo-400">Pending</span>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-slate-700/50">
+                        <div id="progBar" class="bg-gradient-to-r from-indigo-600 to-indigo-400 h-full transition-all duration-1000 ease-out" style="width: 10%"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-bold text-slate-600 uppercase">
+                        <span>Started</span>
+                        <span>Working</span>
+                        <span>Done</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorMsg" class="hidden text-center text-red-400 p-6 glass rounded-3xl mt-4">
+            Order not found. Please verify your ID.
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
+            authDomain: "studiment-tracking.firebaseapp.com",
+            databaseURL: "https://studiment-tracking-default-rtdb.firebaseio.com",
+            projectId: "studiment-tracking",
+            storageBucket: "studiment-tracking.firebasestorage.app",
+            messagingSenderId: "169609151336",
+            appId: "1:169609151336:web:871736f836c312cd4d4cdd"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function track() {
+            const id = document.getElementById('trackId').value.trim().toUpperCase();
+            if(!id) return;
+
+            db.ref('orders/' + id).on('value', snap => {
+                const data = snap.val();
+                const container = document.getElementById('statusContainer');
+                const error = document.getElementById('errorMsg');
+
+                if(data) {
+                    container.classList.remove('hidden');
+                    error.classList.add('hidden');
+
+                    document.getElementById('clientName').innerText = data.name;
+                    document.getElementById('serviceType').innerText = data.service + " • " + data.pages + " Pages";
+                    document.getElementById('progressNote').innerText = data.progressNote ? `"${data.progressNote}"` : '"Work will start soon..."';
+                    document.getElementById('paidAmt').innerText = '₹' + (data.advancePaid || 0);
+                    
+                    const due = data.total - (data.advancePaid || 0);
+                    document.getElementById('dueAmt').innerText = '₹' + Math.max(0, due);
+                    document.getElementById('stageBadge').innerText = data.status || 'Pending';
+                    
+                    let p = 15;
+                    if(data.status === 'In Progress') p = 60;
+                    if(data.status === 'Completed') p = 100;
+                    document.getElementById('progBar').style.width = p + '%';
+                } else {
+                    container.classList.add('hidden');
+                    error.classList.remove('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
