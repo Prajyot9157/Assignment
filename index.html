@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -114,26 +115,38 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            /* Added padding right to account for fixed menu button on mobile if needed */
             padding-right: 60px; 
         }
 
-        /* FIXED MENU BUTTON STYLES */
-        .menu-btn {
-            position: fixed; /* Fixes the button to the screen */
+        /* --- UPDATED: FIXED BUTTONS CONTAINER --- */
+        .fixed-header-actions {
+            position: fixed;
             top: 25px;
-            right: 5%; /* Aligns with container mostly */
-            z-index: 1001; /* Above everything */
-            font-size: 1.5rem;
+            right: 5%;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Space between Track and Menu */
+        }
+        
+        @media (min-width: 1200px) {
+            .fixed-header-actions {
+                right: calc((100% - 1200px) / 2 + 15px);
+            }
+        }
+
+        /* FIXED MENU BUTTON STYLES (UPDATED) */
+        .menu-btn {
+            font-size: 1.1rem;
             color: white;
             cursor: pointer;
-            width: 50px;
-            height: 50px;
+            width: 40px;  /* Reduced from 50px */
+            height: 40px; /* Reduced from 50px */
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(15, 23, 42, 0.6); /* Semi-transparent dark bg */
+            background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -141,34 +154,56 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* Adjust right position for larger screens to match container */
-        @media (min-width: 1200px) {
-            .menu-btn {
-                right: calc((100% - 1200px) / 2 + 15px);
-            }
-        }
-
         .menu-btn:hover { 
             background: var(--primary); 
             border-color: var(--primary);
-            transform: scale(1.1) rotate(90deg); /* Futuristic rotation */
+            transform: rotate(90deg); 
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
         }
+
+        /* NEW: TRACK BUTTON STYLES */
+        .track-float-btn {
+            height: 40px; /* Matches menu btn */
+            padding: 0 18px;
+            border-radius: 25px; /* Pill shape */
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .track-float-btn:hover {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+        }
         
-        /* SIDEBAR */
+        /* SIDEBAR (UPDATED ANIMATION) */
         .sidebar {
             position: fixed;
             top: 0; right: 0;
             width: 300px;
             height: 100vh;
             background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px); /* Enhanced Blur */
+            backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px);
             border-left: 1px solid var(--primary);
             padding: 80px 30px;
             transform: translateX(100%); 
             will-change: transform;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            /* Improved Smoothness: Custom Bezier for snappy start, soft end */
+            transition: transform 0.6s cubic-bezier(0.1, 0.9, 0.1, 1); 
             z-index: 9999;
             box-shadow: -10px 0 50px rgba(0,0,0,0.8);
             overflow-y: auto;
@@ -228,7 +263,7 @@
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 9990;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
             backdrop-filter: blur(3px);
         }
         .overlay.active { opacity: 1; pointer-events: auto; }
@@ -506,8 +541,17 @@
             .whatsapp-float { width: 50px; height: 50px; font-size: 25px; bottom: 20px; right: 20px; }
             #scrollTopBtn { right: 25px; bottom: 80px; width: 40px; height: 40px; }
             .nav-actions { display: none; } /* Hide normal nav buttons on mobile */
-            /* Ensure menu button is visible */
-            .menu-btn { display: flex; top: 20px; right: 20px; }
+            
+            /* Responsive Adjustment for Fixed Header Buttons */
+            .fixed-header-actions { right: 20px; top: 20px; }
+            .hero { padding-top: 150px; } /* More space for fixed buttons */
+        }
+        
+        /* Smaller screens tweaks */
+        @media (max-width: 400px) {
+            .hero h1 { font-size: 2rem; }
+            .btn { padding: 12px 25px; font-size: 0.9rem; }
+            .track-float-btn { font-size: 0.8rem; padding: 0 12px; }
         }
     </style>
 </head>
@@ -525,13 +569,24 @@
             <a href="#home" class="logo">
                 <i class="fas fa-pen-fancy"></i> Studiment
             </a>
+            
+            <!-- Standard Desktop Actions (Hidden on Mobile) -->
             <div class="nav-actions">
-                  <a href="Track.html" class="btn" style="padding: 10px 25px; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary); box-shadow: none;">Track</a>
+                  <!-- The 'Track' button here is replaced by the floating one for better consistency -->
+                  <span style="font-size: 0.9rem; color: var(--text-muted); margin-right: 10px;">Pune's Best</span>
             </div>
 
-            <!-- FIXED MENU BUTTON (The "3 dots/lines" won't scroll away now) -->
-            <div class="menu-btn" onclick="toggleMenu()">
-                <i class="fas fa-bars"></i>
+            <!-- FIXED HEADER ACTIONS (Visible on all screens) -->
+            <div class="fixed-header-actions">
+                <!-- NEW: Track Button (Option Style) -->
+                <a href="Track.html" class="track-float-btn">
+                    <i class="fas fa-search-location"></i> Track
+                </a>
+                
+                <!-- Menu Button (The "3 dots/lines") -->
+                <div class="menu-btn" onclick="toggleMenu()">
+                    <i class="fas fa-bars"></i>
+                </div>
             </div>
         </nav>
     </div>
@@ -965,8 +1020,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
