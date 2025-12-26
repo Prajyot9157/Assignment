@@ -3,240 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studiment | Live Tracker Pro</title>
+    <title>Studiment | Track Progress</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
-        
-        :root {
-            --primary: #6366f1;
-            --bg-dark: #030712;
-        }
-
-        body { 
-            background-color: var(--bg-dark);
-            color: #f8fafc; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            -webkit-tap-highlight-color: transparent; 
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        .mesh-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: 
-                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, var(--bg-dark) 100%);
-        }
-
-        .glass-card { 
-            background: rgba(17, 24, 39, 0.7); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 28px;
-        }
-
-        /* Technical Sequence Styles */
-        .terminal-text {
-            font-family: 'Fira Code', monospace;
-            font-size: 11px;
-        }
-
-        .scan-line {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
-            animation: scan 2s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes scan {
-            0% { top: 0; opacity: 0; }
-            50% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* Saturated Colors */
-        .card-paid {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-        }
-        .card-due {
-            background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(225, 29, 72, 0.05) 100%);
-            border: 1px solid rgba(244, 63, 94, 0.4);
-        }
-
-        .text-saturated-green { color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
-        .text-saturated-rose { color: #fb7185; text-shadow: 0 0 12px rgba(244, 63, 94, 0.4); }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .step-dot.active {
-            background: var(--primary);
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
-            transform: scale(1.3);
-        }
+        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        input { font-size: 16px !important; }
     </style>
 </head>
-<body class="p-4 sm:p-8 flex flex-col items-center">
-    <div class="mesh-bg"></div>
-
-    <div class="w-full max-w-xl pb-32">
-        <!-- Header -->
-        <header class="flex flex-col items-center mt-6 mb-8 text-center">
-            <div class="px-3 py-1 mb-4 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center gap-2">
-                <span id="liveTime" class="text-[10px] font-bold text-slate-400 tracking-widest tabular-nums uppercase">00:00:00 AM IST</span>
-            </div>
-            <h1 class="text-5xl font-black text-white tracking-tighter mb-2">
-                STUDI<span class="text-indigo-500">MENT</span>
-            </h1>
-            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em]">Live Progress Terminal</p>
+<body class="p-4 flex flex-col items-center justify-center min-h-screen">
+    <div class="w-full max-w-md">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-black text-white tracking-tighter">Live <span class="text-indigo-500 font-medium">Tracking</span></h1>
+            <p class="text-slate-400 text-sm mt-1">Real-time status of your work</p>
         </header>
 
-        <!-- Quote Area -->
-        <div id="quoteArea" class="glass-card p-6 mb-8 relative overflow-hidden transition-opacity duration-500">
-            <p id="mainQuote" class="text-slate-300 font-medium italic leading-relaxed text-sm">"Success is the sum of small efforts, repeated day in and day out."</p>
-            <p id="quoteAuthor" class="text-indigo-400 text-[9px] font-bold uppercase mt-3 tracking-widest">— ROBERT COLLIER</p>
+        <div class="flex flex-col sm:flex-row gap-2 mb-8">
+            <input type="text" id="trackId" placeholder="Order ID (ST-XXXX)" 
+                class="flex-1 p-4 bg-slate-800 rounded-2xl outline-none border border-slate-700 focus:border-indigo-500 text-white shadow-inner">
+            <button onclick="track()" class="bg-indigo-600 p-4 rounded-2xl font-bold hover:bg-indigo-500 active:scale-95 transition-all shadow-lg shadow-indigo-600/20">Check Status</button>
         </div>
 
-        <!-- Search Input -->
-        <div class="glass-card p-4 mb-8">
-            <div class="flex flex-col sm:flex-row gap-3">
-                <input type="text" id="trackId" placeholder="ENTER ORDER ID" 
-                    class="flex-grow p-4 bg-slate-900/80 rounded-2xl outline-none border border-slate-700/50 text-white font-bold tracking-widest uppercase focus:border-indigo-500">
-                <button onclick="track()" id="mainBtn" class="btn-primary px-8 py-4 rounded-2xl font-black text-white uppercase tracking-widest text-xs">
-                    Track Now
-                </button>
-            </div>
-        </div>
-
-        <!-- TECHNICAL ANIMATION UI -->
-        <div id="loaderUI" class="hidden glass-card p-10 relative overflow-hidden">
-            <div class="scan-line"></div>
-            <div class="flex flex-col items-center gap-6">
-                <div class="relative w-16 h-16">
-                    <svg class="animate-spin text-indigo-500" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+        <div id="statusContainer" class="hidden space-y-4 animate-in slide-in-from-bottom duration-500">
+            <!-- Custom Progress Note -->
+            <div class="bg-indigo-600/10 border border-indigo-500/30 p-5 rounded-3xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-2 opacity-10">
+                    <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                 </div>
-                <div class="w-full space-y-2 terminal-text">
-                    <div id="log1" class="text-slate-500 opacity-0 transition-opacity duration-300 flex justify-between">
-                        <span>> INITIALIZING HANDSHAKE</span><span class="text-emerald-500">[OK]</span>
-                    </div>
-                    <div id="log2" class="text-slate-500 opacity-0 transition-opacity duration-300 flex justify-between">
-                        <span>> QUERYING SECURE_DB</span><span class="text-emerald-500">[OK]</span>
-                    </div>
-                    <div id="log3" class="text-slate-500 opacity-0 transition-opacity duration-300 flex justify-between">
-                        <span>> VERIFYING ENCRYPTION</span><span class="text-emerald-500">[OK]</span>
-                    </div>
-                    <div id="log4" class="text-slate-500 opacity-0 transition-opacity duration-300 flex justify-between">
-                        <span>> DEPLOYING LIVE_VIEW</span><span class="text-indigo-400 animate-pulse">[LOAD]</span>
-                    </div>
+                <p class="text-[10px] uppercase text-indigo-400 font-black mb-2 tracking-widest">Writer's Latest Update</p>
+                <p id="progressNote" class="text-xl font-medium text-white italic leading-snug">"Checking status..."</p>
+            </div>
+
+            <!-- Financials -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass p-4 rounded-3xl">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Paid</p>
+                    <p id="paidAmt" class="text-lg font-black text-emerald-400">₹0</p>
+                </div>
+                <div class="glass p-4 rounded-3xl">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Due</p>
+                    <p id="dueAmt" class="text-lg font-black text-red-400">₹0</p>
                 </div>
             </div>
-        </div>
 
-        <!-- DASHBOARD UI -->
-        <div id="statusUI" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <!-- Header Card -->
-            <div class="glass-card p-7">
-                <div class="flex justify-between items-start border-b border-slate-800/50 pb-5 mb-5">
+            <!-- Main Status Card -->
+            <div class="glass p-6 rounded-3xl">
+                <div class="flex justify-between items-start mb-6">
                     <div>
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Project ID</p>
-                        <h2 id="orderIdDisplay" class="text-2xl font-black text-white tracking-tighter uppercase">---</h2>
+                        <h2 id="clientName" class="text-xl font-black">---</h2>
+                        <p id="serviceType" class="text-xs text-slate-500 font-medium">---</p>
                     </div>
-                    <span id="statusLabel" class="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-bold text-xs border border-indigo-500/20 uppercase">---</span>
+                    <span id="stageBadge" class="px-3 py-1 bg-indigo-600/20 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase text-indigo-400">Pending</span>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Client</p>
-                        <p id="clientName" class="text-base font-bold text-slate-200">---</p>
+                
+                <div class="space-y-3">
+                    <div class="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-slate-700/50">
+                        <div id="progBar" class="bg-gradient-to-r from-indigo-600 to-indigo-400 h-full transition-all duration-1000 ease-out" style="width: 10%"></div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Service</p>
-                        <p id="serviceType" class="text-base font-bold text-indigo-400">---</p>
+                    <div class="flex justify-between text-[10px] font-bold text-slate-600 uppercase">
+                        <span>Started</span>
+                        <span>Working</span>
+                        <span>Done</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Roadmap -->
-            <div class="glass-card p-7">
-                <div class="flex justify-between items-center mb-10 relative">
-                    <div class="absolute h-0.5 bg-slate-800 top-1.5 left-2 right-2 z-0">
-                        <div id="stepLineFill" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 relative z-10">
-                        <div class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all duration-500" id="dot-1"></div>
-                        <span class="text-[8px] font-bold text-slate-500 uppercase">Booked</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 relative z-10">
-                        <div class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all duration-500" id="dot-2"></div>
-                        <span class="text-[8px] font-bold text-slate-500 uppercase">Research</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 relative z-10">
-                        <div class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all duration-500" id="dot-3"></div>
-                        <span class="text-[8px] font-bold text-slate-500 uppercase">Drafting</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 relative z-10">
-                        <div class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all duration-500" id="dot-4"></div>
-                        <span class="text-[8px] font-bold text-slate-500 uppercase">Final</span>
-                    </div>
-                </div>
-                <div class="flex justify-between items-end mb-2">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Completion Score</p>
-                    <p id="percentLabel" class="text-4xl font-black text-white italic">0%</p>
-                </div>
-                <div class="w-full h-3 bg-slate-950 rounded-full border border-slate-800 overflow-hidden">
-                    <div id="progBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-[1.5s]" style="width: 0%"></div>
                 </div>
             </div>
+        </div>
 
-            <!-- Saturated Financials -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass-card p-6 card-paid">
-                    <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Paid</p>
-                    <p id="paidAmt" class="text-3xl font-black text-saturated-green">₹0</p>
-                </div>
-                <div class="glass-card p-6 card-due">
-                    <p class="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Balance</p>
-                    <p id="dueAmt" class="text-3xl font-black text-saturated-rose">₹0</p>
-                </div>
-            </div>
-
-            <!-- Update -->
-            <div class="glass-card p-6 border-l-4 border-indigo-500 bg-indigo-500/5">
-                <p id="progressNote" class="text-sm font-medium text-slate-300 italic">Connecting to tracker desk...</p>
-            </div>
-
-            <a id="waLink" href="#" target="_blank" class="w-full p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center gap-3 font-bold text-indigo-400 hover:bg-indigo-500/20 transition-all uppercase text-xs tracking-widest">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.483 8.413-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.308 1.654zm6.215-4.761c1.554.921 3.093 1.383 4.671 1.384 5.432 0 9.851-4.419 9.853-9.852.001-2.632-1.024-5.105-2.887-6.97-1.862-1.864-4.337-2.89-6.969-2.891-5.433 0-9.854 4.421-9.854 9.854.001 2.155.702 4.14 2.006 5.761l-1.066 3.89 3.987-1.046h.04z"/></svg>
-                Help Desk
-            </a>
+        <div id="errorMsg" class="hidden text-center text-red-400 p-6 glass rounded-3xl mt-4">
+            Order not found. Please verify your ID.
         </div>
     </div>
 
     <script>
-        const quotes = [
-            { t: "Success is the sum of small efforts, repeated day in and day out.", a: "ROBERT COLLIER" },
-            { t: "The expert in anything was once a beginner.", a: "HELEN HAYES" },
-            { t: "Education is not preparation for life; education is life itself.", a: "JOHN DEWEY" },
-            { t: "Strive for progress, not perfection.", a: "UNKNOWN" }
-        ];
-
         const firebaseConfig = {
             apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
             authDomain: "studiment-tracking.firebaseapp.com",
@@ -249,100 +89,35 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('liveTime').innerText = `${timeStr} IST`;
-        }
-        setInterval(updateClock, 1000); updateClock();
+        function track() {
+            const id = document.getElementById('trackId').value.trim().toUpperCase();
+            if(!id) return;
 
-        function rotateQuote() {
-            const q = quotes[Math.floor(Math.random() * quotes.length)];
-            const area = document.getElementById('quoteArea');
-            area.style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('mainQuote').innerText = `"${q.t}"`;
-                document.getElementById('quoteAuthor').innerText = `— ${q.a}`;
-                area.style.opacity = '1';
-            }, 500);
-        }
-        rotateQuote();
-
-        async function technicalSequence() {
-            return new Promise(res => {
-                const logs = ['log1', 'log2', 'log3', 'log4'];
-                logs.forEach((id, i) => {
-                    setTimeout(() => {
-                        document.getElementById(id).style.opacity = '1';
-                    }, i * 400);
-                });
-                setTimeout(res, 2000);
-            });
-        }
-
-        async function track() {
-            const rawId = document.getElementById('trackId').value.trim();
-            if(!rawId) return;
-            const id = rawId.toUpperCase();
-
-            const statusUI = document.getElementById('statusUI');
-            const loaderUI = document.getElementById('loaderUI');
-            const btn = document.getElementById('mainBtn');
-
-            // Reset Animation Logs
-            ['log1', 'log2', 'log3', 'log4'].forEach(l => document.getElementById(l).style.opacity = '0');
-
-            btn.disabled = true;
-            statusUI.classList.add('hidden');
-            loaderUI.classList.remove('hidden');
-
-            rotateQuote();
-            await technicalSequence();
-
-            db.ref('orders/' + id).once('value', snap => {
-                loaderUI.classList.add('hidden');
-                btn.disabled = false;
+            db.ref('orders/' + id).on('value', snap => {
                 const data = snap.val();
+                const container = document.getElementById('statusContainer');
+                const error = document.getElementById('errorMsg');
 
                 if(data) {
-                    statusUI.classList.remove('hidden');
-                    document.getElementById('orderIdDisplay').innerText = id;
-                    document.getElementById('clientName').innerText = data.name || "Client";
-                    document.getElementById('serviceType').innerText = data.service || "Project";
-                    document.getElementById('progressNote').innerText = data.progressNote ? `"${data.progressNote}"` : "Our team is currently syncing your final requirements.";
-                    
-                    const paid = data.advancePaid || 0;
-                    const total = data.total || 0;
-                    document.getElementById('paidAmt').innerText = '₹' + paid.toLocaleString();
-                    document.getElementById('dueAmt').innerText = '₹' + Math.max(0, total - paid).toLocaleString();
-                    
-                    const status = (data.status || 'Received').toLowerCase();
-                    let p = 15; let milestone = 1;
-                    
-                    if(status.includes('verify')) { p = 25; milestone = 1; }
-                    else if(status.includes('research')) { p = 45; milestone = 2; }
-                    else if(status.includes('draft') || status.includes('progress')) { p = 75; milestone = 3; }
-                    else if(status.includes('review')) { p = 90; milestone = 3; }
-                    else if(status.includes('complete') || status.includes('delivered')) { p = 100; milestone = 4; }
+                    container.classList.remove('hidden');
+                    error.classList.add('hidden');
 
-                    document.getElementById('statusLabel').innerText = data.status || 'Active';
+                    document.getElementById('clientName').innerText = data.name;
+                    document.getElementById('serviceType').innerText = data.service + " • " + data.pages + " Pages";
+                    document.getElementById('progressNote').innerText = data.progressNote ? `"${data.progressNote}"` : '"Work will start soon..."';
+                    document.getElementById('paidAmt').innerText = '₹' + (data.advancePaid || 0);
+                    
+                    const due = data.total - (data.advancePaid || 0);
+                    document.getElementById('dueAmt').innerText = '₹' + Math.max(0, due);
+                    document.getElementById('stageBadge').innerText = data.status || 'Pending';
+                    
+                    let p = 15;
+                    if(data.status === 'In Progress') p = 60;
+                    if(data.status === 'Completed') p = 100;
                     document.getElementById('progBar').style.width = p + '%';
-                    document.getElementById('percentLabel').innerText = p + '%';
-                    document.getElementById('stepLineFill').style.width = ((milestone-1)/3 * 100) + '%';
-                    
-                    for(let i=1; i<=4; i++){
-                        const dot = document.getElementById(`dot-${i}`);
-                        if(i <= milestone) dot.classList.add('active');
-                        else dot.classList.remove('active');
-                    }
-
-                    document.getElementById('waLink').href = `https://wa.me/917048596598?text=Hello Studiment, checking status for ID: ${id}`;
-
-                    if(p === 100) {
-                        confetti({ particleCount: 150, spread: 80, origin: { y: 0.7 } });
-                    }
                 } else {
-                    alert("ID not found in active cluster.");
+                    container.classList.add('hidden');
+                    error.classList.remove('hidden');
                 }
             });
         }
