@@ -3,77 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studiment | Track Progress</title>
+    <title>Studiment | Portal</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; font-family: ui-sans-serif, system-ui; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); }
+        .tab-active { border-bottom: 3px solid #6366f1; color: #6366f1; }
         input { font-size: 16px !important; }
+        .slide-down { animation: slideDown 0.4s ease-out forwards; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .insta-gradient { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
     </style>
 </head>
-<body class="p-4 flex flex-col items-center justify-center min-h-screen">
-    <div class="w-full max-w-md">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-black text-white tracking-tighter">Live <span class="text-indigo-500 font-medium">Tracking</span></h1>
-            <p class="text-slate-400 text-sm mt-1">Real-time status of your work</p>
-        </header>
+<body class="p-4 pb-24 flex flex-col items-center min-h-screen">
+    
+    <!-- Header -->
+    <div class="w-full max-w-md flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-black text-white italic tracking-tighter">STUDIMENT</h1>
+        <a href="https://studiment.live" class="text-[10px] font-bold text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-full flex items-center gap-1">
+            MAIN SITE <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+    </div>
 
-        <div class="flex flex-col sm:flex-row gap-2 mb-8">
-            <input type="text" id="trackId" placeholder="Order ID (ST-XXXX)" 
-                class="flex-1 p-4 bg-slate-800 rounded-2xl outline-none border border-slate-700 focus:border-indigo-500 text-white shadow-inner">
-            <button onclick="track()" class="bg-indigo-600 p-4 rounded-2xl font-bold hover:bg-indigo-500 active:scale-95 transition-all shadow-lg shadow-indigo-600/20">Check Status</button>
+    <!-- Navigation Tabs -->
+    <div class="w-full max-w-md flex border-b border-slate-800 mb-6 text-[11px] font-black tracking-widest text-slate-500">
+        <button onclick="switchTab('track')" id="btn-track" class="flex-1 py-3 tab-active transition-all uppercase">Tracking</button>
+        <button onclick="switchTab('support')" id="btn-support" class="flex-1 py-3 transition-all uppercase">Support</button>
+        <button onclick="switchTab('links')" id="btn-links" class="flex-1 py-3 transition-all uppercase">Links</button>
+    </div>
+
+    <div class="w-full max-w-md">
+        
+        <!-- TAB 1: TRACKING -->
+        <div id="tab-track-content" class="space-y-6">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="trackId" placeholder="Order ID (ST-XXXX)" 
+                    class="flex-1 p-4 bg-slate-800 rounded-2xl outline-none border border-slate-700 focus:border-indigo-500 text-white shadow-inner">
+                <button onclick="track()" class="bg-indigo-600 p-4 rounded-2xl font-bold hover:bg-indigo-500 active:scale-95 transition-all shadow-lg shadow-indigo-600/20">Track</button>
+            </div>
+
+            <div id="statusContainer" class="hidden space-y-4 slide-down">
+                <!-- Progress Note -->
+                <div class="bg-indigo-600/10 border border-indigo-500/20 p-5 rounded-3xl relative overflow-hidden">
+                    <p class="text-[9px] uppercase text-indigo-400 font-black mb-1">Live Update</p>
+                    <p id="progressNote" class="text-lg font-medium text-white italic leading-tight">"..."</p>
+                </div>
+
+                <!-- Financial Details Card -->
+                <div class="glass p-5 rounded-3xl space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-700/50 pb-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Payment Info</span>
+                        <span id="paymentStatusBadge" class="text-[9px] px-2 py-0.5 rounded font-black uppercase">STATUS</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-900/40 p-4 rounded-2xl border border-slate-700/30 text-center">
+                            <p class="text-[9px] text-slate-500 uppercase font-bold">Paid</p>
+                            <p id="paidAmt" class="text-xl font-black text-emerald-400">₹0</p>
+                        </div>
+                        <div class="bg-slate-900/40 p-4 rounded-2xl border border-slate-700/30 text-center">
+                            <p class="text-[9px] text-slate-500 uppercase font-bold">Due</p>
+                            <p id="dueAmt" class="text-xl font-black text-red-400">₹0</p>
+                        </div>
+                    </div>
+
+                    <!-- Payment Trigger Section -->
+                    <div id="paymentSection" class="hidden bg-slate-800/40 p-5 rounded-2xl text-center space-y-4 border border-slate-700/50 slide-down">
+                        <p class="text-xs font-bold text-slate-300">Scan to auto-fill Tracking ID & Name</p>
+                        <!-- QR Code -->
+                        <div class="bg-white p-2 rounded-xl inline-block shadow-2xl">
+                            <img id="qrCode" class="w-44 h-44" src="" alt="Payment QR">
+                        </div>
+                        
+                        <!-- Auto-Fill Reference Info -->
+                        <div class="bg-indigo-500/10 py-2 px-3 rounded-lg border border-indigo-500/20 block">
+                            <p class="text-[8px] text-slate-500 uppercase font-bold mb-1">Auto-Filled Note</p>
+                            <p id="paymentRef" class="text-[10px] text-indigo-400 font-mono font-bold"></p>
+                        </div>
+
+                        <a id="payBtn" href="#" target="_blank" class="flex items-center justify-center gap-2 w-full bg-emerald-500 text-white py-4 rounded-xl font-black text-sm shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-all">
+                            PAY NOW VIA UPI
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Order Details Card -->
+                <div class="glass p-5 rounded-3xl space-y-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h2 id="clientName" class="text-2xl font-black text-white">---</h2>
+                            <p id="serviceType" class="text-xs text-slate-500 font-bold uppercase tracking-tight">---</p>
+                        </div>
+                        <div class="text-right">
+                            <span id="stageBadge" class="text-[10px] px-2.5 py-1 bg-indigo-500/20 text-indigo-400 rounded-full font-black uppercase tracking-widest">Active</span>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
+                            <div id="progBar" class="bg-gradient-to-r from-indigo-600 to-indigo-400 h-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] font-black text-slate-600 uppercase tracking-tighter">
+                            <span>Started</span>
+                            <span>Working</span>
+                            <span>Finished</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="shareStatus()" class="w-full py-4 bg-slate-800/80 border border-slate-700 rounded-2xl text-[11px] font-black text-slate-300 uppercase tracking-widest flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                        Share Status
+                    </button>
+                </div>
+            </div>
+            
+            <div id="errorMsg" class="hidden text-center p-12 glass rounded-3xl text-red-400 border border-red-500/20">
+                <p class="text-xl font-black">Order Not Found</p>
+                <p class="text-xs opacity-60">Check ID and try again.</p>
+            </div>
         </div>
 
-        <div id="statusContainer" class="hidden space-y-4 animate-in slide-in-from-bottom duration-500">
-            <!-- Custom Progress Note -->
-            <div class="bg-indigo-600/10 border border-indigo-500/30 p-5 rounded-3xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-2 opacity-10">
-                    <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                </div>
-                <p class="text-[10px] uppercase text-indigo-400 font-black mb-2 tracking-widest">Writer's Latest Update</p>
-                <p id="progressNote" class="text-xl font-medium text-white italic leading-snug">"Checking status..."</p>
-            </div>
-
-            <!-- Financials -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="glass p-4 rounded-3xl">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Paid</p>
-                    <p id="paidAmt" class="text-lg font-black text-emerald-400">₹0</p>
-                </div>
-                <div class="glass p-4 rounded-3xl">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Due</p>
-                    <p id="dueAmt" class="text-lg font-black text-red-400">₹0</p>
-                </div>
-            </div>
-
-            <!-- Main Status Card -->
-            <div class="glass p-6 rounded-3xl">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <h2 id="clientName" class="text-xl font-black">---</h2>
-                        <p id="serviceType" class="text-xs text-slate-500 font-medium">---</p>
-                    </div>
-                    <span id="stageBadge" class="px-3 py-1 bg-indigo-600/20 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase text-indigo-400">Pending</span>
-                </div>
+        <!-- TAB 2: SUPPORT -->
+        <div id="tab-support-content" class="hidden space-y-4 slide-down">
+            <div class="glass p-6 rounded-3xl space-y-5">
+                <h3 class="text-xl font-black italic">Help Desk</h3>
                 
                 <div class="space-y-3">
-                    <div class="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-slate-700/50">
-                        <div id="progBar" class="bg-gradient-to-r from-indigo-600 to-indigo-400 h-full transition-all duration-1000 ease-out" style="width: 10%"></div>
-                    </div>
-                    <div class="flex justify-between text-[10px] font-bold text-slate-600 uppercase">
-                        <span>Started</span>
-                        <span>Working</span>
-                        <span>Done</span>
-                    </div>
+                    <!-- WhatsApp -->
+                    <a href="https://wa.me/917048596598" class="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl hover:bg-emerald-500/20 transition-all">
+                        <div class="bg-emerald-500 p-2.5 rounded-xl text-white">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.207l-.633 2.307 2.387-.626c.908.54 1.746.88 2.989.88 3.183 0 5.769-2.587 5.77-5.767 0-3.18-2.587-5.767-5.77-5.767zm3.373 8.205c-.145.408-.834.755-1.155.803-.321.047-.633.086-1.748-.372-1.46-.599-2.398-2.083-2.471-2.182-.073-.099-.633-.841-.633-1.603 0-.762.396-1.137.536-1.282.14-.145.306-.182.408-.182.102 0 .204 0 .292.004.095.004.223-.036.35.269.128.303.438 1.066.476 1.142.038.076.064.165.013.269-.051.104-.077.168-.153.257-.077.089-.161.198-.23.269-.077.077-.156.161-.067.315.089.153.396.654.849 1.058.583.519 1.074.68 1.227.755.153.076.242.064.331-.038.089-.102.383-.446.484-.599.102-.153.204-.128.331-.077.128.051.816.384.956.453.14.07.234.104.269.163.036.06.036.345-.109.753z"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">WhatsApp</p>
+                            <p class="text-[9px] text-slate-500 uppercase font-black">Fastest Response</p>
+                        </div>
+                    </a>
+
+                    <!-- Instagram -->
+                    <a href="https://instagram.com/studiment.live" class="flex items-center gap-4 bg-pink-500/10 border border-pink-500/20 p-4 rounded-2xl hover:bg-pink-500/20 transition-all">
+                        <div class="insta-gradient p-2.5 rounded-xl text-white">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">Instagram</p>
+                            <p class="text-[9px] text-slate-500 uppercase font-black">@studiment.live</p>
+                        </div>
+                    </a>
+
+                    <!-- Email -->
+                    <a href="mailto:studiment.live@gmail.com" class="flex items-center gap-4 bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-2xl hover:bg-indigo-500/20 transition-all">
+                        <div class="bg-indigo-600 p-2.5 rounded-xl text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">Email Us</p>
+                            <p class="text-[9px] text-slate-500 uppercase font-black">studiment.live@gmail.com</p>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div id="errorMsg" class="hidden text-center text-red-400 p-6 glass rounded-3xl mt-4">
-            Order not found. Please verify your ID.
+        <!-- TAB 3: LINKS -->
+        <div id="tab-links-content" class="hidden grid grid-cols-2 gap-3 slide-down">
+            <a href="https://studiment.live" target="_blank" class="glass p-8 rounded-3xl text-center space-y-2 border border-slate-700 hover:border-indigo-500/50 transition-all">
+                <span class="text-3xl">🌐</span>
+                <p class="text-[10px] font-black uppercase text-slate-400">Website</p>
+            </a>
+            <a href="https://studiment.live/#calculator" class="glass p-8 rounded-3xl text-center space-y-2 border border-slate-700 hover:border-indigo-500/50 transition-all">
+                <span class="text-3xl">💰</span>
+                <p class="text-[10px] font-black uppercase text-slate-400">Pricing</p>
+            </a>
         </div>
+
     </div>
 
     <script>
@@ -82,19 +186,31 @@
             authDomain: "studiment-tracking.firebaseapp.com",
             databaseURL: "https://studiment-tracking-default-rtdb.firebaseio.com",
             projectId: "studiment-tracking",
-            storageBucket: "studiment-tracking.firebasestorage.app",
-            messagingSenderId: "169609151336",
-            appId: "1:169609151336:web:871736f836c312cd4d4cdd"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        let activeData = null;
+        let activeId = '';
+
+        function switchTab(tab) {
+            ['track', 'support', 'links'].forEach(t => {
+                document.getElementById(`tab-${t}-content`).classList.add('hidden');
+                document.getElementById(`btn-${t}`).classList.remove('tab-active');
+            });
+            document.getElementById(`tab-${tab}-content`).classList.remove('hidden');
+            if(tab === 'links') document.getElementById(`tab-${tab}-content`).classList.replace('hidden', 'grid');
+            document.getElementById(`btn-${tab}`).classList.add('tab-active');
+        }
+
         function track() {
             const id = document.getElementById('trackId').value.trim().toUpperCase();
             if(!id) return;
+            activeId = id;
 
             db.ref('orders/' + id).on('value', snap => {
                 const data = snap.val();
+                activeData = data;
                 const container = document.getElementById('statusContainer');
                 const error = document.getElementById('errorMsg');
 
@@ -103,23 +219,56 @@
                     error.classList.add('hidden');
 
                     document.getElementById('clientName').innerText = data.name;
-                    document.getElementById('serviceType').innerText = data.service + " • " + data.pages + " Pages";
-                    document.getElementById('progressNote').innerText = data.progressNote ? `"${data.progressNote}"` : '"Work will start soon..."';
-                    document.getElementById('paidAmt').innerText = '₹' + (data.advancePaid || 0);
-                    
-                    const due = data.total - (data.advancePaid || 0);
+                    document.getElementById('serviceType').innerText = (data.service || 'Work') + " • " + (data.pages || 'X') + " Pages";
+                    document.getElementById('progressNote').innerText = data.progressNote ? `"${data.progressNote}"` : '"Processing your request..."';
+                    document.getElementById('stageBadge').innerText = data.status || 'Active';
+
+                    const paid = data.advancePaid || 0;
+                    const total = data.total || 0;
+                    const due = total - paid;
+                    document.getElementById('paidAmt').innerText = '₹' + paid;
                     document.getElementById('dueAmt').innerText = '₹' + Math.max(0, due);
-                    document.getElementById('stageBadge').innerText = data.status || 'Pending';
-                    
+
+                    const paySection = document.getElementById('paymentSection');
+                    const badge = document.getElementById('paymentStatusBadge');
+
+                    if(due > 0) {
+                        paySection.classList.remove('hidden');
+                        badge.innerText = 'DUE';
+                        badge.className = 'text-[9px] px-2 py-0.5 rounded font-black uppercase bg-red-500/20 text-red-400';
+                        
+                        const autoFillNote = `${id} - ${data.name}`;
+                        document.getElementById('paymentRef').innerText = autoFillNote;
+                        const upiUri = `upi://pay?pa=7048596598@ybl&pn=Studiment&am=${due}&cu=INR&tn=${encodeURIComponent(autoFillNote)}`;
+                        
+                        document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUri)}`;
+                        document.getElementById('payBtn').href = upiUri;
+                        document.getElementById('payBtn').innerText = `PAY ₹${due} NOW`;
+                    } else {
+                        paySection.classList.add('hidden');
+                        badge.innerText = 'PAID';
+                        badge.className = 'text-[9px] px-2 py-0.5 rounded font-black uppercase bg-emerald-500/20 text-emerald-400';
+                    }
+
                     let p = 15;
                     if(data.status === 'In Progress') p = 60;
-                    if(data.status === 'Completed') p = 100;
+                    if(data.status === 'Completed' || data.status === 'Delivered') {
+                        p = 100;
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                    }
                     document.getElementById('progBar').style.width = p + '%';
+
                 } else {
                     container.classList.add('hidden');
                     error.classList.remove('hidden');
                 }
             });
+        }
+
+        function shareStatus() {
+            if(!activeData) return;
+            const text = `🚀 *Studiment Update*\nOrder: *${activeId}*\nStatus: *${activeData.status || 'Active'}*\n\nTrack Live: https://studiment.live/track?id=${activeId}`;
+            window.open(`https://wa.me/917048596598?text=${encodeURIComponent(text)}`);
         }
     </script>
 </body>
