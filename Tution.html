@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSC Daily Tuition & Chapter Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .slot-card { transition: all 0.2s ease; border-left: 5px solid transparent; }
+        .slot-active { border-left-color: #6366f1; background: #f5f3ff; transform: scale(1.02); }
+        .exam-tag { background: #fee2e2; color: #ef4444; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 800; }
+        .chapter-label { font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-md mx-auto">
+        <!-- Dashboard Header -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900 leading-none mb-1">Tuition Mode</h1>
+                    <p id="currentDateDisplay" class="text-slate-500 text-xs font-bold uppercase tracking-widest">January 2, 2026</p>
+                </div>
+                <div id="dayCounter" class="bg-indigo-600 text-white text-[10px] font-black px-3 py-2 rounded-xl">DAY 1 / 45</div>
+            </div>
+            
+            <div class="mt-6 bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                <div class="flex justify-between text-[10px] font-black mb-2">
+                    <span class="text-slate-400">SYLLABUS MASTERY</span>
+                    <span id="pctText" class="text-indigo-600">0%</span>
+                </div>
+                <div class="bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div id="progressBar" class="bg-indigo-500 h-full w-0 transition-all duration-1000 ease-out"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hourly Schedule -->
+        <div id="scheduleContainer" class="space-y-4">
+            <!-- Time slots injected here -->
+        </div>
+
+        <!-- Day Controls -->
+        <div class="mt-8 flex gap-3">
+            <button onclick="changeDay(-1)" class="flex-1 py-4 bg-white border border-slate-200 text-slate-500 rounded-2xl font-bold text-xs hover:bg-slate-50">Previous Day</button>
+            <button onclick="changeDay(1)" class="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs shadow-xl shadow-slate-200">Next Day</button>
+        </div>
+
+        <!-- Live Session Indicator -->
+        <div class="mt-8 p-5 bg-indigo-900 rounded-[2rem] text-white relative overflow-hidden">
+            <div class="relative z-10 flex items-start gap-4">
+                <div class="bg-white/10 p-2 rounded-lg">🚀</div>
+                <div>
+                    <h4 class="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">Live Suggestion</h4>
+                    <p id="statusMsg" class="text-xs text-indigo-100 leading-relaxed italic">Loading your routine...</p>
+                </div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full"></div>
+        </div>
+    </div>
+
+    <script>
+        const START_DATE = new Date("2026-01-02T00:00:00");
+        
+        // Full Curriculum Mapping
+        const curriculum = {
+            Maths: [
+                "Trigonometry I", "Trigonometry II", "Determinants & Matrices", 
+                "Straight Line", "Circle", "Conic Sections", "Sets & Relations", 
+                "Functions", "Sequence & Series", "Limits & Continuity", "Differentiation"
+            ],
+            Physics: [
+                "Units & Measurements", "Mathematical Methods", "Motion in a Plane", 
+                "Laws of Motion", "Gravitation", "Mechanical Properties of Solids", 
+                "Thermal Properties", "Sound", "Optics", "Electrostatics", "Current Electricity"
+            ],
+            Chemistry: [
+                "Some Basic Concepts", "Structure of Atom", "Chemical Bonding", 
+                "Redox Reactions", "Adsorption & Colloids", "S-Block Elements", 
+                "P-Block Elements", "Organic Chemistry Basics", "Hydrocarbons"
+            ]
+        };
+
+        let displayDayIndex = 0;
+        let completionState = JSON.parse(localStorage.getItem('hsc_tuition_full_state')) || {};
+
+        function init() {
+            const today = new Date();
+            const diffDays = Math.floor((today - START_DATE) / (1000 * 60 * 60 * 24));
+            displayDayIndex = Math.max(0, Math.min(44, diffDays));
+            
+            updateUI();
+            checkCurrentSlot();
+            setInterval(checkCurrentSlot, 60000);
+        }
+
+        function updateUI() {
+            const dayNum = displayDayIndex + 1;
+            const data = generateTuitionPlan(dayNum);
+            
+            document.getElementById('dayCounter').innerText = `DAY ${dayNum} / 45`;
+            document.getElementById('currentDateDisplay').innerText = new Date(START_DATE.getTime() + (displayDayIndex * 86400000)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = '';
+
+            data.slots.forEach((slot, i) => {
+                const slotId = `d${dayNum}-s${i}`;
+                const isChecked = completionState[slotId];
+                
+                const div = document.createElement('div');
+                const colors = { "Maths": "border-l-blue-500", "Physics": "border-l-emerald-500", "Chemistry": "border-l-orange-500", "Revision": "border-l-slate-400" };
+                const subColors = { "Maths": "text-blue-600", "Physics": "text-emerald-600", "Chemistry": "text-orange-600", "Revision": "text-slate-400" };
+
+                div.className = `slot-card bg-white p-5 rounded-2xl shadow-sm cursor-pointer flex items-center gap-4 ${colors[slot.sub]} ${isChecked ? 'opacity-50' : ''}`;
+                div.onclick = () => toggleSlot(slotId);
+                
+                div.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="chapter-label">${slot.chapter}</span>
+                            <span class="text-[9px] font-black text-slate-300 font-mono">${slot.time}</span>
+                        </div>
+                        <h3 class="text-sm font-black text-slate-800 mb-1 flex items-center gap-2">
+                            <span class="${subColors[slot.sub]}">${slot.sub}:</span> ${slot.task}
+                            ${slot.exam ? '<span class="exam-tag">EXAM FAVORITE</span>' : ''}
+                        </h3>
+                    </div>
+                    <div class="w-8 h-8 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${isChecked ? 'bg-indigo-600 border-indigo-600' : 'border-slate-100'}">
+                        ${isChecked ? '<span class="text-white text-xs">✓</span>' : ''}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            updateProgress();
+        }
+
+        function generateTuitionPlan(day) {
+            // Logic to rotate chapters every 4 days
+            const getChapter = (sub, day) => {
+                const list = curriculum[sub];
+                const index = Math.floor((day - 1) / 4) % list.length;
+                return list[index];
+            };
+
+            const pCh = getChapter("Physics", day);
+            const mCh = getChapter("Maths", day);
+            const cCh = getChapter("Chemistry", day);
+
+            // Specific tasks based on position in the 4-day chapter cycle
+            const cyclePos = (day - 1) % 4;
+            const taskMap = [
+                "Key Concepts & Definitions",
+                "High-Weightage Derivations / Theorems",
+                "Textbook Solved Examples",
+                "Exercise & MCQ Practice"
+            ];
+
+            return {
+                day: day,
+                slots: [
+                    { time: "06:30-08:30", sub: "Maths", chapter: mCh, task: taskMap[cyclePos], exam: cyclePos === 1 },
+                    { time: "08:30-10:30", sub: "Physics", chapter: pCh, task: taskMap[cyclePos], exam: cyclePos === 1 },
+                    { time: "18:30-20:30", sub: "Chemistry", chapter: cCh, task: taskMap[cyclePos], exam: cyclePos === 0 },
+                    { time: "21:00-22:30", sub: "Revision", chapter: "Mixed Review", task: "Solve 2 PYQs per subject", exam: false }
+                ]
+            };
+        }
+
+        function toggleSlot(id) {
+            completionState[id] = !completionState[id];
+            localStorage.setItem('hsc_tuition_full_state', JSON.stringify(completionState));
+            updateUI();
+        }
+
+        function updateProgress() {
+            const total = 45 * 4;
+            const done = Object.values(completionState).filter(v => v === true).length;
+            const pct = Math.min(100, Math.round((done / total) * 100));
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('pctText').innerText = pct + '%';
+        }
+
+        function checkCurrentSlot() {
+            const now = new Date();
+            const time = now.getHours() * 100 + now.getMinutes();
+            const msg = document.getElementById('statusMsg');
+            
+            if (time >= 630 && time <= 830) msg.innerText = "Morning Maths session is live. Stay focused!";
+            else if (time > 830 && time <= 1030) msg.innerText = "Physics hour. Perfect time for diagrams.";
+            else if (time > 1200 && time <= 1800) msg.innerText = "College Hours. Protect your energy.";
+            else if (time > 1830 && time <= 2030) msg.innerText = "Chemistry evening session. Review the reactions.";
+            else if (time > 2100 && time <= 2230) msg.innerText = "Consolidation phase. Wrap up the day's work.";
+            else msg.innerText = "Current Mode: Rest. Charge your phone and brain.";
+        }
+
+        function changeDay(val) {
+            displayDayIndex = Math.max(0, Math.min(44, displayDayIndex + val));
+            updateUI();
+        }
+
+        init();
+    </script>
+</body>
+</html>
