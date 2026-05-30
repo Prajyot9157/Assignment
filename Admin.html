@@ -2,305 +2,736 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin | Management Panel</title>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Admin Panel | Udayagiri Classes</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <!-- Google Fonts + Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { background: #0f172a; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .mobile-card { background: #1e293b; border: 1px solid #334155; border-radius: 1.5rem; padding: 1rem; margin-bottom: 1rem; }
-        input, select { font-size: 16px !important; }
-        .btn-outline { border: 1px solid #6366f1; color: #818cf8; transition: all 0.2s; }
-        .btn-outline:hover { background: #6366f1; color: white; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #fff5f7 0%, #ffeef2 100%);
+            min-height: 100vh;
+        }
+
+        /* Left Drawer (Three-dot menu) */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(3px);
+        }
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            z-index: 1001;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            overflow-y: auto;
+            border-radius: 0 1.5rem 1.5rem 0;
+        }
+        .side-drawer.open {
+            left: 0;
+        }
+        .drawer-header {
+            text-align: center;
+            border-bottom: 1px solid #ffe2ec;
+            padding-bottom: 1rem;
+        }
+        .drawer-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #FF4FA3, #ff8cb0);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 0 auto 0.5rem;
+        }
+        .drawer-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .drawer-menu a {
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            color: #4a4a4a;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .drawer-menu a:hover, .drawer-menu a.active {
+            background: #ffe4ec;
+            color: #FF4FA3;
+        }
+        .logout-btn {
+            margin-top: auto;
+            border-top: 1px solid #ffe2ec;
+            padding-top: 1rem;
+            color: #ef4444 !important;
+        }
+
+        /* Main Container */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #FF4FA3, #ff7aa2);
+            border-radius: 1.5rem;
+            padding: 1.2rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .menu-icon-left {
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(255, 79, 163, 0.08);
+            border: 1px solid #ffe2ec;
+        }
+        .card-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FF4FA3;
+            border-left: 4px solid #FF4FA3;
+            padding-left: 1rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            font-weight: 600;
+            color: #c4456c;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 1rem;
+            border: 1.5px solid #ffe0e8;
+            background: #fffafc;
+            font-size: 0.95rem;
+        }
+        .btn-primary {
+            background: #FF4FA3;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            background: #e03a8a;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #FF4FA3;
+            color: #FF4FA3;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+        }
+
+        /* Lists */
+        .item-list {
+            margin-top: 1rem;
+        }
+        .list-item {
+            background: #fff8fa;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid #ffe2ec;
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .empty-msg {
+            text-align: center;
+            padding: 2rem;
+            color: #b86c87;
+            font-style: italic;
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c2c2c;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 40px;
+            z-index: 2000;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        hr {
+            margin: 1rem 0;
+            border-color: #ffe2ec;
+        }
+        @media (max-width: 768px) {
+            .app-container { padding: 1rem; }
+            .header { flex-direction: column; gap: 1rem; text-align: center; }
+        }
     </style>
 </head>
-<body class="p-4">
-    <div class="max-w-7xl mx-auto pb-10">
-        <!-- Dashboard Header -->
-        <header class="mb-8">
-            <div class="flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-black text-indigo-400">Admin Panel</h1>
-                    <p class="text-slate-500 text-sm">Finances & Project Control</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <a href="https://studiment.live" target="_blank" class="px-5 py-2.5 rounded-xl text-sm font-bold btn-outline flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        Main Website
-                    </a>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                    <p class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Revenue</p>
-                    <p id="totalRevenue" class="text-lg font-black text-white">₹0</p>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                    <p class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Materials</p>
-                    <p id="totalMaterials" class="text-lg font-black text-orange-400">₹0</p>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                    <p class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Payouts</p>
-                    <p id="totalExpenses" class="text-lg font-black text-red-400">₹0</p>
-                </div>
-                <div class="bg-indigo-600/20 p-4 rounded-2xl border border-indigo-500/20">
-                    <p class="text-[9px] uppercase font-bold text-indigo-400 tracking-wider">Profit</p>
-                    <p id="netProfit" class="text-lg font-black text-emerald-400">₹0</p>
-                </div>
-            </div>
-        </header>
+<body>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="side-drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <div class="drawer-avatar">AD</div>
+            <div>Admin</div>
+            <div style="font-size:0.75rem;">udayagiri@admin.com</div>
+        </div>
+        <div class="drawer-menu">
+            <a href="#" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="#" data-section="live"><i class="fas fa-video"></i> Live Classes</a>
+            <a href="#" data-section="materials"><i class="fas fa-book"></i> Study Materials</a>
+            <a href="#" data-section="assignments"><i class="fas fa-tasks"></i> Assignments</a>
+            <a href="#" data-section="users"><i class="fas fa-users"></i> Users</a>
+            <a href="#" data-section="share"><i class="fas fa-share-alt"></i> Share Class Details</a>
+            <a href="#" id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
 
-        <!-- Forms Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-            <!-- Material Entry -->
-            <div class="bg-slate-800/40 p-5 rounded-3xl border border-slate-700">
-                <h3 class="font-bold text-orange-400 mb-4 text-sm flex items-center gap-2">📦 Material Purchase</h3>
-                <div class="space-y-3">
-                    <select id="matType" class="w-full p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
-                        <option value="Assignment Sheets">Assignment Sheets</option>
-                        <option value="A4 Bundle">A4 Bundle</option>
-                        <option value="Drawing Sheets">Drawing Sheets</option>
-                        <option value="Stationary/Ink">Stationary/Ink</option>
-                    </select>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="matQty" placeholder="Qty" class="p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
-                        <input type="number" id="matPrice" placeholder="Price (₹)" class="p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
+    <div class="app-container">
+        <div class="header">
+            <button class="menu-icon-left" id="menuIconLeft"><i class="fas fa-ellipsis-v"></i> Menu</button>
+            <h1><i class="fas fa-user-shield"></i> Udayagiri Classes | Admin Panel</h1>
+            <div style="width:80px;"></div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="section active-section">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-chart-line"></i> Platform Overview</div>
+                <div class="grid-2">
+                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
+                        <h3 id="liveCount">0</h3>
+                        <p>Live Classes</p>
                     </div>
-                    <button onclick="addMaterial()" class="w-full bg-orange-600 p-3 rounded-xl font-bold text-sm">Add Cost</button>
-                </div>
-            </div>
-
-            <!-- Salary Entry -->
-            <div class="bg-slate-800/40 p-5 rounded-3xl border border-slate-700">
-                <h3 class="font-bold text-indigo-400 mb-4 text-sm flex items-center gap-2">💰 Employee Salary / Misc</h3>
-                <div class="space-y-3">
-                    <input type="text" id="expNote" placeholder="Employee Name / Reason" class="w-full p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
-                    <input type="number" id="expAmt" placeholder="Amount (₹)" class="w-full p-3 bg-slate-900 rounded-xl border border-slate-700 outline-none text-sm">
-                    <button onclick="addGeneralExpense()" class="w-full bg-indigo-600 p-3 rounded-xl font-bold text-sm">Log Payout</button>
-                </div>
-            </div>
-
-            <!-- History -->
-            <div class="bg-slate-800/40 p-5 rounded-3xl border border-slate-700 h-[260px] flex flex-col">
-                <h3 class="font-bold text-slate-500 mb-4 text-[10px] uppercase">Spending History</h3>
-                <div id="outflowList" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1 text-xs">
-                    <p class="text-slate-600 italic">No history...</p>
+                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
+                        <h3 id="materialCount">0</h3>
+                        <p>Study Materials</p>
+                    </div>
+                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
+                        <h3 id="assignmentCount">0</h3>
+                        <p>Assignments</p>
+                    </div>
+                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
+                        <h3 id="userCount">0</h3>
+                        <p>Registered Students</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Orders Management -->
-        <h3 class="text-xl font-black mb-4 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Projects</h3>
-        
-        <div class="block lg:hidden" id="mobileOrderList"></div>
+        <!-- Live Classes Section -->
+        <div id="liveSection" class="section">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-plus-circle"></i> Add New Live Class</div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="liveTitle" placeholder="e.g., Calculus Masterclass">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="liveDesc" rows="2" placeholder="Class details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Date (YYYY-MM-DD)</label>
+                    <input type="date" id="liveDate">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="liveStatus">
+                        <option value="Active">Active (Live Now)</option>
+                        <option value="Upcoming">Upcoming</option>
+                    </select>
+                </div>
+                <button class="btn-primary" id="addLiveBtn"><i class="fas fa-save"></i> Add Class</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><i class="fas fa-list"></i> All Live Classes</div>
+                <div id="liveList" class="item-list"></div>
+            </div>
+        </div>
 
-        <div class="hidden lg:block bg-slate-900/40 rounded-3xl p-4 border border-slate-800 overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="text-slate-500 text-left text-[10px] uppercase">
-                    <tr>
-                        <th class="p-3">Client & ID</th>
-                        <th class="p-3">User Update</th>
-                        <th class="p-3">Stage</th>
-                        <th class="p-3">Finance (Total/Paid)</th>
-                        <th class="p-3">Manage</th>
-                    </tr>
-                </thead>
-                <tbody id="desktopOrderList"></tbody>
-            </table>
+        <!-- Study Materials Section -->
+        <div id="materialsSection" class="section">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-upload"></i> Upload Study Material</div>
+                <div class="form-group"><label>Title</label><input type="text" id="materialTitle" placeholder="Chapter 1 Notes"></div>
+                <div class="form-group"><label>Subject</label><input type="text" id="materialSubject" placeholder="Mathematics"></div>
+                <div class="form-group"><label>PDF/File URL</label><input type="url" id="materialUrl" placeholder="https://..."></div>
+                <button class="btn-primary" id="addMaterialBtn"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><i class="fas fa-database"></i> All Materials</div>
+                <div id="materialsList" class="item-list"></div>
+            </div>
+        </div>
+
+        <!-- Assignments Section -->
+        <div id="assignmentsSection" class="section">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-pen-alt"></i> Create Assignment</div>
+                <div class="form-group"><label>Assignment Title</label><input type="text" id="assignmentTitle" placeholder="Physics Worksheet"></div>
+                <div class="form-group"><label>Due Date</label><input type="date" id="assignmentDue"></div>
+                <button class="btn-primary" id="addAssignmentBtn"><i class="fas fa-plus"></i> Create</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><i class="fas fa-tasks"></i> All Assignments</div>
+                <div id="assignmentsList" class="item-list"></div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="usersSection" class="section">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-users"></i> Registered Students</div>
+                <div id="usersList" class="item-list"></div>
+            </div>
+        </div>
+
+        <!-- Share Class Details Section -->
+        <div id="shareSection" class="section">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-bullhorn"></i> Share Class Details with Students</div>
+                <div class="form-group">
+                    <label>Select Live Class</label>
+                    <select id="shareClassSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>Additional Message (Optional)</label>
+                    <textarea id="shareMessage" rows="3" placeholder="Reminder: Join 5 minutes early..."></textarea>
+                </div>
+                <button class="btn-primary" id="shareClassBtn"><i class="fas fa-paper-plane"></i> Share Notification</button>
+                <div id="shareResult" style="margin-top:1rem;"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        // Firebase Config
         const firebaseConfig = {
-            apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
-            authDomain: "studiment-tracking.firebaseapp.com",
-            databaseURL: "https://studiment-tracking-default-rtdb.firebaseio.com",
-            projectId: "studiment-tracking",
-            storageBucket: "studiment-tracking.firebasestorage.app",
-            messagingSenderId: "169609151336",
-            appId: "1:169609151336:web:871736f836c312cd4d4cdd"
+            apiKey: "AIzaSyBPtxG_tTq33ltQSo2oiJjrEQIaIGOEAwc",
+            authDomain: "udayagiri-f3a6d.firebaseapp.com",
+            projectId: "udayagiri-f3a6d",
+            storageBucket: "udayagiri-f3a6d.firebasestorage.app",
+            messagingSenderId: "912069472765",
+            appId: "1:912069472765:web:dba14daa231e2addbf2994"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const db = firebase.firestore();
 
-        db.ref('orders').on('value', snap => {
-            const data = snap.val();
-            const desk = document.getElementById('desktopOrderList');
-            const mob = document.getElementById('mobileOrderList');
-            desk.innerHTML = ''; mob.innerHTML = '';
-            let rev = 0;
+        // Collections
+        const liveEventsRef = db.collection("liveEvents");
+        const materialsRef = db.collection("studyMaterials");
+        const assignmentsRef = db.collection("assignments");
+        const usersRef = db.collection("users");
+        const notificationsRef = db.collection("notifications");
 
-            if(data) {
-                Object.keys(data).forEach(key => {
-                    const o = data[key];
-                    rev += parseFloat(o.total || 0);
-                    const paid = parseFloat(o.advancePaid || 0);
-                    const totalAmt = parseFloat(o.total || 0);
-                    const due = totalAmt - paid;
+        // Helper: show toast
+        function showToast(msg, isError = false) {
+            let t = document.querySelector('.toast-msg');
+            if(t) t.remove();
+            let div = document.createElement('div');
+            div.className = 'toast-msg';
+            div.style.backgroundColor = isError ? '#ef4444' : '#22c55e';
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
 
-                    // Desktop View
-                    desk.innerHTML += `
-                        <tr class="border-b border-slate-800/50">
-                            <td class="p-3"><b class="text-indigo-400 font-mono">${key}</b><br><span class="text-white">${o.name}</span></td>
-                            <td class="p-3">
-                                <input type="text" value="${o.progressNote || ''}" onchange="updateField('${key}', 'progressNote', this.value)" 
-                                    class="w-full bg-slate-800 p-2 rounded border border-slate-700 outline-none text-xs">
-                            </td>
-                            <td class="p-3">
-                                <select onchange="updateField('${key}', 'status', this.value)" class="bg-slate-800 p-2 rounded text-[11px] border border-slate-700">
-                                    <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
-                                    <option value="In Progress" ${o.status=='In Progress'?'selected':''}>In Progress</option>
-                                    <option value="Completed" ${o.status=='Completed'?'selected':''}>Completed</option>
-                                </select>
-                            </td>
-                            <td class="p-3">
-                                <div class="flex flex-col gap-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-[9px] text-slate-500 w-8">TOT:</span>
-                                        <input type="number" value="${totalAmt}" onchange="updateField('${key}', 'total', this.value)" class="w-20 bg-transparent border-b border-slate-700 text-white font-bold outline-none">
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-[9px] text-slate-500 w-8">PAID:</span>
-                                        <input type="number" value="${paid}" onchange="updateField('${key}', 'advancePaid', this.value)" class="w-20 bg-transparent border-b border-slate-700 text-emerald-400 outline-none">
-                                    </div>
-                                    <p class="text-[10px] ${due > 0 ? 'text-red-500' : 'text-emerald-500'}">Due: ₹${due}</p>
-                                </div>
-                            </td>
-                            <td class="p-3">
-                                <div class="flex flex-col gap-1">
-                                    <button onclick="markDone('${key}', ${totalAmt})" class="bg-emerald-600/20 text-emerald-400 p-2 rounded-lg text-[10px]">Full Paid</button>
-                                    <button onclick="deleteOrder('${key}')" class="bg-red-900/20 text-red-500 p-2 rounded-lg text-[10px]">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+        function escapeHtml(str) {
+            if(!str) return '';
+            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+        }
 
-                    // Mobile View
-                    mob.innerHTML += `
-                        <div class="mobile-card">
-                            <div class="flex justify-between items-start border-b border-slate-700/50 pb-2 mb-3">
-                                <div><b class="text-indigo-400 text-sm font-mono">${key}</b><h4 class="text-white font-bold">${o.name}</h4></div>
-                                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">${o.status}</span>
-                            </div>
-                            <div class="space-y-3">
-                                <input type="text" value="${o.progressNote || ''}" onchange="updateField('${key}', 'progressNote', this.value)" placeholder="Status update..." class="w-full bg-slate-900 p-3 rounded-xl border border-slate-700 outline-none text-sm">
-                                
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 space-y-2">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-[9px] uppercase text-slate-500">Total:</span>
-                                            <input type="number" value="${totalAmt}" onchange="updateField('${key}', 'total', this.value)" class="w-16 bg-transparent text-right text-white font-bold outline-none text-sm">
-                                        </div>
-                                        <div class="flex items-center justify-between border-t border-slate-800 pt-2">
-                                            <span class="text-[9px] uppercase text-slate-500">Paid:</span>
-                                            <input type="number" value="${paid}" onchange="updateField('${key}', 'advancePaid', this.value)" class="w-16 bg-transparent text-right text-emerald-400 font-bold outline-none text-sm">
-                                        </div>
-                                        <div class="text-[10px] text-right ${due > 0 ? 'text-red-500' : 'text-emerald-500'} font-bold">
-                                            DUE: ₹${due}
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <select onchange="updateField('${key}', 'status', this.value)" class="bg-slate-900 p-3 rounded-xl text-xs border border-slate-700 w-full h-full">
-                                            <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
-                                            <option value="In Progress" ${o.status=='In Progress'?'selected':''}>In Progress</option>
-                                            <option value="Completed" ${o.status=='Completed'?'selected':''}>Completed</option>
-                                        </select>
-                                    </div>
-                                </div>
+        // Dashboard Stats
+        async function updateStats() {
+            const liveSnap = await liveEventsRef.get();
+            const materialSnap = await materialsRef.get();
+            const assignmentSnap = await assignmentsRef.get();
+            const userSnap = await usersRef.get();
+            document.getElementById('liveCount').innerText = liveSnap.size;
+            document.getElementById('materialCount').innerText = materialSnap.size;
+            document.getElementById('assignmentCount').innerText = assignmentSnap.size;
+            document.getElementById('userCount').innerText = userSnap.size;
+        }
 
-                                <div class="flex gap-2">
-                                    <button onclick="markDone('${key}', ${totalAmt})" class="flex-1 bg-emerald-600 p-3 rounded-xl font-bold text-xs">Mark Full Paid</button>
-                                    <button onclick="deleteOrder('${key}')" class="bg-red-500 p-3 rounded-xl font-bold text-xs">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+        // ========== LIVE CLASSES CRUD ==========
+        async function renderLiveClasses() {
+            const snapshot = await liveEventsRef.orderBy('date', 'desc').get();
+            const container = document.getElementById('liveList');
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="empty-msg">📭 No live classes scheduled.</div>';
+                return;
             }
-            document.getElementById('totalRevenue').innerText = '₹' + rev;
-            calculateNet();
-        });
-
-        function updateField(id, field, val) {
-            let value = (field === 'total' || field === 'advancePaid') ? parseFloat(val) || 0 : val;
-            db.ref('orders/' + id).update({ [field]: value });
-        }
-
-        function markDone(id, total) {
-            db.ref('orders/' + id).update({ 
-                advancePaid: total, 
-                status: 'Completed', 
-                progressNote: 'Fully Paid & Delivered' 
-            });
-        }
-
-        function deleteOrder(id) {
-            if(confirm("Delete this order?")) db.ref('orders/'+id).remove();
-        }
-
-        function addMaterial() {
-            const type = document.getElementById('matType').value;
-            const qty = parseFloat(document.getElementById('matQty').value);
-            const price = parseFloat(document.getElementById('matPrice').value);
-            if(!qty || !price) return;
-            db.ref('outflows').push({ category: 'Material', note: `${type} (x${qty})`, amt: qty * price });
-            document.getElementById('matQty').value = '';
-            document.getElementById('matPrice').value = '';
-        }
-
-        function addGeneralExpense() {
-            const note = document.getElementById('expNote').value;
-            const amt = parseFloat(document.getElementById('expAmt').value);
-            if(!note || !amt) return;
-            db.ref('outflows').push({ category: 'Salary/Misc', note, amt });
-            document.getElementById('expNote').value = '';
-            document.getElementById('expAmt').value = '';
-        }
-
-        db.ref('outflows').on('value', snap => {
-            let matT = 0; let expT = 0;
-            const outflowList = document.getElementById('outflowList');
-            outflowList.innerHTML = '';
-            
-            snap.forEach(child => {
-                const v = child.val();
-                const key = child.key;
-                if(v.category === 'Material') matT += v.amt; else expT += v.amt;
-
-                outflowList.innerHTML = `
-                    <div class="flex justify-between items-center bg-slate-900/50 p-2 rounded-xl border border-slate-700/50">
-                        <div class="flex flex-col">
-                            <span class="text-slate-200 font-bold">${v.note}</span>
-                            <span class="text-[8px] uppercase tracking-tighter ${v.category=='Material'?'text-orange-400':'text-indigo-400'}">${v.category}</span>
+            let html = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                html += `
+                    <div class="list-item" data-id="${doc.id}">
+                        <div class="item-info">
+                            <strong>${escapeHtml(data.title)}</strong><br>
+                            <small>${escapeHtml(data.description || '')}</small><br>
+                            📅 ${data.date} | 🏷️ ${data.status}
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-red-400 font-black">₹${v.amt}</span>
-                            <button onclick="db.ref('outflows/${key}').remove()" class="text-slate-600 hover:text-red-500 px-1 font-bold">✕</button>
+                        <div class="item-actions">
+                            <button class="btn-outline edit-live" data-id="${doc.id}" data-title="${escapeHtml(data.title)}" data-desc="${escapeHtml(data.description || '')}" data-date="${data.date}" data-status="${data.status}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-outline btn-danger delete-live" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
-                ` + outflowList.innerHTML;
+                `;
             });
+            container.innerHTML = html;
+            // Delete events
+            document.querySelectorAll('.delete-live').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.getAttribute('data-id');
+                    if(confirm('Delete this live class?')) {
+                        await liveEventsRef.doc(id).delete();
+                        showToast('Class deleted');
+                        renderLiveClasses();
+                        updateStats();
+                        loadShareClassSelect();
+                    }
+                });
+            });
+            // Edit events - simple inline prompt for demo
+            document.querySelectorAll('.edit-live').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    const oldTitle = btn.getAttribute('data-title');
+                    const newTitle = prompt('Edit title:', oldTitle);
+                    if(newTitle && newTitle.trim()) {
+                        liveEventsRef.doc(id).update({ title: newTitle.trim() });
+                        showToast('Updated');
+                        renderLiveClasses();
+                    }
+                });
+            });
+        }
 
-            document.getElementById('totalMaterials').innerText = '₹' + matT;
-            document.getElementById('totalExpenses').innerText = '₹' + expT;
-            calculateNet();
+        document.getElementById('addLiveBtn').addEventListener('click', async () => {
+            const title = document.getElementById('liveTitle').value.trim();
+            const desc = document.getElementById('liveDesc').value.trim();
+            const date = document.getElementById('liveDate').value;
+            const status = document.getElementById('liveStatus').value;
+            if(!title || !date) { showToast('Title and date required', true); return; }
+            await liveEventsRef.add({ title, description: desc, date, status, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            showToast('Live class added');
+            document.getElementById('liveTitle').value = '';
+            document.getElementById('liveDesc').value = '';
+            document.getElementById('liveDate').value = '';
+            renderLiveClasses();
+            updateStats();
+            loadShareClassSelect();
         });
 
-        function calculateNet() {
-            const revText = document.getElementById('totalRevenue').innerText.replace('₹','');
-            const matText = document.getElementById('totalMaterials').innerText.replace('₹','');
-            const expText = document.getElementById('totalExpenses').innerText.replace('₹','');
-            
-            const rev = parseFloat(revText) || 0;
-            const mat = parseFloat(matText) || 0;
-            const exp = parseFloat(expText) || 0;
-            
-            document.getElementById('netProfit').innerText = '₹' + (rev - mat - exp);
+        // ========== STUDY MATERIALS ==========
+        async function renderMaterials() {
+            const snapshot = await materialsRef.orderBy('timestamp', 'desc').get();
+            const container = document.getElementById('materialsList');
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="empty-msg">📂 No study materials uploaded.</div>';
+                return;
+            }
+            let html = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                html += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <strong>${escapeHtml(data.title)}</strong> (${escapeHtml(data.subject)})<br>
+                            <a href="${escapeHtml(data.url)}" target="_blank">🔗 Open PDF</a>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-outline btn-danger delete-material" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.querySelectorAll('.delete-material').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if(confirm('Delete material?')) {
+                        await materialsRef.doc(btn.getAttribute('data-id')).delete();
+                        showToast('Deleted');
+                        renderMaterials();
+                        updateStats();
+                    }
+                });
+            });
         }
+
+        document.getElementById('addMaterialBtn').addEventListener('click', async () => {
+            const title = document.getElementById('materialTitle').value.trim();
+            const subject = document.getElementById('materialSubject').value.trim();
+            const url = document.getElementById('materialUrl').value.trim();
+            if(!title || !subject || !url) { showToast('All fields required', true); return; }
+            await materialsRef.add({ title, subject, url, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            showToast('Material uploaded');
+            document.getElementById('materialTitle').value = '';
+            document.getElementById('materialSubject').value = '';
+            document.getElementById('materialUrl').value = '';
+            renderMaterials();
+            updateStats();
+        });
+
+        // ========== ASSIGNMENTS ==========
+        async function renderAssignments() {
+            const snapshot = await assignmentsRef.orderBy('dueDate', 'asc').get();
+            const container = document.getElementById('assignmentsList');
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="empty-msg">📋 No assignments created.</div>';
+                return;
+            }
+            let html = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                html += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <strong>${escapeHtml(data.title)}</strong><br>
+                            Due: ${data.dueDate || 'Not set'}
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-outline btn-danger delete-assignment" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.querySelectorAll('.delete-assignment').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if(confirm('Delete assignment?')) {
+                        await assignmentsRef.doc(btn.getAttribute('data-id')).delete();
+                        showToast('Deleted');
+                        renderAssignments();
+                        updateStats();
+                    }
+                });
+            });
+        }
+
+        document.getElementById('addAssignmentBtn').addEventListener('click', async () => {
+            const title = document.getElementById('assignmentTitle').value.trim();
+            const dueDate = document.getElementById('assignmentDue').value;
+            if(!title) { showToast('Title required', true); return; }
+            await assignmentsRef.add({ title, dueDate, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            showToast('Assignment created');
+            document.getElementById('assignmentTitle').value = '';
+            document.getElementById('assignmentDue').value = '';
+            renderAssignments();
+            updateStats();
+        });
+
+        // ========== USERS ==========
+        async function renderUsers() {
+            const snapshot = await usersRef.get();
+            const container = document.getElementById('usersList');
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="empty-msg">👤 No student profiles yet.</div>';
+                return;
+            }
+            let html = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                html += `
+                    <div class="list-item">
+                        <div><strong>${escapeHtml(data.displayName || 'No name')}</strong><br>📧 ${escapeHtml(data.email || '')}<br>🆔 ${escapeHtml(data.uid || '')}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ========== SHARE CLASS DETAILS ==========
+        async function loadShareClassSelect() {
+            const snapshot = await liveEventsRef.orderBy('date', 'desc').get();
+            const select = document.getElementById('shareClassSelect');
+            if (snapshot.empty) {
+                select.innerHTML = '<option>No classes available</option>';
+                return;
+            }
+            let html = '<option value="">Select a class</option>';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                html += `<option value="${doc.id}">${escapeHtml(data.title)} (${data.date})</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        document.getElementById('shareClassBtn').addEventListener('click', async () => {
+            const classId = document.getElementById('shareClassSelect').value;
+            const message = document.getElementById('shareMessage').value.trim();
+            if (!classId) { showToast('Please select a class', true); return; }
+            const classDoc = await liveEventsRef.doc(classId).get();
+            const classData = classDoc.data();
+            const notification = {
+                title: `📢 Class Update: ${classData.title}`,
+                body: message || `Reminder: ${classData.title} on ${classData.date} | ${classData.description || ''}`,
+                classId: classId,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false
+            };
+            await notificationsRef.add(notification);
+            showToast('Notification sent to all students!');
+            document.getElementById('shareMessage').value = '';
+            // Also update a local display
+            document.getElementById('shareResult').innerHTML = `<div class="empty-msg" style="color:green;">✅ Shared successfully!</div>`;
+            setTimeout(() => document.getElementById('shareResult').innerHTML = '', 3000);
+        });
+
+        // ========== SECTION SWITCHING (Left Drawer) ==========
+        let currentSection = 'dashboard';
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active-section'));
+            document.getElementById(`${sectionId}Section`).classList.add('active-section');
+            currentSection = sectionId;
+            // Update active menu style
+            document.querySelectorAll('.drawer-menu a').forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('data-section') === sectionId) link.classList.add('active');
+            });
+            // Refresh data when section changes
+            if(sectionId === 'live') renderLiveClasses();
+            if(sectionId === 'materials') renderMaterials();
+            if(sectionId === 'assignments') renderAssignments();
+            if(sectionId === 'users') renderUsers();
+            if(sectionId === 'share') loadShareClassSelect();
+            if(sectionId === 'dashboard') updateStats();
+        }
+
+        // Drawer controls
+        const drawer = document.getElementById('sideDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        document.getElementById('menuIconLeft').addEventListener('click', () => {
+            drawer.classList.add('open');
+            overlay.style.display = 'block';
+        });
+        overlay.addEventListener('click', () => {
+            drawer.classList.remove('open');
+            overlay.style.display = 'none';
+        });
+        document.querySelectorAll('.drawer-menu a[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.getAttribute('data-section');
+                showSection(section);
+                drawer.classList.remove('open');
+                overlay.style.display = 'none';
+            });
+        });
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showToast('Logged out (demo)');
+        });
+
+        // CSS for active section
+        const style = document.createElement('style');
+        style.textContent = `.section { display: none; } .section.active-section { display: block; }`;
+        document.head.appendChild(style);
+
+        // Initial load
+        showSection('dashboard');
+        updateStats();
+        renderLiveClasses();
+        renderMaterials();
+        renderAssignments();
+        renderUsers();
+        loadShareClassSelect();
+
+        // Real-time listeners for stats and lists
+        liveEventsRef.onSnapshot(() => { if(currentSection === 'live') renderLiveClasses(); updateStats(); loadShareClassSelect(); });
+        materialsRef.onSnapshot(() => { if(currentSection === 'materials') renderMaterials(); updateStats(); });
+        assignmentsRef.onSnapshot(() => { if(currentSection === 'assignments') renderAssignments(); updateStats(); });
+        usersRef.onSnapshot(() => { if(currentSection === 'users') renderUsers(); updateStats(); });
     </script>
 </body>
-</html>
+                                                                   </html>
