@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MHT CET Class 12 | Learning App</title>
+    <title>MHT CET Class 12 | Student App</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -35,81 +35,48 @@
         body {
             background-color: #000;
             color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100dvh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Hide Scrollbar but keep functionality */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Animations */
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .slide-in-right { animation: slideInRight 0.3s ease forwards; }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        /* Custom Input Styling */
-        .admin-input {
-            width: 100%; background: #1a1b26; border: 1px solid #2d2e3d; border-radius: 0.75rem; 
-            padding: 0.875rem; color: white; font-size: 0.875rem; outline: none; transition: all 0.2s;
+        .app-container { 
+            width: 100%; 
+            max-width: 480px; 
+            height: 100%; 
+            position: relative; 
+            background: #090a10; 
+            box-shadow: 0 0 40px rgba(0,0,0,0.5); 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
         }
-        .admin-input:focus { border-color: #f43f5e; box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2); }
-        select.admin-input { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b8d9c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
-
-        /* App Container constraints for Desktop viewing */
-        .app-container { max-width: 480px; margin: 0 auto; height: 100dvh; position: relative; background: #090a10; box-shadow: 0 0 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; }
     </style>
 </head>
-<body class="bg-gray-900 flex justify-center items-center h-screen w-screen">
+<body>
 
-    <!-- Auth Screen -->
-    <div id="view-auth" class="app-container w-full z-50 flex items-center justify-center p-6 bg-appBg">
-        <div class="w-full max-w-sm space-y-8 text-center fade-in">
-            <div class="w-20 h-20 mx-auto bg-gradient-to-tr from-appPink to-purple-600 rounded-3xl flex items-center justify-center shadow-lg shadow-appPink/30">
-                <i class="fa-solid fa-graduation-cap text-4xl text-white"></i>
-            </div>
-            <div>
-                <h1 class="text-3xl font-extrabold text-white">MHT CET <span class="text-appPink">Class 12</span></h1>
-                <p class="text-textMuted mt-2 text-sm">Select your role to continue</p>
-            </div>
-            
-            <div class="space-y-4 pt-4">
-                <button onclick="loginAs('student')" class="w-full bg-appCard border border-gray-800 hover:border-appPink text-white p-4 rounded-2xl flex items-center gap-4 transition-all group">
-                    <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-appPink/20 group-hover:text-appPink transition-colors">
-                        <i class="fa-solid fa-user-graduate text-xl"></i>
-                    </div>
-                    <div class="text-left flex-1">
-                        <div class="font-bold text-lg">Student</div>
-                        <div class="text-xs text-textMuted">Access notes & materials</div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-textMuted"></i>
-                </button>
-
-                <button onclick="loginAs('admin')" class="w-full bg-appCard border border-gray-800 hover:border-appPink text-white p-4 rounded-2xl flex items-center gap-4 transition-all group">
-                    <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-appPink/20 group-hover:text-appPink transition-colors">
-                        <i class="fa-solid fa-user-shield text-xl"></i>
-                    </div>
-                    <div class="text-left flex-1">
-                        <div class="font-bold text-lg">Admin / Teacher</div>
-                        <div class="text-xs text-textMuted">Manage app content</div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-textMuted"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main App Container -->
-    <div id="app-wrapper" class="hidden app-container w-full">
+    <div id="app-wrapper" class="app-container">
         
-        <!-- Header (Shared) -->
-        <header class="pt-12 pb-4 px-5 flex justify-between items-center bg-appBg z-10 shrink-0">
+        <!-- Header -->
+        <header class="pt-8 pb-4 px-5 flex justify-between items-center bg-appBg z-10 shrink-0 border-b border-gray-800/50">
             <div class="flex items-center gap-3">
                 <button id="btn-back" onclick="goBack()" class="hidden text-white text-xl pr-2"><i class="fa-solid fa-arrow-left"></i></button>
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-bars text-xl text-white/90"></i>
+                    <i class="fa-solid fa-bars text-xl text-white/90" id="menu-icon"></i>
                     <h1 id="header-title" class="text-lg font-bold text-white ml-2 tracking-wide">MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span></h1>
                 </div>
             </div>
@@ -122,257 +89,187 @@
             </div>
         </header>
 
-        <!-- VIEW: HOME (Dashboard) -->
-        <main id="view-home" class="flex-1 overflow-y-auto hide-scrollbar pb-24 app-view fade-in">
-            <!-- Greeting Card -->
-            <div class="mx-5 mt-2 p-5 rounded-3xl bg-gradient-to-br from-[#2a1738] to-appCard relative overflow-hidden border border-white/5">
-                <div class="relative z-10">
-                    <h2 class="text-xl font-bold text-white mb-1">Hello, Student <span class="text-yellow-400">👋</span></h2>
-                    <p class="text-xs text-gray-400 mb-5">Let's make today productive!</p>
-                    
-                    <div class="flex gap-4 text-center">
-                        <div>
-                            <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-solid fa-book-open text-[10px]"></i> Syllabus</div>
-                            <div class="font-bold text-lg text-white">45%</div>
-                            <div class="text-[10px] text-gray-500">Completed</div>
-                        </div>
-                        <div class="w-px h-10 bg-white/10 my-auto"></div>
-                        <div>
-                            <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-regular fa-calendar text-[10px]"></i> Tests</div>
-                            <div class="font-bold text-lg text-white">12</div>
-                            <div class="text-[10px] text-gray-500">Attempted</div>
-                        </div>
-                        <div class="w-px h-10 bg-white/10 my-auto"></div>
-                        <div>
-                            <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-solid fa-bullseye text-[10px]"></i> Accuracy</div>
-                            <div class="font-bold text-lg text-white">78%</div>
-                            <div class="text-[10px] text-gray-500">Average</div>
+        <!-- Dynamic Views Area -->
+        <div class="flex-1 overflow-hidden relative">
+            
+            <!-- VIEW: HOME (Dashboard) -->
+            <main id="view-home" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view fade-in">
+                <!-- Greeting Card -->
+                <div class="mx-5 mt-4 p-5 rounded-3xl bg-gradient-to-br from-[#2a1738] to-appCard relative overflow-hidden border border-white/5 shadow-lg">
+                    <div class="relative z-10">
+                        <h2 class="text-xl font-bold text-white mb-1">Hello, Student <span class="text-yellow-400">👋</span></h2>
+                        <p class="text-xs text-gray-400 mb-5">Let's make today productive!</p>
+                        
+                        <div class="flex gap-4 text-center">
+                            <div>
+                                <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-solid fa-book-open text-[10px]"></i> Syllabus</div>
+                                <div class="font-bold text-lg text-white">45%</div>
+                                <div class="text-[10px] text-gray-500">Completed</div>
+                            </div>
+                            <div class="w-px h-10 bg-white/10 my-auto"></div>
+                            <div>
+                                <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-regular fa-calendar text-[10px]"></i> Tests</div>
+                                <div class="font-bold text-lg text-white">12</div>
+                                <div class="text-[10px] text-gray-500">Attempted</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <!-- Large Right Button (Decorative) -->
-                <div class="absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#361e47] to-transparent flex flex-col items-center justify-center border-l border-white/5 cursor-pointer" onclick="switchTab('notes')">
-                    <div class="w-10 h-12 bg-appPink rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-appPink/50 mb-2 relative">
-                        PDF
-                        <div class="absolute top-1 right-1 w-2 h-1 bg-white/30 rounded-full"></div>
+                    <!-- Right Decorative Button -->
+                    <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#361e47] to-transparent flex flex-col items-center justify-center border-l border-white/5 cursor-pointer" onclick="switchTab('notes')">
+                        <div class="w-10 h-12 bg-appPink rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-appPink/50 mb-2 relative">
+                            PDF
+                        </div>
+                        <div class="text-[10px] text-center font-bold text-white">Materials</div>
                     </div>
-                    <div class="text-[10px] text-center font-bold text-white">Offline Material</div>
-                    <div class="text-[9px] text-appPink mt-0.5">120+ PDFs</div>
                 </div>
-            </div>
 
-            <!-- Quick Access Grid (Static UI matching Image) -->
-            <div class="px-5 mt-6">
-                <h3 class="text-sm font-semibold text-white mb-4">Quick Access</h3>
-                <div class="grid grid-cols-4 gap-y-6 gap-x-2">
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
-                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-tv"></i></div>
-                        <span class="text-[10px] text-gray-400 font-medium">Live Classes</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
-                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-pen"></i></div>
-                        <span class="text-[10px] text-gray-400 font-medium">Tests</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('notes')">
-                        <div class="w-14 h-14 rounded-2xl bg-[#2a1738] border border-appPink/30 flex items-center justify-center text-appPink text-xl"><i class="fa-solid fa-book"></i></div>
-                        <span class="text-[10px] text-white font-medium">Notes</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
-                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-bullseye"></i></div>
-                        <span class="text-[10px] text-gray-400 font-medium">PYQ Bank</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
-                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-crosshairs"></i></div>
-                        <span class="text-[10px] text-gray-400 font-medium">Practice</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
-                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-lines"></i></div>
-                        <span class="text-[10px] text-gray-400 font-medium">Formula Sheet</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
-                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-network-wired"></i></div>
-                        <span class="text-[10px] text-gray-400 font-medium">Mind Maps</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
-                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-list-check"></i></div>
-                        <span class="text-[10px] text-gray-400 font-medium">DPPs</span>
+                <!-- Quick Access Grid -->
+                <div class="px-5 mt-6">
+                    <h3 class="text-sm font-semibold text-white mb-4">Quick Access</h3>
+                    <div class="grid grid-cols-4 gap-y-6 gap-x-2">
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('live')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-tv"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium">Live Classes</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('tests')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-pen"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium">Tests</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('notes')">
+                            <div class="w-14 h-14 rounded-2xl bg-[#2a1738] border border-appPink/30 flex items-center justify-center text-appPink text-xl"><i class="fa-solid fa-book"></i></div>
+                            <span class="text-[10px] text-white font-medium">Notes</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('pyq')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-bullseye"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium">PYQ Bank</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('practice')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-crosshairs"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium">Practice</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('formula')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-lines"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium">Formula Sheet</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('mindmaps')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-network-wired"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium">Mind Maps</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('dpps')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-list-check"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium">DPPs</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Recent PDFs (Dynamic from Firebase) -->
-            <div class="mt-8">
-                <div class="px-5 flex justify-between items-end mb-4">
-                    <h3 class="text-sm font-semibold text-white">Recent PDFs</h3>
-                    <button onclick="switchTab('notes')" class="text-[11px] text-appPink font-medium">View all</button>
+                <!-- Recent Added Materials -->
+                <div class="mt-8">
+                    <div class="px-5 flex justify-between items-end mb-4">
+                        <h3 class="text-sm font-semibold text-white">Recently Added</h3>
+                    </div>
+                    <div class="flex overflow-x-auto hide-scrollbar px-5 gap-4 pb-2" id="home-recent-list">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
-                <div class="flex overflow-x-auto hide-scrollbar px-5 gap-4 pb-2" id="home-recent-list">
+            </main>
+
+            <!-- VIEW: NOTES SUBJECTS -->
+            <main id="view-notes" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5">
+                <div class="flex items-center gap-3 mb-6 mt-4">
+                    <div class="flex-1 bg-appCard border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                        <i class="fa-solid fa-magnifying-glass text-textMuted text-sm"></i>
+                        <input type="text" placeholder="Search subjects..." class="bg-transparent border-none outline-none text-sm text-white w-full placeholder-textMuted">
+                    </div>
+                </div>
+                <div class="space-y-3" id="subject-list">
                     <!-- Populated by JS -->
                 </div>
-            </div>
-            
-            <!-- Today's Plan -->
-            <div class="px-5 mt-6 mb-8">
-                <h3 class="text-sm font-semibold text-white mb-3">Today's Plan</h3>
-                <div class="bg-appCard p-4 rounded-2xl flex items-center justify-between border border-gray-800">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-appPink"><i class="fa-solid fa-list-ul"></i></div>
-                        <div>
-                            <div class="text-xs text-white font-bold"><span class="text-appPink">3</span> Tasks</div>
-                            <div class="text-[10px] text-gray-500"><span class="text-white">2</span> Completed</div>
-                        </div>
+            </main>
+
+            <!-- VIEW: SUBJECT DETAIL (For Notes primarily) -->
+            <main id="view-subject-detail" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden slide-in-right flex-col">
+                <div class="px-5 flex items-center gap-4 mb-4 mt-4">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg" id="detail-subj-icon-container">
+                        <i class="fa-solid fa-atom text-white" id="detail-subj-icon"></i>
                     </div>
-                    <div class="flex-1 max-w-[120px] mx-4">
-                        <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-appPink rounded-full w-[66%]"></div>
-                        </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white leading-tight" id="detail-subj-title">Physics Notes</h2>
+                        <p class="text-xs text-textMuted mt-0.5" id="detail-subj-count">0 Items</p>
                     </div>
-                    <div class="text-xs text-gray-400 font-bold flex items-center gap-1">66% <i class="fa-solid fa-chevron-right text-[10px]"></i></div>
                 </div>
-            </div>
-        </main>
-
-        <!-- VIEW: NOTES MAIN (Subjects List) -->
-        <main id="view-notes" class="flex-1 overflow-y-auto hide-scrollbar pb-24 app-view hidden fade-in px-5">
-            <div class="flex items-center gap-3 mb-6 mt-2">
-                <div class="flex-1 bg-appCard border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                    <i class="fa-solid fa-magnifying-glass text-textMuted text-sm"></i>
-                    <input type="text" placeholder="Search notes..." class="bg-transparent border-none outline-none text-sm text-white w-full placeholder-textMuted">
+                <div class="px-5 space-y-3 flex-1 overflow-y-auto hide-scrollbar" id="detail-pdf-list">
+                    <!-- Populated by JS -->
                 </div>
-                <button class="w-12 h-12 bg-appCard border border-gray-800 rounded-xl flex items-center justify-center text-textMuted hover:text-white transition-colors">
-                    <i class="fa-solid fa-sliders"></i>
-                </button>
-            </div>
+            </main>
 
-            <div class="space-y-3" id="subject-list">
-                <!-- Populated by JS -->
-            </div>
-        </main>
-
-        <!-- VIEW: SUBJECT DETAIL -->
-        <main id="view-subject-detail" class="flex-1 overflow-y-auto hide-scrollbar pb-24 app-view hidden slide-in-right px-0 flex flex-col">
-            <!-- Subject Header (Icon + Name) -->
-            <div class="px-5 flex items-center gap-4 mb-4">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg" id="detail-subj-icon-container">
-                    <i class="fa-solid fa-atom text-white" id="detail-subj-icon"></i>
+            <!-- GENERIC LIST VIEW (For Live Classes, Tests, PYQ, Practice, etc.) -->
+            <main id="view-generic-list" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5">
+                <h2 class="text-lg font-bold text-white mt-4 mb-4" id="generic-list-title">Category Name</h2>
+                <div class="space-y-3" id="generic-list-container">
+                    <!-- Populated dynamically from Firebase -->
                 </div>
-                <div>
-                    <h2 class="text-lg font-bold text-white leading-tight" id="detail-subj-title">Physics Notes</h2>
-                    <p class="text-xs text-textMuted mt-0.5" id="detail-subj-count">0 PDFs</p>
+            </main>
+
+            <!-- Profile View -->
+            <main id="view-profile" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5">
+                <div class="flex items-center gap-4 mt-6 mb-8 bg-appCard p-4 rounded-2xl border border-gray-800">
+                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center text-2xl text-appPink"><i class="fa-solid fa-user"></i></div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Student User</h2>
+                        <p class="text-xs text-textMuted">MHT CET Batch</p>
+                    </div>
                 </div>
-                <button class="ml-auto w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-textMuted"><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
+                <div class="space-y-3">
+                    <button class="w-full bg-appCard border border-gray-800 p-4 rounded-xl flex items-center justify-between text-white">
+                        <div class="flex items-center gap-3"><i class="fa-solid fa-bookmark text-appPink w-5"></i> Saved Items</div>
+                        <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
+                    </button>
+                    <button class="w-full bg-appCard border border-gray-800 p-4 rounded-xl flex items-center justify-between text-white">
+                        <div class="flex items-center gap-3"><i class="fa-solid fa-chart-line text-appPink w-5"></i> My Performance</div>
+                        <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
+                    </button>
+                </div>
+            </main>
 
-            <!-- Sub Tabs -->
-            <div class="flex overflow-x-auto hide-scrollbar px-5 gap-6 border-b border-gray-800 mb-4" id="detail-tabs">
-                <button class="detail-tab active pb-3 text-sm font-semibold text-appPink border-b-2 border-appPink whitespace-nowrap" data-type="All">All</button>
-                <button class="detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap" data-type="Class Notes">Class Notes</button>
-                <button class="detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap" data-type="Formula Sheet">Formula Sheet</button>
-                <button class="detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap" data-type="Short Notes">Short Notes</button>
-            </div>
-
-            <!-- PDF List -->
-            <div class="px-5 space-y-3 flex-1 overflow-y-auto hide-scrollbar" id="detail-pdf-list">
-                <!-- Populated by JS -->
-            </div>
-        </main>
+        </div>
 
         <!-- Bottom Navigation -->
-        <nav class="absolute bottom-0 w-full h-16 bg-[#0c0d14] border-t border-gray-800 flex items-center justify-around z-20 pb-safe">
-            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-appPink" data-tab="home">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] font-medium">Home</span>
+        <nav class="shrink-0 h-[70px] bg-[#0c0d14] border-t border-gray-800 flex items-center justify-around z-20 pb-1">
+            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-appPink w-16" data-tab="home">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Home</span>
             </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="tests">
-                <i class="fa-solid fa-file-pen text-lg"></i>
-                <span class="text-[10px] font-medium">Tests</span>
+            <button onclick="switchTab('tests')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white w-16 transition-colors" data-tab="tests">
+                <i class="fa-solid fa-file-pen text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Tests</span>
             </button>
-            <button onclick="switchTab('notes')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="notes">
-                <i class="fa-solid fa-book text-lg"></i>
-                <span class="text-[10px] font-medium">Notes</span>
+            <button onclick="switchTab('notes')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white w-16 transition-colors" data-tab="notes">
+                <i class="fa-solid fa-book text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Notes</span>
             </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="downloads">
-                <i class="fa-solid fa-download text-lg"></i>
-                <span class="text-[10px] font-medium">Downloads</span>
-            </button>
-            <button onclick="logout()" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="profile">
-                <i class="fa-solid fa-user text-lg"></i>
-                <span class="text-[10px] font-medium">Profile</span>
+            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white w-16 transition-colors" data-tab="profile">
+                <i class="fa-solid fa-user text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Profile</span>
             </button>
         </nav>
 
-        <!-- Admin FAB (Floating Action Button) -->
-        <button id="admin-fab" onclick="openUploadModal()" class="admin-only hidden absolute bottom-20 right-5 w-14 h-14 bg-appPink rounded-full flex items-center justify-center text-white text-2xl shadow-lg shadow-appPink/40 z-30 transition-transform active:scale-95">
-            <i class="fa-solid fa-plus"></i>
-        </button>
-
-        <!-- Admin Upload Modal -->
-        <div id="modal-upload" class="hidden absolute inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity">
-            <div class="bg-appCard w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-gray-800 slide-in-right sm:fade-in max-h-[90dvh] overflow-y-auto hide-scrollbar">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Upload Material</h3>
-                    <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <!-- PDF Preview Modal -->
+        <div id="modal-preview" class="hidden absolute inset-0 z-[80] bg-appBg flex flex-col fade-in">
+            <div class="h-14 shrink-0 flex items-center justify-between px-4 bg-appCard border-b border-gray-800 shadow-md relative z-20">
+                <div class="flex items-center gap-3 w-[80%]">
+                    <i class="fa-solid fa-file-pdf text-appPink text-lg"></i>
+                    <h3 class="text-white font-bold text-sm truncate" id="preview-title">Document Preview</h3>
                 </div>
-                
-                <form id="upload-form" onsubmit="handleUpload(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Subject</label>
-                        <select id="up-subject" class="admin-input" required>
-                            <option value="Physics">Physics</option>
-                            <option value="Chemistry">Chemistry</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Biology">Biology</option>
-                            <option value="Inorganic Chemistry">Inorganic Chemistry</option>
-                            <option value="Organic Chemistry">Organic Chemistry</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Document Type</label>
-                        <select id="up-doctype" class="admin-input" required>
-                            <option value="Class Notes">Class Notes</option>
-                            <option value="Formula Sheet">Formula Sheet</option>
-                            <option value="Short Notes">Short Notes</option>
-                            <option value="Mind Map">Mind Map</option>
-                            <option value="DPP">DPP</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Topic Name</label>
-                        <input type="text" id="up-topic" placeholder="e.g. Kinematics 1D" class="admin-input" required>
-                    </div>
-                    
-                    <div class="flex gap-3">
-                        <div class="w-1/2">
-                            <label class="block text-xs text-textMuted mb-1 ml-1">File Size (Optional)</label>
-                            <input type="text" id="up-size" placeholder="e.g. 2.4 MB" class="admin-input">
-                        </div>
-                        <div class="w-1/2">
-                            <label class="block text-xs text-textMuted mb-1 ml-1">Link / File Code</label>
-                            <input type="text" id="up-code" placeholder="URL or Code" class="admin-input" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full mt-2 bg-appPink hover:bg-appPinkDark text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF
-                    </button>
-                </form>
+                <button onclick="closePreview()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-textMuted hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-        </div>
-
-        <!-- Delete Confirm Modal -->
-        <div id="modal-delete" class="hidden absolute inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm px-5">
-            <div class="bg-appCard w-full max-w-sm rounded-3xl p-6 text-center border border-gray-800 shadow-2xl fade-in">
-                <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
-                    <i class="fa-solid fa-trash"></i>
+            <div class="flex-1 w-full relative bg-[#1e1e1e]">
+                <div id="preview-loader" class="absolute inset-0 flex flex-col items-center justify-center text-appPink z-0">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                    <p class="text-xs text-textMuted">Loading document...</p>
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">Delete File?</h3>
-                <p class="text-textMuted text-sm mb-6">This action cannot be undone.</p>
-                <div class="flex gap-3">
-                    <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-800 rounded-xl text-white font-medium">Cancel</button>
-                    <button id="btn-confirm-del" class="flex-1 py-3 bg-red-500 rounded-xl text-white font-medium shadow-lg shadow-red-500/20">Delete</button>
-                </div>
+                <iframe id="preview-iframe" class="w-full h-full border-none z-10 relative bg-transparent" onload="document.getElementById('preview-loader').classList.add('hidden')"></iframe>
             </div>
         </div>
 
@@ -385,7 +282,7 @@
     </div>
 
     <script>
-        // --- 1. FIREBASE SETUP ---
+        // --- FIREBASE SETUP ---
         const firebaseConfig = {
             apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
             authDomain: "studiment-tracking.firebaseapp.com",
@@ -397,292 +294,297 @@
         const db = firebase.database();
         const refMaterials = db.ref('study_text_entries');
 
-        // --- 2. STATE ---
+        // --- STATE ---
         const state = {
-            role: null, // 'student' | 'admin'
-            currentTab: 'home', // 'home' | 'notes' | 'subject'
+            currentTab: 'home',
             selectedSubject: null,
-            selectedDocType: 'All',
             allMaterials: [],
-            pendingDeleteId: null
         };
 
-        // --- UI METADATA FOR SUBJECTS ---
         const subjectMeta = {
-            "Physics": { icon: "fa-atom", color: "bg-[#4834df]", iconCol: "text-[#c2baff]" },
-            "Chemistry": { icon: "fa-flask", color: "bg-[#e84393]", iconCol: "text-[#ffb8d9]" },
-            "Mathematics": { icon: "fa-superscript", color: "bg-[#6c5ce7]", iconCol: "text-[#d1caff]" },
-            "Biology": { icon: "fa-leaf", color: "bg-[#d63031]", iconCol: "text-[#ffc2c2]" },
-            "Inorganic Chemistry": { icon: "fa-cubes", color: "bg-[#8e44ad]", iconCol: "text-[#e8c8ff]" },
-            "Organic Chemistry": { icon: "fa-hexagon-nodes", color: "bg-[#c0392b]", iconCol: "text-[#ffc4be]" }
+            "Physics": { icon: "fa-atom", color: "bg-[#4834df]" },
+            "Chemistry": { icon: "fa-flask", color: "bg-[#e84393]" },
+            "Mathematics": { icon: "fa-superscript", color: "bg-[#6c5ce7]" },
+            "Biology": { icon: "fa-leaf", color: "bg-[#d63031]" },
+            "Inorganic Chemistry": { icon: "fa-cubes", color: "bg-[#8e44ad]" },
+            "Organic Chemistry": { icon: "fa-hexagon-nodes", color: "bg-[#c0392b]" }
         };
 
-        const fallbackMeta = { icon: "fa-book", color: "bg-gray-700", iconCol: "text-gray-300" };
-
-        // --- 3. CORE LOGIC ---
-        
-        const loginAs = (role) => {
-            state.role = role;
-            document.getElementById('view-auth').classList.add('hidden');
-            document.getElementById('app-wrapper').classList.remove('hidden');
-            
-            // Toggle Admin elements
-            document.querySelectorAll('.admin-only').forEach(el => {
-                role === 'admin' ? el.classList.remove('hidden') : el.classList.add('hidden');
-            });
-            
-            switchTab('home');
-            showToast(`Logged in as ${role === 'admin' ? 'Teacher' : 'Student'}`);
+        const categoryMeta = {
+            "notes": { title: "Notes", icon: "fa-book" },
+            "live": { title: "Live Classes", icon: "fa-tv" },
+            "tests": { title: "Mock Tests", icon: "fa-file-pen" },
+            "pyq": { title: "PYQ Bank", icon: "fa-bullseye" },
+            "practice": { title: "Practice Sets", icon: "fa-crosshairs" },
+            "formula": { title: "Formula Sheets", icon: "fa-file-lines" },
+            "mindmaps": { title: "Mind Maps", icon: "fa-network-wired" },
+            "dpps": { title: "DPPs", icon: "fa-list-check" }
         };
 
-        const logout = () => {
-            state.role = null;
-            document.getElementById('app-wrapper').classList.add('hidden');
-            document.getElementById('view-auth').classList.remove('hidden');
-        };
+        const fallbackMeta = { icon: "fa-folder", color: "bg-gray-700" };
 
+        // --- NAVIGATION LOGIC ---
         const switchTab = (tabId) => {
             state.currentTab = tabId;
             
-            // Update Nav UI
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                const isMatch = btn.dataset.tab === tabId;
-                btn.classList.toggle('text-appPink', isMatch);
-                btn.classList.toggle('text-textMuted', !isMatch);
-            });
+            const navIds = ['home', 'tests', 'notes', 'profile'];
+            if(navIds.includes(tabId)) {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    const isMatch = btn.dataset.tab === tabId;
+                    btn.classList.toggle('text-appPink', isMatch);
+                    btn.classList.toggle('text-textMuted', !isMatch);
+                });
+            }
 
-            // Update Views
-            document.getElementById('view-home').classList.add('hidden');
-            document.getElementById('view-notes').classList.add('hidden');
-            document.getElementById('view-subject-detail').classList.add('hidden');
-            
-            // Header config
+            document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
+
             const backBtn = document.getElementById('btn-back');
+            const menuIcon = document.getElementById('menu-icon');
             const titleEl = document.getElementById('header-title');
 
             if (tabId === 'home') {
                 document.getElementById('view-home').classList.remove('hidden');
                 backBtn.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
                 titleEl.innerHTML = 'MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span>';
-            } else if (tabId === 'notes') {
+            } 
+            else if (tabId === 'notes') {
                 document.getElementById('view-notes').classList.remove('hidden');
                 backBtn.classList.remove('hidden');
-                titleEl.innerHTML = 'Notes';
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'Notes Material';
+            }
+            else if (tabId === 'profile') {
+                document.getElementById('view-profile').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'Profile';
+            }
+            else {
+                // Dynamic Category Views (live, tests, pyq, etc.)
+                document.getElementById('view-generic-list').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                
+                const catMeta = categoryMeta[tabId] || { title: tabId.toUpperCase() };
+                titleEl.innerHTML = catMeta.title;
+                document.getElementById('generic-list-title').innerText = catMeta.title;
+                
+                renderGenericList(tabId);
             }
         };
 
         const goBack = () => {
             if (state.currentTab === 'subject') {
                 switchTab('notes');
-            } else if (state.currentTab === 'notes') {
+            } else {
                 switchTab('home');
             }
         };
 
-        // --- 4. FIREBASE DATA HANDLING ---
+        // --- FIREBASE FETCH ---
         refMaterials.on('value', snap => {
             const data = snap.val() || {};
             state.allMaterials = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             state.allMaterials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             
-            if (state.role) {
-                renderHomeRecents();
-                renderNotesMain();
-                if (state.currentTab === 'subject' && state.selectedSubject) {
-                    renderSubjectDetail();
-                }
+            renderHomeRecents();
+            renderNotesSubjects();
+            
+            if (state.currentTab === 'subject' && state.selectedSubject) {
+                renderSubjectDetail();
+            } else if (categoryMeta[state.currentTab]) {
+                renderGenericList(state.currentTab);
             }
         });
 
         // --- RENDERERS ---
-
         const renderHomeRecents = () => {
             const container = document.getElementById('home-recent-list');
-            const recent = state.allMaterials.slice(0, 5); // top 5
+            const recent = state.allMaterials.slice(0, 5); 
             
             if (!recent.length) {
-                container.innerHTML = `<div class="w-full text-center py-4 text-textMuted text-xs bg-appCard rounded-xl border border-gray-800">No PDFs available yet.</div>`;
+                container.innerHTML = `<div class="w-full text-center py-6 text-textMuted text-sm bg-appCard rounded-xl border border-gray-800">No materials available yet.</div>`;
                 return;
             }
 
-            container.innerHTML = recent.map(item => `
-                <div class="min-w-[130px] w-[130px] bg-appCard border border-gray-800 rounded-2xl p-3 flex flex-col shrink-0">
-                    <div class="w-10 h-12 bg-appPink rounded-lg flex items-center justify-center text-white font-bold text-[10px] mb-3 relative shadow-md shadow-appPink/20">
-                        PDF
-                        <div class="absolute top-1 right-1 w-2 h-1 bg-white/30 rounded-full"></div>
+            container.innerHTML = recent.map(item => {
+                const catInfo = categoryMeta[item.category || 'notes'] || fallbackMeta;
+                return `
+                <div class="min-w-[140px] w-[140px] bg-appCard border border-gray-800 rounded-2xl p-3 flex flex-col shrink-0">
+                    <div class="w-10 h-10 bg-appPink/10 rounded-lg flex items-center justify-center text-appPink mb-3 shadow-sm border border-appPink/20">
+                        <i class="fa-solid ${catInfo.icon}"></i>
                     </div>
                     <h4 class="text-xs font-bold text-white truncate w-full">${escapeHtml(item.topic)}</h4>
-                    <p class="text-[9px] text-textMuted truncate w-full mt-0.5">${escapeHtml(item.docType || 'Class Notes')}</p>
-                    <div class="mt-3 flex justify-between items-end">
-                        <span class="text-[9px] text-gray-500">${escapeHtml(item.size || '1.2 MB')}</span>
-                        <button onclick="viewPDF('${escapeHtml(item.code)}')" class="text-appPink hover:text-white transition-colors"><i class="fa-solid fa-download"></i></button>
+                    <p class="text-[9px] text-textMuted truncate w-full mt-0.5">${escapeHtml(item.subject)}</p>
+                    <div class="mt-3 flex justify-between items-end border-t border-gray-800 pt-2">
+                        <button onclick="previewPDF('${escapeHtml(item.code)}', '${escapeHtml(item.topic)}')" class="text-gray-400 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fa-solid fa-eye"></i> View</button>
+                        <button onclick="openLink('${escapeHtml(item.code)}')" class="text-appPink hover:text-white transition-colors"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         };
 
-        const renderNotesMain = () => {
+        const renderNotesSubjects = () => {
             const container = document.getElementById('subject-list');
-            
-            // Define fixed subjects from design, calculate counts
             const subjectsToRender = ["Physics", "Chemistry", "Mathematics", "Biology", "Inorganic Chemistry", "Organic Chemistry"];
             
-            let html = '';
-            subjectsToRender.forEach(subjName => {
-                const count = state.allMaterials.filter(m => m.subject === subjName).length;
+            container.innerHTML = subjectsToRender.map(subjName => {
+                // Filter only notes for the subject view
+                const count = state.allMaterials.filter(m => m.subject === subjName && (m.category === 'notes' || !m.category)).length;
                 const meta = subjectMeta[subjName] || fallbackMeta;
 
-                html += `
+                return `
                 <div onclick="openSubject('${subjName}')" class="bg-appCard border border-gray-800 rounded-2xl p-4 flex items-center gap-4 active:bg-gray-800 transition-colors cursor-pointer">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner ${meta.color}">
                         <i class="fa-solid ${meta.icon} text-white/90"></i>
                     </div>
                     <div class="flex-1">
-                        <h3 class="text-sm font-bold text-white">${subjName} Notes</h3>
-                        <p class="text-[10px] text-textMuted mt-0.5">${count} PDFs</p>
+                        <h3 class="text-sm font-bold text-white">${subjName}</h3>
+                        <p class="text-[10px] text-textMuted mt-0.5">${count} Items available</p>
                     </div>
                     <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
                 </div>`;
-            });
-            container.innerHTML = html;
+            }).join('');
         };
 
         const openSubject = (subjName) => {
             state.selectedSubject = subjName;
-            state.selectedDocType = 'All'; // Reset tab
             state.currentTab = 'subject';
             
-            // Header Update
             document.getElementById('header-title').innerText = subjName;
             document.getElementById('btn-back').classList.remove('hidden');
+            document.getElementById('menu-icon').classList.add('hidden');
             
-            // Views
-            document.getElementById('view-notes').classList.add('hidden');
-            document.getElementById('view-home').classList.add('hidden');
+            document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
             document.getElementById('view-subject-detail').classList.remove('hidden');
 
             renderSubjectDetail();
-            setupDetailTabs();
-        };
-
-        const setupDetailTabs = () => {
-            const tabs = document.querySelectorAll('.detail-tab');
-            tabs.forEach(tab => {
-                // reset styling
-                tab.className = 'detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap border-b-2 border-transparent';
-                if(tab.dataset.type === state.selectedDocType) {
-                    tab.className = 'detail-tab pb-3 text-sm font-semibold text-appPink border-b-2 border-appPink whitespace-nowrap active';
-                }
-                
-                tab.onclick = () => {
-                    state.selectedDocType = tab.dataset.type;
-                    setupDetailTabs(); // refresh tabs
-                    renderSubjectDetail(); // refresh list
-                };
-            });
         };
 
         const renderSubjectDetail = () => {
             const meta = subjectMeta[state.selectedSubject] || fallbackMeta;
             
-            // Update Subject Hero
             document.getElementById('detail-subj-icon-container').className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${meta.color}`;
             document.getElementById('detail-subj-icon').className = `fa-solid ${meta.icon} text-white/90`;
             document.getElementById('detail-subj-title').innerText = `${state.selectedSubject} Notes`;
 
-            // Filter data
-            let filtered = state.allMaterials.filter(m => m.subject === state.selectedSubject);
-            document.getElementById('detail-subj-count').innerText = `${filtered.length} PDFs`; // Total for subject
-
-            if (state.selectedDocType !== 'All') {
-                filtered = filtered.filter(m => (m.docType || 'Class Notes') === state.selectedDocType);
-            }
+            let filtered = state.allMaterials.filter(m => m.subject === state.selectedSubject && (m.category === 'notes' || !m.category));
+            document.getElementById('detail-subj-count').innerText = `${filtered.length} Items`;
 
             const container = document.getElementById('detail-pdf-list');
             if (!filtered.length) {
-                container.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-folder-open text-4xl text-gray-800 mb-2"></i><p class="text-sm text-textMuted">No ${state.selectedDocType} found.</p></div>`;
+                container.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-folder-open text-4xl text-gray-800 mb-3"></i><p class="text-sm text-textMuted">No materials found for this subject.</p></div>`;
                 return;
             }
 
-            container.innerHTML = filtered.map(item => {
-                const isAdmin = state.role === 'admin';
-                const delBtn = isAdmin ? `<button onclick="confirmDelete('${item.id}')" class="ml-2 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-500 rounded-full"><i class="fa-solid fa-trash-can"></i></button>` : '';
-
-                return `
-                <div class="bg-appCard border border-gray-800 rounded-2xl p-3.5 flex items-center gap-4 transition-colors">
-                    <div class="w-10 h-12 bg-appPink/20 rounded-lg flex items-center justify-center border border-appPink/30 shrink-0">
-                        <span class="text-[10px] font-bold text-appPink">PDF</span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="text-sm font-bold text-white truncate leading-tight">${escapeHtml(item.topic)}</h4>
-                        <p class="text-[10px] text-textMuted mt-1">${escapeHtml(item.docType || 'Class Notes')}</p>
-                    </div>
-                    <div class="flex items-center">
-                        <button onclick="viewPDF('${escapeHtml(item.code)}')" class="w-10 h-10 flex items-center justify-center text-appPink hover:bg-appPink/10 rounded-full transition-colors"><i class="fa-solid fa-download text-lg"></i></button>
-                        ${delBtn}
-                    </div>
-                </div>`;
-            }).join('');
+            container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
         };
 
-        // --- ADMIN UPLOAD ---
-        const openUploadModal = () => {
-            document.getElementById('modal-upload').classList.remove('hidden');
-            if(state.selectedSubject) {
-                document.getElementById('up-subject').value = state.selectedSubject;
+        const renderGenericList = (category) => {
+            const container = document.getElementById('generic-list-container');
+            let filtered = state.allMaterials.filter(m => m.category === category);
+            
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div class="text-center py-16 flex flex-col items-center">
+                        <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center text-3xl text-gray-600 mb-4">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <h3 class="text-white font-bold mb-1">Nothing here yet</h3>
+                        <p class="text-xs text-textMuted max-w-[200px]">Content for this section has not been uploaded by the admin.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
+        };
+
+        const generateItemCard = (item) => {
+            const catIcon = (categoryMeta[item.category] && categoryMeta[item.category].icon) ? categoryMeta[item.category].icon : 'fa-file';
+            
+            return `
+            <div class="bg-appCard border border-gray-800 rounded-2xl p-3.5 flex items-center gap-4 transition-colors">
+                <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center shrink-0 text-appPink">
+                    <i class="fa-solid ${catIcon}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-bold text-white truncate leading-tight">${escapeHtml(item.topic)}</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] text-textMuted bg-appBg px-2 py-0.5 rounded-md border border-gray-800">${escapeHtml(item.subject)}</span>
+                        ${item.size ? `<span class="text-[9px] text-gray-500">${escapeHtml(item.size)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <button onclick="previewPDF('${escapeHtml(item.code)}', '${escapeHtml(item.topic)}')" class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"><i class="fa-solid fa-eye text-xs"></i></button>
+                    <button onclick="openLink('${escapeHtml(item.code)}')" class="w-9 h-9 flex items-center justify-center text-appPink bg-appPink/10 hover:bg-appPink/20 rounded-full transition-colors"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></button>
+                </div>
+            </div>`;
+        };
+
+        // --- PREVIEW & OPEN LOGIC ---
+        const previewPDF = (code, title) => {
+            if(!code) return;
+            document.getElementById('preview-title').innerText = title || "Document";
+            document.getElementById('modal-preview').classList.remove('hidden');
+            document.getElementById('preview-loader').classList.remove('hidden');
+            
+            const iframe = document.getElementById('preview-iframe');
+            
+            const loadIframe = (url) => {
+                // Determine if it's a Youtube link or PDF
+                if(url.includes('youtube.com') || url.includes('youtu.be')) {
+                    // Extract Video ID and use embed URL
+                    let videoId = url.split('v=')[1];
+                    if(!videoId) videoId = url.split('youtu.be/')[1];
+                    const ampersandPosition = videoId ? videoId.indexOf('&') : -1;
+                    if(ampersandPosition !== -1) videoId = videoId.substring(0, ampersandPosition);
+                    
+                    iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                } else {
+                    // Try to load as PDF via Google Docs
+                    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+                    iframe.src = viewerUrl;
+                }
+            };
+
+            if(code.startsWith('http')) {
+                loadIframe(code);
+            } else {
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
+                fetch(proxyUrl)
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data && data.cdnUrl) loadIframe(data.cdnUrl);
+                        else {
+                            closePreview();
+                            showToast("Invalid Document Link", true);
+                        }
+                    }).catch(() => {
+                        closePreview();
+                        showToast("Error loading document", true);
+                    });
             }
         };
-        const closeUploadModal = () => {
-            document.getElementById('modal-upload').classList.add('hidden');
-            document.getElementById('upload-form').reset();
+
+        const closePreview = () => {
+            document.getElementById('modal-preview').classList.add('hidden');
+            document.getElementById('preview-iframe').src = ""; 
         };
 
-        const handleUpload = async (e) => {
-            e.preventDefault();
-            const subject = document.getElementById('up-subject').value;
-            const docType = document.getElementById('up-doctype').value;
-            const topic = document.getElementById('up-topic').value.trim();
-            const size = document.getElementById('up-size').value.trim() || '1.5 MB';
-            const code = document.getElementById('up-code').value.trim();
-
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
-
-            try {
-                // Keep backward compatibility with previous DB structure, add new fields
-                await refMaterials.push({ 
-                    subject, topic, docType, size, code, category: 'notes', 
-                    timestamp: Date.now() 
-                });
-                closeUploadModal();
-                showToast("PDF Uploaded Successfully");
-            } catch(err) {
-                showToast("Upload failed", true);
-            } finally {
-                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF';
+        const openLink = (code) => {
+            if(!code) return;
+            if(code.startsWith('http')) {
+                window.open(code, '_blank');
+                return;
             }
+            showToast("Opening Link...");
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
+            fetch(proxyUrl).then(res => res.json()).then(data => {
+                if(data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
+                else showToast("Invalid Code", true);
+            }).catch(() => showToast("Network error", true));
         };
-
-        // --- DELETE ---
-        const confirmDelete = (id) => {
-            state.pendingDeleteId = id;
-            document.getElementById('modal-delete').classList.remove('hidden');
-        };
-        const closeDeleteModal = () => {
-            state.pendingDeleteId = null;
-            document.getElementById('modal-delete').classList.add('hidden');
-        };
-        
-        document.getElementById('btn-confirm-del').addEventListener('click', async () => {
-            if(!state.pendingDeleteId) return;
-            try {
-                await refMaterials.child(state.pendingDeleteId).remove();
-                showToast("File Deleted");
-            } catch(e) {
-                showToast("Failed to delete", true);
-            }
-            closeDeleteModal();
-        });
 
         // --- UTILS ---
         const escapeHtml = (str) => {
@@ -708,23 +610,6 @@
                 toast.style.opacity = '0';
                 toast.style.transform = 'translate(-50%, -20px)';
             }, 3000);
-        };
-
-        // PDF Viewer Simulator
-        const viewPDF = (code) => {
-            if(!code) return;
-            // Agar code http se start hota hai, directly link open karo
-            if(code.startsWith('http')) {
-                window.open(code, '_blank');
-                return;
-            }
-            // Warna pehle wala BrightClass logic
-            showToast("Opening Document...");
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
-            fetch(proxyUrl).then(res => res.json()).then(data => {
-                if(data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
-                else showToast("Invalid Code", true);
-            }).catch(() => showToast("Failed to fetch document", true));
         };
 
     </script>
