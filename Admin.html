@@ -2,736 +2,283 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Admin Panel | Udayagiri Classes</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <!-- Google Fonts + Font Awesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MHT CET | Admin Portal</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        appBg: '#090a10',
+                        appCard: '#15161e',
+                        appPink: '#f43f5e',
+                        textMuted: '#8b8d9c'
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(145deg, #fff5f7 0%, #ffeef2 100%);
-            min-height: 100vh;
-        }
-
-        /* Left Drawer (Three-dot menu) */
-        .drawer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: none;
-            backdrop-filter: blur(3px);
-        }
-        .side-drawer {
-            position: fixed;
-            top: 0;
-            left: -300px;
-            width: 280px;
-            height: 100%;
-            background: white;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-            z-index: 1001;
-            transition: left 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            gap: 1.5rem;
-            overflow-y: auto;
-            border-radius: 0 1.5rem 1.5rem 0;
-        }
-        .side-drawer.open {
-            left: 0;
-        }
-        .drawer-header {
-            text-align: center;
-            border-bottom: 1px solid #ffe2ec;
-            padding-bottom: 1rem;
-        }
-        .drawer-avatar {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #FF4FA3, #ff8cb0);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.5rem;
-            margin: 0 auto 0.5rem;
-        }
-        .drawer-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .drawer-menu a {
-            padding: 0.75rem 1rem;
-            border-radius: 1rem;
-            color: #4a4a4a;
-            text-decoration: none;
-            font-weight: 500;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .drawer-menu a:hover, .drawer-menu a.active {
-            background: #ffe4ec;
-            color: #FF4FA3;
-        }
-        .logout-btn {
-            margin-top: auto;
-            border-top: 1px solid #ffe2ec;
-            padding-top: 1rem;
-            color: #ef4444 !important;
-        }
-
-        /* Main Container */
-        .app-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #FF4FA3, #ff7aa2);
-            border-radius: 1.5rem;
-            padding: 1.2rem 2rem;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        .menu-icon-left {
-            font-size: 1.5rem;
-            cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            border-radius: 2rem;
-            padding: 0.5rem 1rem;
-            color: white;
-        }
-
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 10px 30px rgba(255, 79, 163, 0.08);
-            border: 1px solid #ffe2ec;
-        }
-        .card-header {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #FF4FA3;
-            border-left: 4px solid #FF4FA3;
-            padding-left: 1rem;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        label {
-            font-weight: 600;
-            color: #c4456c;
-            display: block;
-            margin-bottom: 0.3rem;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 0.7rem 1rem;
-            border-radius: 1rem;
-            border: 1.5px solid #ffe0e8;
-            background: #fffafc;
-            font-size: 0.95rem;
-        }
-        .btn-primary {
-            background: #FF4FA3;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 2rem;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-primary:hover {
-            background: #e03a8a;
-            transform: translateY(-2px);
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid #FF4FA3;
-            color: #FF4FA3;
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-            border: none;
-        }
-
-        /* Lists */
-        .item-list {
-            margin-top: 1rem;
-        }
-        .list-item {
-            background: #fff8fa;
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            border: 1px solid #ffe2ec;
-        }
-        .item-info {
-            flex: 1;
-        }
-        .item-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .empty-msg {
-            text-align: center;
-            padding: 2rem;
-            color: #b86c87;
-            font-style: italic;
-        }
-        .toast-msg {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #2c2c2c;
-            color: white;
-            padding: 10px 18px;
-            border-radius: 40px;
-            z-index: 2000;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        hr {
-            margin: 1rem 0;
-            border-color: #ffe2ec;
-        }
-        @media (max-width: 768px) {
-            .app-container { padding: 1rem; }
-            .header { flex-direction: column; gap: 1rem; text-align: center; }
-        }
+        body { background-color: #090a10; color: #fff; margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .admin-input { width: 100%; background: #1a1b26; border: 1px solid #2d2e3d; border-radius: 0.75rem; padding: 0.875rem; color: white; font-size: 0.875rem; outline: none; transition: all 0.2s; }
+        .admin-input:focus { border-color: #f43f5e; box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2); }
+        select.admin-input { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b8d9c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
     </style>
 </head>
 <body>
-    <div class="drawer-overlay" id="drawerOverlay"></div>
-    <div class="side-drawer" id="sideDrawer">
-        <div class="drawer-header">
-            <div class="drawer-avatar">AD</div>
-            <div>Admin</div>
-            <div style="font-size:0.75rem;">udayagiri@admin.com</div>
+
+    <!-- Header -->
+    <header class="p-5 flex justify-between items-center bg-appCard border-b border-gray-800 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-appPink/20 flex items-center justify-center text-appPink border border-appPink/30">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold leading-tight">Admin Portal</h1>
+                <p class="text-[10px] text-textMuted">Manage App Content</p>
+            </div>
         </div>
-        <div class="drawer-menu">
-            <a href="#" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-            <a href="#" data-section="live"><i class="fas fa-video"></i> Live Classes</a>
-            <a href="#" data-section="materials"><i class="fas fa-book"></i> Study Materials</a>
-            <a href="#" data-section="assignments"><i class="fas fa-tasks"></i> Assignments</a>
-            <a href="#" data-section="users"><i class="fas fa-users"></i> Users</a>
-            <a href="#" data-section="share"><i class="fas fa-share-alt"></i> Share Class Details</a>
-            <a href="#" id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <button onclick="openUploadModal()" class="px-4 py-2 bg-appPink text-white text-sm font-bold rounded-lg shadow-md shadow-appPink/20 flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Add Item
+        </button>
+    </header>
+
+    <!-- Main Content List -->
+    <main class="flex-1 overflow-y-auto hide-scrollbar p-5 space-y-4" id="admin-list">
+        <!-- Loader -->
+        <div class="text-center py-10 text-textMuted">
+            <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-appPink"></i>
+            <p>Loading server data...</p>
+        </div>
+    </main>
+
+    <!-- Admin Upload Modal -->
+    <div id="modal-upload" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity p-2 sm:p-0">
+        <div class="bg-appCard w-full sm:max-w-md sm:rounded-3xl rounded-3xl p-6 shadow-2xl border border-gray-800 fade-in max-h-[95dvh] overflow-y-auto hide-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-white">Add New Content</h3>
+                <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="upload-form" onsubmit="handleUpload(event)" class="space-y-4">
+                
+                <div>
+                    <label class="block text-xs text-textMuted mb-1 ml-1">Category (Where should it appear?)</label>
+                    <select id="up-category" class="admin-input" required>
+                        <option value="notes">Notes</option>
+                        <option value="live">Live Classes</option>
+                        <option value="tests">Mock Tests</option>
+                        <option value="pyq">PYQ Bank</option>
+                        <option value="practice">Practice Sets</option>
+                        <option value="formula">Formula Sheet</option>
+                        <option value="mindmaps">Mind Maps</option>
+                        <option value="dpps">DPPs</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-textMuted mb-1 ml-1">Subject</label>
+                    <select id="up-subject" class="admin-input" required>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Inorganic Chemistry">Inorganic Chemistry</option>
+                        <option value="Organic Chemistry">Organic Chemistry</option>
+                        <option value="Full Syllabus">Full Syllabus / General</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-xs text-textMuted mb-1 ml-1">Title / Topic Name</label>
+                    <input type="text" id="up-topic" placeholder="e.g. Thermodynamics L-1 or Test 1" class="admin-input" required>
+                </div>
+                
+                <div class="flex gap-3">
+                    <div class="w-1/2">
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Meta Info (Optional)</label>
+                        <input type="text" id="up-size" placeholder="e.g. 1.5 MB or 120 Mins" class="admin-input">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Link (URL / Code)</label>
+                        <input type="text" id="up-code" placeholder="File URL or Video Link" class="admin-input" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-4 bg-appPink text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload to Server
+                </button>
+            </form>
         </div>
     </div>
 
-    <div class="app-container">
-        <div class="header">
-            <button class="menu-icon-left" id="menuIconLeft"><i class="fas fa-ellipsis-v"></i> Menu</button>
-            <h1><i class="fas fa-user-shield"></i> Udayagiri Classes | Admin Panel</h1>
-            <div style="width:80px;"></div>
+    <!-- Delete Confirm Modal -->
+    <div id="modal-delete" class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm px-5">
+        <div class="bg-appCard w-full max-w-sm rounded-3xl p-6 text-center border border-gray-800 shadow-2xl fade-in">
+            <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Delete Item?</h3>
+            <p class="text-textMuted text-sm mb-6">This action cannot be undone and will remove it from the student app immediately.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-800 rounded-xl text-white font-medium">Cancel</button>
+                <button id="btn-confirm-del" class="flex-1 py-3 bg-red-500 rounded-xl text-white font-medium shadow-lg shadow-red-500/20">Delete</button>
+            </div>
         </div>
+    </div>
 
-        <!-- Dashboard Section -->
-        <div id="dashboardSection" class="section active-section">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-chart-line"></i> Platform Overview</div>
-                <div class="grid-2">
-                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
-                        <h3 id="liveCount">0</h3>
-                        <p>Live Classes</p>
-                    </div>
-                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
-                        <h3 id="materialCount">0</h3>
-                        <p>Study Materials</p>
-                    </div>
-                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
-                        <h3 id="assignmentCount">0</h3>
-                        <p>Assignments</p>
-                    </div>
-                    <div class="stat-card" style="background:#fff0f5; border-radius:1rem; padding:1rem; text-align:center;">
-                        <h3 id="userCount">0</h3>
-                        <p>Registered Students</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Live Classes Section -->
-        <div id="liveSection" class="section">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-plus-circle"></i> Add New Live Class</div>
-                <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="liveTitle" placeholder="e.g., Calculus Masterclass">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="liveDesc" rows="2" placeholder="Class details..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Date (YYYY-MM-DD)</label>
-                    <input type="date" id="liveDate">
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="liveStatus">
-                        <option value="Active">Active (Live Now)</option>
-                        <option value="Upcoming">Upcoming</option>
-                    </select>
-                </div>
-                <button class="btn-primary" id="addLiveBtn"><i class="fas fa-save"></i> Add Class</button>
-            </div>
-            <div class="card">
-                <div class="card-header"><i class="fas fa-list"></i> All Live Classes</div>
-                <div id="liveList" class="item-list"></div>
-            </div>
-        </div>
-
-        <!-- Study Materials Section -->
-        <div id="materialsSection" class="section">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-upload"></i> Upload Study Material</div>
-                <div class="form-group"><label>Title</label><input type="text" id="materialTitle" placeholder="Chapter 1 Notes"></div>
-                <div class="form-group"><label>Subject</label><input type="text" id="materialSubject" placeholder="Mathematics"></div>
-                <div class="form-group"><label>PDF/File URL</label><input type="url" id="materialUrl" placeholder="https://..."></div>
-                <button class="btn-primary" id="addMaterialBtn"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
-            </div>
-            <div class="card">
-                <div class="card-header"><i class="fas fa-database"></i> All Materials</div>
-                <div id="materialsList" class="item-list"></div>
-            </div>
-        </div>
-
-        <!-- Assignments Section -->
-        <div id="assignmentsSection" class="section">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-pen-alt"></i> Create Assignment</div>
-                <div class="form-group"><label>Assignment Title</label><input type="text" id="assignmentTitle" placeholder="Physics Worksheet"></div>
-                <div class="form-group"><label>Due Date</label><input type="date" id="assignmentDue"></div>
-                <button class="btn-primary" id="addAssignmentBtn"><i class="fas fa-plus"></i> Create</button>
-            </div>
-            <div class="card">
-                <div class="card-header"><i class="fas fa-tasks"></i> All Assignments</div>
-                <div id="assignmentsList" class="item-list"></div>
-            </div>
-        </div>
-
-        <!-- Users Section -->
-        <div id="usersSection" class="section">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-users"></i> Registered Students</div>
-                <div id="usersList" class="item-list"></div>
-            </div>
-        </div>
-
-        <!-- Share Class Details Section -->
-        <div id="shareSection" class="section">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-bullhorn"></i> Share Class Details with Students</div>
-                <div class="form-group">
-                    <label>Select Live Class</label>
-                    <select id="shareClassSelect"></select>
-                </div>
-                <div class="form-group">
-                    <label>Additional Message (Optional)</label>
-                    <textarea id="shareMessage" rows="3" placeholder="Reminder: Join 5 minutes early..."></textarea>
-                </div>
-                <button class="btn-primary" id="shareClassBtn"><i class="fas fa-paper-plane"></i> Share Notification</button>
-                <div id="shareResult" style="margin-top:1rem;"></div>
-            </div>
-        </div>
+    <!-- Toast -->
+    <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+        <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
+        <span id="toast-msg">Success</span>
     </div>
 
     <script>
-        // Firebase Config
+        // --- FIREBASE SETUP ---
         const firebaseConfig = {
-            apiKey: "AIzaSyBPtxG_tTq33ltQSo2oiJjrEQIaIGOEAwc",
-            authDomain: "udayagiri-f3a6d.firebaseapp.com",
-            projectId: "udayagiri-f3a6d",
-            storageBucket: "udayagiri-f3a6d.firebasestorage.app",
-            messagingSenderId: "912069472765",
-            appId: "1:912069472765:web:dba14daa231e2addbf2994"
+            apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
+            authDomain: "studiment-tracking.firebaseapp.com",
+            databaseURL: "https://studiment-tracking-default-rtdb.firebaseio.com",
+            projectId: "studiment-tracking"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const refMaterials = db.ref('study_text_entries');
 
-        // Collections
-        const liveEventsRef = db.collection("liveEvents");
-        const materialsRef = db.collection("studyMaterials");
-        const assignmentsRef = db.collection("assignments");
-        const usersRef = db.collection("users");
-        const notificationsRef = db.collection("notifications");
+        let allData = [];
+        let pendingDeleteId = null;
 
-        // Helper: show toast
-        function showToast(msg, isError = false) {
-            let t = document.querySelector('.toast-msg');
-            if(t) t.remove();
-            let div = document.createElement('div');
-            div.className = 'toast-msg';
-            div.style.backgroundColor = isError ? '#ef4444' : '#22c55e';
-            div.innerText = msg;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 3000);
-        }
+        const categoryLabels = {
+            "notes": "Notes", "live": "Live Class", "tests": "Mock Test", 
+            "pyq": "PYQ Bank", "practice": "Practice", "formula": "Formula", 
+            "mindmaps": "Mind Map", "dpps": "DPP"
+        };
 
-        function escapeHtml(str) {
-            if(!str) return '';
-            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
-        }
+        // --- FETCH DATA ---
+        refMaterials.on('value', snap => {
+            const data = snap.val() || {};
+            allData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            renderAdminList();
+        });
 
-        // Dashboard Stats
-        async function updateStats() {
-            const liveSnap = await liveEventsRef.get();
-            const materialSnap = await materialsRef.get();
-            const assignmentSnap = await assignmentsRef.get();
-            const userSnap = await usersRef.get();
-            document.getElementById('liveCount').innerText = liveSnap.size;
-            document.getElementById('materialCount').innerText = materialSnap.size;
-            document.getElementById('assignmentCount').innerText = assignmentSnap.size;
-            document.getElementById('userCount').innerText = userSnap.size;
-        }
-
-        // ========== LIVE CLASSES CRUD ==========
-        async function renderLiveClasses() {
-            const snapshot = await liveEventsRef.orderBy('date', 'desc').get();
-            const container = document.getElementById('liveList');
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="empty-msg">📭 No live classes scheduled.</div>';
+        // --- RENDER LIST ---
+        const renderAdminList = () => {
+            const container = document.getElementById('admin-list');
+            if (allData.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-textMuted"><i class="fa-solid fa-box-open text-3xl mb-3"></i><p>Server is empty. Add items to see them here.</p></div>`;
                 return;
             }
-            let html = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                html += `
-                    <div class="list-item" data-id="${doc.id}">
-                        <div class="item-info">
-                            <strong>${escapeHtml(data.title)}</strong><br>
-                            <small>${escapeHtml(data.description || '')}</small><br>
-                            📅 ${data.date} | 🏷️ ${data.status}
+
+            container.innerHTML = allData.map(item => `
+                <div class="bg-appCard border border-gray-800 rounded-xl p-4 flex items-center gap-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[9px] uppercase tracking-wider font-bold text-white bg-appPink px-2 py-0.5 rounded">${categoryLabels[item.category] || 'Notes'}</span>
+                            <span class="text-[10px] text-gray-400">${escapeHtml(item.subject)}</span>
                         </div>
-                        <div class="item-actions">
-                            <button class="btn-outline edit-live" data-id="${doc.id}" data-title="${escapeHtml(data.title)}" data-desc="${escapeHtml(data.description || '')}" data-date="${data.date}" data-status="${data.status}"><i class="fas fa-edit"></i></button>
-                            <button class="btn-outline btn-danger delete-live" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
-                        </div>
+                        <h4 class="text-sm font-bold text-white truncate">${escapeHtml(item.topic)}</h4>
+                        <div class="text-[10px] text-textMuted mt-1 truncate">Link: ${escapeHtml(item.code)}</div>
                     </div>
-                `;
-            });
-            container.innerHTML = html;
-            // Delete events
-            document.querySelectorAll('.delete-live').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const id = btn.getAttribute('data-id');
-                    if(confirm('Delete this live class?')) {
-                        await liveEventsRef.doc(id).delete();
-                        showToast('Class deleted');
-                        renderLiveClasses();
-                        updateStats();
-                        loadShareClassSelect();
-                    }
-                });
-            });
-            // Edit events - simple inline prompt for demo
-            document.querySelectorAll('.edit-live').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-id');
-                    const oldTitle = btn.getAttribute('data-title');
-                    const newTitle = prompt('Edit title:', oldTitle);
-                    if(newTitle && newTitle.trim()) {
-                        liveEventsRef.doc(id).update({ title: newTitle.trim() });
-                        showToast('Updated');
-                        renderLiveClasses();
-                    }
-                });
-            });
-        }
+                    <button onclick="confirmDelete('${item.id}')" class="w-10 h-10 shrink-0 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors flex items-center justify-center">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        };
 
-        document.getElementById('addLiveBtn').addEventListener('click', async () => {
-            const title = document.getElementById('liveTitle').value.trim();
-            const desc = document.getElementById('liveDesc').value.trim();
-            const date = document.getElementById('liveDate').value;
-            const status = document.getElementById('liveStatus').value;
-            if(!title || !date) { showToast('Title and date required', true); return; }
-            await liveEventsRef.add({ title, description: desc, date, status, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            showToast('Live class added');
-            document.getElementById('liveTitle').value = '';
-            document.getElementById('liveDesc').value = '';
-            document.getElementById('liveDate').value = '';
-            renderLiveClasses();
-            updateStats();
-            loadShareClassSelect();
-        });
+        // --- UPLOAD LOGIC ---
+        const openUploadModal = () => document.getElementById('modal-upload').classList.remove('hidden');
+        const closeUploadModal = () => {
+            document.getElementById('modal-upload').classList.add('hidden');
+            document.getElementById('upload-form').reset();
+        };
 
-        // ========== STUDY MATERIALS ==========
-        async function renderMaterials() {
-            const snapshot = await materialsRef.orderBy('timestamp', 'desc').get();
-            const container = document.getElementById('materialsList');
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="empty-msg">📂 No study materials uploaded.</div>';
-                return;
-            }
-            let html = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                html += `
-                    <div class="list-item">
-                        <div class="item-info">
-                            <strong>${escapeHtml(data.title)}</strong> (${escapeHtml(data.subject)})<br>
-                            <a href="${escapeHtml(data.url)}" target="_blank">🔗 Open PDF</a>
-                        </div>
-                        <div class="item-actions">
-                            <button class="btn-outline btn-danger delete-material" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-            document.querySelectorAll('.delete-material').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    if(confirm('Delete material?')) {
-                        await materialsRef.doc(btn.getAttribute('data-id')).delete();
-                        showToast('Deleted');
-                        renderMaterials();
-                        updateStats();
-                    }
-                });
-            });
-        }
-
-        document.getElementById('addMaterialBtn').addEventListener('click', async () => {
-            const title = document.getElementById('materialTitle').value.trim();
-            const subject = document.getElementById('materialSubject').value.trim();
-            const url = document.getElementById('materialUrl').value.trim();
-            if(!title || !subject || !url) { showToast('All fields required', true); return; }
-            await materialsRef.add({ title, subject, url, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            showToast('Material uploaded');
-            document.getElementById('materialTitle').value = '';
-            document.getElementById('materialSubject').value = '';
-            document.getElementById('materialUrl').value = '';
-            renderMaterials();
-            updateStats();
-        });
-
-        // ========== ASSIGNMENTS ==========
-        async function renderAssignments() {
-            const snapshot = await assignmentsRef.orderBy('dueDate', 'asc').get();
-            const container = document.getElementById('assignmentsList');
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="empty-msg">📋 No assignments created.</div>';
-                return;
-            }
-            let html = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                html += `
-                    <div class="list-item">
-                        <div class="item-info">
-                            <strong>${escapeHtml(data.title)}</strong><br>
-                            Due: ${data.dueDate || 'Not set'}
-                        </div>
-                        <div class="item-actions">
-                            <button class="btn-outline btn-danger delete-assignment" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-            document.querySelectorAll('.delete-assignment').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    if(confirm('Delete assignment?')) {
-                        await assignmentsRef.doc(btn.getAttribute('data-id')).delete();
-                        showToast('Deleted');
-                        renderAssignments();
-                        updateStats();
-                    }
-                });
-            });
-        }
-
-        document.getElementById('addAssignmentBtn').addEventListener('click', async () => {
-            const title = document.getElementById('assignmentTitle').value.trim();
-            const dueDate = document.getElementById('assignmentDue').value;
-            if(!title) { showToast('Title required', true); return; }
-            await assignmentsRef.add({ title, dueDate, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            showToast('Assignment created');
-            document.getElementById('assignmentTitle').value = '';
-            document.getElementById('assignmentDue').value = '';
-            renderAssignments();
-            updateStats();
-        });
-
-        // ========== USERS ==========
-        async function renderUsers() {
-            const snapshot = await usersRef.get();
-            const container = document.getElementById('usersList');
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="empty-msg">👤 No student profiles yet.</div>';
-                return;
-            }
-            let html = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                html += `
-                    <div class="list-item">
-                        <div><strong>${escapeHtml(data.displayName || 'No name')}</strong><br>📧 ${escapeHtml(data.email || '')}<br>🆔 ${escapeHtml(data.uid || '')}</div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        // ========== SHARE CLASS DETAILS ==========
-        async function loadShareClassSelect() {
-            const snapshot = await liveEventsRef.orderBy('date', 'desc').get();
-            const select = document.getElementById('shareClassSelect');
-            if (snapshot.empty) {
-                select.innerHTML = '<option>No classes available</option>';
-                return;
-            }
-            let html = '<option value="">Select a class</option>';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                html += `<option value="${doc.id}">${escapeHtml(data.title)} (${data.date})</option>`;
-            });
-            select.innerHTML = html;
-        }
-
-        document.getElementById('shareClassBtn').addEventListener('click', async () => {
-            const classId = document.getElementById('shareClassSelect').value;
-            const message = document.getElementById('shareMessage').value.trim();
-            if (!classId) { showToast('Please select a class', true); return; }
-            const classDoc = await liveEventsRef.doc(classId).get();
-            const classData = classDoc.data();
-            const notification = {
-                title: `📢 Class Update: ${classData.title}`,
-                body: message || `Reminder: ${classData.title} on ${classData.date} | ${classData.description || ''}`,
-                classId: classId,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                read: false
-            };
-            await notificationsRef.add(notification);
-            showToast('Notification sent to all students!');
-            document.getElementById('shareMessage').value = '';
-            // Also update a local display
-            document.getElementById('shareResult').innerHTML = `<div class="empty-msg" style="color:green;">✅ Shared successfully!</div>`;
-            setTimeout(() => document.getElementById('shareResult').innerHTML = '', 3000);
-        });
-
-        // ========== SECTION SWITCHING (Left Drawer) ==========
-        let currentSection = 'dashboard';
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active-section'));
-            document.getElementById(`${sectionId}Section`).classList.add('active-section');
-            currentSection = sectionId;
-            // Update active menu style
-            document.querySelectorAll('.drawer-menu a').forEach(link => {
-                link.classList.remove('active');
-                if(link.getAttribute('data-section') === sectionId) link.classList.add('active');
-            });
-            // Refresh data when section changes
-            if(sectionId === 'live') renderLiveClasses();
-            if(sectionId === 'materials') renderMaterials();
-            if(sectionId === 'assignments') renderAssignments();
-            if(sectionId === 'users') renderUsers();
-            if(sectionId === 'share') loadShareClassSelect();
-            if(sectionId === 'dashboard') updateStats();
-        }
-
-        // Drawer controls
-        const drawer = document.getElementById('sideDrawer');
-        const overlay = document.getElementById('drawerOverlay');
-        document.getElementById('menuIconLeft').addEventListener('click', () => {
-            drawer.classList.add('open');
-            overlay.style.display = 'block';
-        });
-        overlay.addEventListener('click', () => {
-            drawer.classList.remove('open');
-            overlay.style.display = 'none';
-        });
-        document.querySelectorAll('.drawer-menu a[data-section]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = link.getAttribute('data-section');
-                showSection(section);
-                drawer.classList.remove('open');
-                overlay.style.display = 'none';
-            });
-        });
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        const handleUpload = async (e) => {
             e.preventDefault();
-            showToast('Logged out (demo)');
+            const category = document.getElementById('up-category').value;
+            const subject = document.getElementById('up-subject').value;
+            const topic = document.getElementById('up-topic').value.trim();
+            const size = document.getElementById('up-size').value.trim();
+            const code = document.getElementById('up-code').value.trim();
+
+            const btn = e.target.querySelector('button');
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            btn.disabled = true;
+
+            try {
+                await refMaterials.push({ 
+                    category, subject, topic, size, code, 
+                    timestamp: Date.now() 
+                });
+                closeUploadModal();
+                showToast("Content added successfully");
+            } catch(err) {
+                showToast("Failed to upload content", true);
+            } finally {
+                btn.innerHTML = originalBtnHtml;
+                btn.disabled = false;
+            }
+        };
+
+        // --- DELETE LOGIC ---
+        const confirmDelete = (id) => {
+            pendingDeleteId = id;
+            document.getElementById('modal-delete').classList.remove('hidden');
+        };
+        const closeDeleteModal = () => {
+            pendingDeleteId = null;
+            document.getElementById('modal-delete').classList.add('hidden');
+        };
+        
+        document.getElementById('btn-confirm-del').addEventListener('click', async () => {
+            if(!pendingDeleteId) return;
+            try {
+                await refMaterials.child(pendingDeleteId).remove();
+                showToast("Item permanently deleted");
+            } catch(e) {
+                showToast("Failed to delete item", true);
+            }
+            closeDeleteModal();
         });
 
-        // CSS for active section
-        const style = document.createElement('style');
-        style.textContent = `.section { display: none; } .section.active-section { display: block; }`;
-        document.head.appendChild(style);
+        // --- UTILS ---
+        const escapeHtml = (str) => {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m]));
+        };
 
-        // Initial load
-        showSection('dashboard');
-        updateStats();
-        renderLiveClasses();
-        renderMaterials();
-        renderAssignments();
-        renderUsers();
-        loadShareClassSelect();
+        const showToast = (msg, isError = false) => {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            
+            const icon = document.getElementById('toast-icon');
+            icon.className = isError ? 'fa-solid fa-circle-exclamation text-red-500' : 'fa-solid fa-circle-check text-appPink';
 
-        // Real-time listeners for stats and lists
-        liveEventsRef.onSnapshot(() => { if(currentSection === 'live') renderLiveClasses(); updateStats(); loadShareClassSelect(); });
-        materialsRef.onSnapshot(() => { if(currentSection === 'materials') renderMaterials(); updateStats(); });
-        assignmentsRef.onSnapshot(() => { if(currentSection === 'assignments') renderAssignments(); updateStats(); });
-        usersRef.onSnapshot(() => { if(currentSection === 'users') renderUsers(); updateStats(); });
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, -20px)';
+            }, 3000);
+        };
     </script>
 </body>
-                                                                   </html>
+</html>
