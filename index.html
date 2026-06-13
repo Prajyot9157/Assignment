@@ -3,959 +3,730 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StudyCore | Learning Platform</title>
+    <title>MHT CET Class 12 | Learning App</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        appBg: '#090a10',
+                        appCard: '#15161e',
+                        appCardHover: '#1c1d26',
+                        appPink: '#f43f5e',
+                        appPinkDark: '#e11d48',
+                        textMuted: '#8b8d9c'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0b1121;
-            color: #f8fafc;
-            overflow: hidden; /* App-like feel, scroll in main content */
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
+
+        /* Hide Scrollbar but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .slide-in-right { animation: slideInRight 0.3s ease forwards; }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.2s ease;
+        /* Custom Input Styling */
+        .admin-input {
+            width: 100%; background: #1a1b26; border: 1px solid #2d2e3d; border-radius: 0.75rem; 
+            padding: 0.875rem; color: white; font-size: 0.875rem; outline: none; transition: all 0.2s;
         }
-        
-        .glass-card:hover {
-            border-color: rgba(99, 102, 241, 0.3);
-            transform: translateY(-2px);
-        }
+        .admin-input:focus { border-color: #f43f5e; box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2); }
+        select.admin-input { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b8d9c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        .nav-item.active {
-            background: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
-            border-right: 3px solid #818cf8;
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Toast animation */
-        .toast-enter { animation: slideInUp 0.3s ease forwards; }
-        .toast-exit { animation: fadeOutDown 0.3s ease forwards; }
-        
-        @keyframes slideInUp {
-            from { transform: translate(-50%, 100%); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
-        @keyframes fadeOutDown {
-            from { transform: translate(-50%, 0); opacity: 1; }
-            to { transform: translate(-50%, 20px); opacity: 0; }
-        }
-
-        /* Live Stream Simulation Pulse */
-        .live-pulse {
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            animation: pulse-red 2s infinite;
-        }
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        /* Simulated Video Feed gradient */
-        .video-feed-active {
-            background: linear-gradient(45deg, #1e1b4b, #312e81, #1e1b4b);
-            background-size: 400% 400%;
-            animation: gradientBG 5s ease infinite;
-        }
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        /* App Container constraints for Desktop viewing */
+        .app-container { max-width: 480px; margin: 0 auto; height: 100dvh; position: relative; background: #090a10; box-shadow: 0 0 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; }
     </style>
 </head>
-<body class="bg-[#0b1121] text-slate-200 h-screen w-screen overflow-hidden">
+<body class="bg-gray-900 flex justify-center items-center h-screen w-screen">
 
-    <!-- Role Selection / Auth Screen -->
-    <div id="auth-screen" class="flex h-screen w-screen items-center justify-center relative z-50 p-6 bg-[#0b1121]">
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute -top-1/4 -right-1/4 w-1/2 h-1/2 bg-indigo-600/20 rounded-full blur-[120px]"></div>
-            <div class="absolute -bottom-1/4 -left-1/4 w-1/2 h-1/2 bg-purple-600/20 rounded-full blur-[120px]"></div>
-        </div>
-        
-        <div class="glass-card max-w-2xl w-full p-8 md:p-12 rounded-3xl border border-slate-700/50 shadow-2xl relative z-10 text-center">
-            <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/30 mb-6 text-2xl">
-                <i class="fa-solid fa-graduation-cap"></i>
+    <!-- Auth Screen -->
+    <div id="view-auth" class="app-container w-full z-50 flex items-center justify-center p-6 bg-appBg">
+        <div class="w-full max-w-sm space-y-8 text-center fade-in">
+            <div class="w-20 h-20 mx-auto bg-gradient-to-tr from-appPink to-purple-600 rounded-3xl flex items-center justify-center shadow-lg shadow-appPink/30">
+                <i class="fa-solid fa-graduation-cap text-4xl text-white"></i>
             </div>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2">Welcome to StudyCore</h1>
-            <p class="text-slate-400 mb-10">Choose your portal to continue to the platform.</p>
+            <div>
+                <h1 class="text-3xl font-extrabold text-white">MHT CET <span class="text-appPink">Class 12</span></h1>
+                <p class="text-textMuted mt-2 text-sm">Select your role to continue</p>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <button onclick="loginAs('student')" class="group relative overflow-hidden bg-slate-800/50 hover:bg-indigo-600/10 border border-slate-700 hover:border-indigo-500/50 p-6 rounded-2xl transition-all duration-300 flex flex-col items-center gap-4 hover:-translate-y-1">
-                    <div class="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-2xl group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300">
-                        <i class="fa-solid fa-user-graduate"></i>
+            <div class="space-y-4 pt-4">
+                <button onclick="loginAs('student')" class="w-full bg-appCard border border-gray-800 hover:border-appPink text-white p-4 rounded-2xl flex items-center gap-4 transition-all group">
+                    <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-appPink/20 group-hover:text-appPink transition-colors">
+                        <i class="fa-solid fa-user-graduate text-xl"></i>
                     </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-1">Student Portal</h3>
-                        <p class="text-sm text-slate-400">Access live classes, notes, and schedules.</p>
+                    <div class="text-left flex-1">
+                        <div class="font-bold text-lg">Student</div>
+                        <div class="text-xs text-textMuted">Access notes & materials</div>
                     </div>
+                    <i class="fa-solid fa-chevron-right text-textMuted"></i>
                 </button>
 
-                <button onclick="loginAs('admin')" class="group relative overflow-hidden bg-slate-800/50 hover:bg-rose-600/10 border border-slate-700 hover:border-rose-500/50 p-6 rounded-2xl transition-all duration-300 flex flex-col items-center gap-4 hover:-translate-y-1">
-                    <div class="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 text-2xl group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition-all duration-300">
-                        <i class="fa-solid fa-chalkboard-user"></i>
+                <button onclick="loginAs('admin')" class="w-full bg-appCard border border-gray-800 hover:border-appPink text-white p-4 rounded-2xl flex items-center gap-4 transition-all group">
+                    <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-appPink/20 group-hover:text-appPink transition-colors">
+                        <i class="fa-solid fa-user-shield text-xl"></i>
                     </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-1">Teacher / Admin</h3>
-                        <p class="text-sm text-slate-400">Manage streams, upload materials, and schedule.</p>
+                    <div class="text-left flex-1">
+                        <div class="font-bold text-lg">Admin / Teacher</div>
+                        <div class="text-xs text-textMuted">Manage app content</div>
                     </div>
+                    <i class="fa-solid fa-chevron-right text-textMuted"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Main App Wrapper -->
-    <div id="app-wrapper" class="hidden flex h-screen w-screen overflow-hidden">
-
-    <!-- Sidebar -->
-    <aside class="w-20 md:w-64 glass flex flex-col h-full border-r border-slate-800 z-20 shrink-0">
-        <!-- Logo -->
-        <div class="h-16 flex items-center justify-center md:justify-start md:px-6 border-b border-slate-800 shrink-0">
-            <div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/30 mr-0 md:mr-3 shrink-0">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-            <span class="font-bold text-xl tracking-tight hidden md:block text-white">StudyCore</span>
-        </div>
-
-        <!-- Navigation Links -->
-        <nav class="flex-1 py-4 flex flex-col gap-1 overflow-y-auto">
-            <button onclick="switchTab('dashboard')" class="nav-item active flex items-center px-4 md:px-6 py-3.5 transition-all text-slate-400 hover:text-slate-100 group" data-tab="dashboard">
-                <i class="fa-solid fa-border-all w-6 text-center text-lg group-hover:scale-110 transition-transform"></i>
-                <span class="ml-3 font-medium hidden md:block">Dashboard</span>
-            </button>
-            <button onclick="switchTab('live')" class="nav-item flex items-center px-4 md:px-6 py-3.5 transition-all text-slate-400 hover:text-slate-100 group relative" data-tab="live">
-                <i class="fa-solid fa-video w-6 text-center text-lg group-hover:scale-110 transition-transform"></i>
-                <span class="ml-3 font-medium hidden md:block">Live Classes</span>
-                <!-- Live Indicator dot -->
-                <span id="nav-live-dot" class="absolute right-4 w-2 h-2 rounded-full bg-red-500 hidden live-pulse"></span>
-            </button>
-            <button onclick="switchTab('schedule')" class="nav-item flex items-center px-4 md:px-6 py-3.5 transition-all text-slate-400 hover:text-slate-100 group" data-tab="schedule">
-                <i class="fa-regular fa-calendar-alt w-6 text-center text-lg group-hover:scale-110 transition-transform"></i>
-                <span class="ml-3 font-medium hidden md:block">Schedule</span>
-            </button>
-            <button onclick="switchTab('materials')" class="nav-item flex items-center px-4 md:px-6 py-3.5 transition-all text-slate-400 hover:text-slate-100 group" data-tab="materials">
-                <i class="fa-solid fa-book-open w-6 text-center text-lg group-hover:scale-110 transition-transform"></i>
-                <span class="ml-3 font-medium hidden md:block">Study Materials</span>
-            </button>
-        </nav>
-
-        <!-- User Profile snippet & Logout -->
-        <div class="p-4 border-t border-slate-800 flex flex-col gap-3 shrink-0">
+    <!-- Main App Container -->
+    <div id="app-wrapper" class="hidden app-container w-full">
+        
+        <!-- Header (Shared) -->
+        <header class="pt-12 pb-4 px-5 flex justify-between items-center bg-appBg z-10 shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shrink-0 shadow-lg" id="profile-avatar">S</div>
-                <div class="hidden md:block overflow-hidden">
-                    <div class="text-sm font-bold text-white truncate" id="profile-name">Student Account</div>
-                    <div class="text-xs text-emerald-400 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online
-                    </div>
+                <button id="btn-back" onclick="goBack()" class="hidden text-white text-xl pr-2"><i class="fa-solid fa-arrow-left"></i></button>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-bars text-xl text-white/90"></i>
+                    <h1 id="header-title" class="text-lg font-bold text-white ml-2 tracking-wide">MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span></h1>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full py-2 bg-slate-800 hover:bg-rose-600/20 hover:text-rose-400 text-slate-400 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> <span class="hidden md:inline">Sign Out</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-full bg-[#0b1121] relative overflow-hidden">
-        
-        <!-- Topbar -->
-        <header class="h-16 glass px-6 flex items-center justify-between border-b border-slate-800 shrink-0 z-10">
-            <h2 id="topbar-title" class="text-xl font-bold text-white tracking-wide">Dashboard</h2>
-            <div class="flex items-center gap-4">
-                <button class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-colors relative">
+            <div class="flex gap-4 text-xl text-white/90">
+                <i class="fa-solid fa-gift"></i>
+                <div class="relative">
                     <i class="fa-regular fa-bell"></i>
-                    <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 border-2 border-slate-800"></span>
-                </button>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-appPink rounded-full border border-appBg"></span>
+                </div>
             </div>
         </header>
 
-        <!-- Scrollable Content -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth" id="main-scroll-area">
+        <!-- VIEW: HOME (Dashboard) -->
+        <main id="view-home" class="flex-1 overflow-y-auto hide-scrollbar pb-24 app-view fade-in">
+            <!-- Greeting Card -->
+            <div class="mx-5 mt-2 p-5 rounded-3xl bg-gradient-to-br from-[#2a1738] to-appCard relative overflow-hidden border border-white/5">
+                <div class="relative z-10">
+                    <h2 class="text-xl font-bold text-white mb-1">Hello, Student <span class="text-yellow-400">👋</span></h2>
+                    <p class="text-xs text-gray-400 mb-5">Let's make today productive!</p>
+                    
+                    <div class="flex gap-4 text-center">
+                        <div>
+                            <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-solid fa-book-open text-[10px]"></i> Syllabus</div>
+                            <div class="font-bold text-lg text-white">45%</div>
+                            <div class="text-[10px] text-gray-500">Completed</div>
+                        </div>
+                        <div class="w-px h-10 bg-white/10 my-auto"></div>
+                        <div>
+                            <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-regular fa-calendar text-[10px]"></i> Tests</div>
+                            <div class="font-bold text-lg text-white">12</div>
+                            <div class="text-[10px] text-gray-500">Attempted</div>
+                        </div>
+                        <div class="w-px h-10 bg-white/10 my-auto"></div>
+                        <div>
+                            <div class="text-xs text-appPink mb-1 flex items-center gap-1 justify-center"><i class="fa-solid fa-bullseye text-[10px]"></i> Accuracy</div>
+                            <div class="font-bold text-lg text-white">78%</div>
+                            <div class="text-[10px] text-gray-500">Average</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Large Right Button (Decorative) -->
+                <div class="absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#361e47] to-transparent flex flex-col items-center justify-center border-l border-white/5 cursor-pointer" onclick="switchTab('notes')">
+                    <div class="w-10 h-12 bg-appPink rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-appPink/50 mb-2 relative">
+                        PDF
+                        <div class="absolute top-1 right-1 w-2 h-1 bg-white/30 rounded-full"></div>
+                    </div>
+                    <div class="text-[10px] text-center font-bold text-white">Offline Material</div>
+                    <div class="text-[9px] text-appPink mt-0.5">120+ PDFs</div>
+                </div>
+            </div>
+
+            <!-- Quick Access Grid (Static UI matching Image) -->
+            <div class="px-5 mt-6">
+                <h3 class="text-sm font-semibold text-white mb-4">Quick Access</h3>
+                <div class="grid grid-cols-4 gap-y-6 gap-x-2">
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-tv"></i></div>
+                        <span class="text-[10px] text-gray-400 font-medium">Live Classes</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-pen"></i></div>
+                        <span class="text-[10px] text-gray-400 font-medium">Tests</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('notes')">
+                        <div class="w-14 h-14 rounded-2xl bg-[#2a1738] border border-appPink/30 flex items-center justify-center text-appPink text-xl"><i class="fa-solid fa-book"></i></div>
+                        <span class="text-[10px] text-white font-medium">Notes</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-bullseye"></i></div>
+                        <span class="text-[10px] text-gray-400 font-medium">PYQ Bank</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-crosshairs"></i></div>
+                        <span class="text-[10px] text-gray-400 font-medium">Practice</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-lines"></i></div>
+                        <span class="text-[10px] text-gray-400 font-medium">Formula Sheet</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-network-wired"></i></div>
+                        <span class="text-[10px] text-gray-400 font-medium">Mind Maps</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-list-check"></i></div>
+                        <span class="text-[10px] text-gray-400 font-medium">DPPs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent PDFs (Dynamic from Firebase) -->
+            <div class="mt-8">
+                <div class="px-5 flex justify-between items-end mb-4">
+                    <h3 class="text-sm font-semibold text-white">Recent PDFs</h3>
+                    <button onclick="switchTab('notes')" class="text-[11px] text-appPink font-medium">View all</button>
+                </div>
+                <div class="flex overflow-x-auto hide-scrollbar px-5 gap-4 pb-2" id="home-recent-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
             
-            <!-- TAB: Dashboard -->
-            <div id="tab-dashboard" class="tab-content active max-w-6xl mx-auto">
-                
-                <!-- Welcome Banner -->
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 md:p-10 mb-8 shadow-2xl shadow-indigo-900/20">
-                    <div class="relative z-10">
-                        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-sm">Welcome Back</span>
-                        <h1 class="text-3xl md:text-5xl font-extrabold text-white mt-4 mb-2">Ready to learn?</h1>
-                        <p class="text-indigo-100 max-w-md">Your personalized hub for live sessions, daily practice, and comprehensive study materials.</p>
-                        <button onclick="switchTab('live')" class="mt-6 bg-white text-indigo-600 px-6 py-2.5 rounded-lg font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all">Go to Live Class</button>
-                    </div>
-                    <!-- Decorative shapes -->
-                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
-                    <div class="absolute bottom-0 right-32 w-32 h-32 rounded-full bg-purple-300 opacity-20 blur-2xl"></div>
-                </div>
-
-                <!-- Quick Preview Sections -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Schedule Preview -->
-                    <div class="glass-card rounded-2xl p-6">
-                        <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-4">
-                            <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-regular fa-clock text-indigo-400"></i> Today's Schedule</h3>
-                            <button onclick="switchTab('schedule')" class="text-sm text-indigo-400 hover:text-indigo-300">View All</button>
-                        </div>
-                        <div id="dash-schedule-list" class="space-y-3">
-                            <div class="text-center text-slate-500 py-4 text-sm">Loading schedule...</div>
+            <!-- Today's Plan -->
+            <div class="px-5 mt-6 mb-8">
+                <h3 class="text-sm font-semibold text-white mb-3">Today's Plan</h3>
+                <div class="bg-appCard p-4 rounded-2xl flex items-center justify-between border border-gray-800">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-appPink"><i class="fa-solid fa-list-ul"></i></div>
+                        <div>
+                            <div class="text-xs text-white font-bold"><span class="text-appPink">3</span> Tasks</div>
+                            <div class="text-[10px] text-gray-500"><span class="text-white">2</span> Completed</div>
                         </div>
                     </div>
-
-                    <!-- Recent Material Preview -->
-                    <div class="glass-card rounded-2xl p-6">
-                        <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-4">
-                            <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-bolt text-amber-400"></i> Recent Updates</h3>
-                            <button onclick="switchTab('materials')" class="text-sm text-indigo-400 hover:text-indigo-300">Go to Vault</button>
-                        </div>
-                        <div id="dash-recent-list" class="space-y-3">
-                            <div class="text-center text-slate-500 py-4 text-sm">Loading updates...</div>
+                    <div class="flex-1 max-w-[120px] mx-4">
+                        <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-appPink rounded-full w-[66%]"></div>
                         </div>
                     </div>
+                    <div class="text-xs text-gray-400 font-bold flex items-center gap-1">66% <i class="fa-solid fa-chevron-right text-[10px]"></i></div>
                 </div>
             </div>
+        </main>
 
-            <!-- TAB: Live Classes -->
-            <div id="tab-live" class="tab-content max-w-6xl mx-auto h-full flex flex-col">
-                
-                <!-- Admin Control Panel (Only visible in admin role) -->
-                <div id="admin-live-controls" class="hidden mb-6 bg-slate-800/80 border border-indigo-500/30 rounded-2xl p-5 shadow-lg">
-                    <div class="flex flex-col md:flex-row gap-4 items-end">
-                        <div class="flex-1 w-full">
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Class Title / Topic</label>
-                            <input type="text" id="live-topic-input" placeholder="e.g. Physics: Laws of Motion L-1" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                        </div>
-                        <button id="btn-start-live" onclick="toggleLiveStream()" class="w-full md:w-auto px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-900/30 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-video"></i> <span>Go Live</span>
-                        </button>
-                    </div>
+        <!-- VIEW: NOTES MAIN (Subjects List) -->
+        <main id="view-notes" class="flex-1 overflow-y-auto hide-scrollbar pb-24 app-view hidden fade-in px-5">
+            <div class="flex items-center gap-3 mb-6 mt-2">
+                <div class="flex-1 bg-appCard border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-magnifying-glass text-textMuted text-sm"></i>
+                    <input type="text" placeholder="Search notes..." class="bg-transparent border-none outline-none text-sm text-white w-full placeholder-textMuted">
                 </div>
-
-                <!-- Video Player Container -->
-                <div class="glass-card rounded-2xl overflow-hidden flex-1 min-h-[400px] flex flex-col relative border border-slate-700">
-                    
-                    <!-- Live Header Indicator -->
-                    <div class="absolute top-4 left-4 z-10 flex items-center gap-3">
-                        <div id="live-badge" class="bg-slate-900/80 backdrop-blur text-slate-400 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 border border-slate-700">
-                            <span class="w-2 h-2 rounded-full bg-slate-500" id="live-dot"></span>
-                            <span id="live-status-text">Offline</span>
-                        </div>
-                        <div id="live-viewers-badge" class="hidden bg-slate-900/80 backdrop-blur text-slate-300 px-3 py-1.5 rounded-full text-xs font-medium border border-slate-700 flex items-center gap-1.5">
-                            <i class="fa-regular fa-eye"></i> 1.2k
-                        </div>
-                    </div>
-
-                    <!-- Video Area -->
-                    <div id="video-frame" class="flex-1 bg-black flex items-center justify-center relative">
-                        <!-- Offline State -->
-                        <div id="offline-state" class="text-center p-6">
-                            <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-600 text-3xl shadow-inner">
-                                <i class="fa-solid fa-video-slash"></i>
-                            </div>
-                            <h3 class="text-xl font-bold text-white mb-2">No active live class</h3>
-                            <p class="text-slate-400 text-sm max-w-sm mx-auto">The teacher is not streaming right now. Check the schedule for upcoming classes.</p>
-                        </div>
-                        
-                        <!-- Streaming State (Simulated) -->
-                        <div id="streaming-state" class="hidden absolute inset-0 video-feed-active flex items-center justify-center">
-                            <div class="absolute inset-0 bg-black/40"></div> <!-- overlay -->
-                            <div class="relative z-10 text-center">
-                                <i class="fa-solid fa-chalkboard-user text-6xl text-white/50 mb-4 drop-shadow-lg"></i>
-                                <h2 id="current-live-topic" class="text-3xl md:text-4xl font-black text-white drop-shadow-md">Physics: Laws of Motion</h2>
-                                <p class="text-indigo-200 mt-2 font-medium">Live Session in Progress</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Controls -->
-                    <div class="h-16 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-4 md:px-6">
-                        <div class="text-sm font-medium text-slate-300 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">TC</div>
-                            <span>Teacher Cam</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-slate-400">
-                            <button class="hover:text-white transition-colors w-10 h-10 rounded-full hover:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-volume-high"></i></button>
-                            <button class="hover:text-white transition-colors w-10 h-10 rounded-full hover:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-expand"></i></button>
-                        </div>
-                    </div>
-                </div>
+                <button class="w-12 h-12 bg-appCard border border-gray-800 rounded-xl flex items-center justify-center text-textMuted hover:text-white transition-colors">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
             </div>
 
-            <!-- TAB: Schedule -->
-            <div id="tab-schedule" class="tab-content max-w-4xl mx-auto">
-                <div class="flex justify-between items-end mb-6">
+            <div class="space-y-3" id="subject-list">
+                <!-- Populated by JS -->
+            </div>
+        </main>
+
+        <!-- VIEW: SUBJECT DETAIL -->
+        <main id="view-subject-detail" class="flex-1 overflow-y-auto hide-scrollbar pb-24 app-view hidden slide-in-right px-0 flex flex-col">
+            <!-- Subject Header (Icon + Name) -->
+            <div class="px-5 flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg" id="detail-subj-icon-container">
+                    <i class="fa-solid fa-atom text-white" id="detail-subj-icon"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-white leading-tight" id="detail-subj-title">Physics Notes</h2>
+                    <p class="text-xs text-textMuted mt-0.5" id="detail-subj-count">0 PDFs</p>
+                </div>
+                <button class="ml-auto w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-textMuted"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+
+            <!-- Sub Tabs -->
+            <div class="flex overflow-x-auto hide-scrollbar px-5 gap-6 border-b border-gray-800 mb-4" id="detail-tabs">
+                <button class="detail-tab active pb-3 text-sm font-semibold text-appPink border-b-2 border-appPink whitespace-nowrap" data-type="All">All</button>
+                <button class="detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap" data-type="Class Notes">Class Notes</button>
+                <button class="detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap" data-type="Formula Sheet">Formula Sheet</button>
+                <button class="detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap" data-type="Short Notes">Short Notes</button>
+            </div>
+
+            <!-- PDF List -->
+            <div class="px-5 space-y-3 flex-1 overflow-y-auto hide-scrollbar" id="detail-pdf-list">
+                <!-- Populated by JS -->
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="absolute bottom-0 w-full h-16 bg-[#0c0d14] border-t border-gray-800 flex items-center justify-around z-20 pb-safe">
+            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-appPink" data-tab="home">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] font-medium">Home</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="tests">
+                <i class="fa-solid fa-file-pen text-lg"></i>
+                <span class="text-[10px] font-medium">Tests</span>
+            </button>
+            <button onclick="switchTab('notes')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="notes">
+                <i class="fa-solid fa-book text-lg"></i>
+                <span class="text-[10px] font-medium">Notes</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="downloads">
+                <i class="fa-solid fa-download text-lg"></i>
+                <span class="text-[10px] font-medium">Downloads</span>
+            </button>
+            <button onclick="logout()" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white" data-tab="profile">
+                <i class="fa-solid fa-user text-lg"></i>
+                <span class="text-[10px] font-medium">Profile</span>
+            </button>
+        </nav>
+
+        <!-- Admin FAB (Floating Action Button) -->
+        <button id="admin-fab" onclick="openUploadModal()" class="admin-only hidden absolute bottom-20 right-5 w-14 h-14 bg-appPink rounded-full flex items-center justify-center text-white text-2xl shadow-lg shadow-appPink/40 z-30 transition-transform active:scale-95">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
+        <!-- Admin Upload Modal -->
+        <div id="modal-upload" class="hidden absolute inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity">
+            <div class="bg-appCard w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-gray-800 slide-in-right sm:fade-in max-h-[90dvh] overflow-y-auto hide-scrollbar">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold text-white">Upload Material</h3>
+                    <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <form id="upload-form" onsubmit="handleUpload(event)" class="space-y-4">
                     <div>
-                        <h2 class="text-2xl font-bold text-white">Class Schedule</h2>
-                        <p class="text-slate-400 text-sm mt-1">Upcoming live sessions and events</p>
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Subject</label>
+                        <select id="up-subject" class="admin-input" required>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Biology">Biology</option>
+                            <option value="Inorganic Chemistry">Inorganic Chemistry</option>
+                            <option value="Organic Chemistry">Organic Chemistry</option>
+                        </select>
                     </div>
-                </div>
 
-                <!-- Admin Add Schedule Form -->
-                <div id="admin-schedule-form" class="hidden glass-card p-5 rounded-2xl mb-8 border-l-4 border-l-indigo-500">
-                    <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-plus text-indigo-400"></i> Add New Class</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="md:col-span-2">
-                            <input type="text" id="sch-title" placeholder="Class Title (e.g. Math Revision)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <input type="time" id="sch-time" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:outline-none [color-scheme:dark]">
-                        </div>
-                        <div>
-                            <button onclick="addSchedule()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all h-full">Add Class</button>
-                        </div>
+                    <div>
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Document Type</label>
+                        <select id="up-doctype" class="admin-input" required>
+                            <option value="Class Notes">Class Notes</option>
+                            <option value="Formula Sheet">Formula Sheet</option>
+                            <option value="Short Notes">Short Notes</option>
+                            <option value="Mind Map">Mind Map</option>
+                            <option value="DPP">DPP</option>
+                        </select>
                     </div>
-                </div>
-
-                <!-- Schedule List -->
-                <div class="space-y-4" id="full-schedule-list">
-                    <!-- Dynamic rendering here -->
-                    <div class="text-center text-slate-500 py-10 italic glass-card rounded-2xl">Loading schedule...</div>
-                </div>
-            </div>
-
-            <!-- TAB: Study Materials -->
-            <div id="tab-materials" class="tab-content max-w-7xl mx-auto">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-extrabold text-white">Study Vault</h2>
-                    <p class="text-slate-400 text-sm mt-2">Notes, Daily Practice Problems (DPP) & Homework</p>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    <!-- Notes Column -->
-                    <div class="glass-card rounded-2xl p-5 flex flex-col h-[70vh]">
-                        <div class="flex items-center gap-3 border-b border-slate-700 pb-3 mb-4 shrink-0">
-                            <div class="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">📘</div>
-                            <h2 class="text-xl font-bold text-white">Notes</h2>
-                            <span class="ml-auto text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full" id="mat-notes-count">0</span>
+                    <div>
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Topic Name</label>
+                        <input type="text" id="up-topic" placeholder="e.g. Kinematics 1D" class="admin-input" required>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <div class="w-1/2">
+                            <label class="block text-xs text-textMuted mb-1 ml-1">File Size (Optional)</label>
+                            <input type="text" id="up-size" placeholder="e.g. 2.4 MB" class="admin-input">
                         </div>
-                        <div id="col-notes-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth pb-4">
-                            <!-- Items -->
-                        </div>
-                        <!-- Admin Input -->
-                        <div class="admin-only-element hidden shrink-0 mt-3 pt-3 border-t border-slate-700 flex-col gap-2">
-                            <div class="flex gap-2">
-                                <select id="input-notes-subject" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none">
-                                    <option value="Physics">Physics</option>
-                                    <option value="Chemistry">Chemistry</option>
-                                    <option value="Mathematics">Mathematics</option>
-                                    <option value="Biology">Biology</option>
-                                    <option value="English">English</option>
-                                    <option value="General">General</option>
-                                </select>
-                                <input type="date" id="input-notes-date" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-300 focus:border-emerald-500 focus:outline-none [color-scheme:dark]">
-                            </div>
-                            <input type="text" id="input-notes-topic" placeholder="Topic Name" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none">
-                            <textarea id="input-notes-desc" rows="2" placeholder="Description or Link..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none resize-none"></textarea>
-                            <input type="text" id="input-notes-code" placeholder="Whiteboard Code (Optional)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none">
-                            <button onclick="addMaterial('notes')" class="w-full bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-lg transition-all shadow-lg shadow-emerald-900/20">Add Note</button>
+                        <div class="w-1/2">
+                            <label class="block text-xs text-textMuted mb-1 ml-1">Link / File Code</label>
+                            <input type="text" id="up-code" placeholder="URL or Code" class="admin-input" required>
                         </div>
                     </div>
 
-                    <!-- DPP Column -->
-                    <div class="glass-card rounded-2xl p-5 flex flex-col h-[70vh]">
-                        <div class="flex items-center gap-3 border-b border-slate-700 pb-3 mb-4 shrink-0">
-                            <div class="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400">📝</div>
-                            <h2 class="text-xl font-bold text-white">DPP</h2>
-                            <span class="ml-auto text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full" id="mat-dpp-count">0</span>
-                        </div>
-                        <div id="col-dpp-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth pb-4">
-                            <!-- Items -->
-                        </div>
-                        <!-- Admin Input -->
-                        <div class="admin-only-element hidden shrink-0 mt-3 pt-3 border-t border-slate-700 flex-col gap-2">
-                            <div class="flex gap-2">
-                                <select id="input-dpp-subject" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-amber-500 focus:outline-none">
-                                    <option value="Physics">Physics</option>
-                                    <option value="Chemistry">Chemistry</option>
-                                    <option value="Mathematics">Mathematics</option>
-                                    <option value="Biology">Biology</option>
-                                    <option value="English">English</option>
-                                    <option value="General">General</option>
-                                </select>
-                                <input type="date" id="input-dpp-date" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-300 focus:border-amber-500 focus:outline-none [color-scheme:dark]">
-                            </div>
-                            <input type="text" id="input-dpp-topic" placeholder="Topic Name" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-amber-500 focus:outline-none">
-                            <textarea id="input-dpp-desc" rows="2" placeholder="Practice Problems details..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-amber-500 focus:outline-none resize-none"></textarea>
-                            <input type="text" id="input-dpp-code" placeholder="Whiteboard Code (Optional)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-amber-500 focus:outline-none">
-                            <button onclick="addMaterial('dpp')" class="w-full bg-amber-600/90 hover:bg-amber-500 text-white font-medium py-2.5 rounded-lg transition-all shadow-lg shadow-amber-900/20">Add DPP</button>
-                        </div>
-                    </div>
+                    <button type="submit" class="w-full mt-2 bg-appPink hover:bg-appPinkDark text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF
+                    </button>
+                </form>
+            </div>
+        </div>
 
-                    <!-- Homework Column -->
-                    <div class="glass-card rounded-2xl p-5 flex flex-col h-[70vh]">
-                        <div class="flex items-center gap-3 border-b border-slate-700 pb-3 mb-4 shrink-0">
-                            <div class="w-8 h-8 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-400">📋</div>
-                            <h2 class="text-xl font-bold text-white">Homework</h2>
-                            <span class="ml-auto text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-full" id="mat-hw-count">0</span>
-                        </div>
-                        <div id="col-hw-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth pb-4">
-                            <!-- Items -->
-                        </div>
-                        <!-- Admin Input -->
-                        <div class="admin-only-element hidden shrink-0 mt-3 pt-3 border-t border-slate-700 flex-col gap-2">
-                            <div class="flex gap-2">
-                                <select id="input-homework-subject" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-rose-500 focus:outline-none">
-                                    <option value="Physics">Physics</option>
-                                    <option value="Chemistry">Chemistry</option>
-                                    <option value="Mathematics">Mathematics</option>
-                                    <option value="Biology">Biology</option>
-                                    <option value="English">English</option>
-                                    <option value="General">General</option>
-                                </select>
-                                <input type="date" id="input-homework-date" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-300 focus:border-rose-500 focus:outline-none [color-scheme:dark]">
-                            </div>
-                            <input type="text" id="input-homework-topic" placeholder="Topic Name" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-rose-500 focus:outline-none">
-                            <textarea id="input-homework-desc" rows="2" placeholder="Homework instructions..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-rose-500 focus:outline-none resize-none"></textarea>
-                            <input type="text" id="input-homework-code" placeholder="Whiteboard Code (Optional)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:border-rose-500 focus:outline-none">
-                            <button onclick="addMaterial('homework')" class="w-full bg-rose-600/90 hover:bg-rose-500 text-white font-medium py-2.5 rounded-lg transition-all shadow-lg shadow-rose-900/20">Add Homework</button>
-                        </div>
-                    </div>
+        <!-- Delete Confirm Modal -->
+        <div id="modal-delete" class="hidden absolute inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm px-5">
+            <div class="bg-appCard w-full max-w-sm rounded-3xl p-6 text-center border border-gray-800 shadow-2xl fade-in">
+                <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
+                    <i class="fa-solid fa-trash"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Delete File?</h3>
+                <p class="text-textMuted text-sm mb-6">This action cannot be undone.</p>
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-800 rounded-xl text-white font-medium">Cancel</button>
+                    <button id="btn-confirm-del" class="flex-1 py-3 bg-red-500 rounded-xl text-white font-medium shadow-lg shadow-red-500/20">Delete</button>
                 </div>
             </div>
+        </div>
 
-        </div> <!-- End Scrollable Area -->
-    </main>
-    </div> <!-- End App Wrapper -->
+        <!-- Toast -->
+        <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+            <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
+            <span id="toast-msg">Success</span>
+        </div>
 
-    <!-- Global Toast Container -->
-    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    </div>
 
     <script>
-        // --- 1. Firebase Configuration (User provided) ---
+        // --- 1. FIREBASE SETUP ---
         const firebaseConfig = {
             apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
             authDomain: "studiment-tracking.firebaseapp.com",
             databaseURL: "https://studiment-tracking-default-rtdb.firebaseio.com",
-            projectId: "studiment-tracking",
-            storageBucket: "studiment-tracking.firebasestorage.app",
-            messagingSenderId: "169609151336",
-            appId: "1:169609151336:web:871736f836c312cd4d4cdd"
+            projectId: "studiment-tracking"
         };
         
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
-        // Database References
         const refMaterials = db.ref('study_text_entries');
-        const refSchedule = db.ref('study_schedule_entries');
-        const refLive = db.ref('study_live_status');
 
-        // --- 2. Global State ---
+        // --- 2. STATE ---
         const state = {
-            role: 'student', // 'student' or 'admin'
-            materials: { notes: [], dpp: [], homework: [] },
-            schedule: [],
-            live: { isLive: false, topic: '' }
+            role: null, // 'student' | 'admin'
+            currentTab: 'home', // 'home' | 'notes' | 'subject'
+            selectedSubject: null,
+            selectedDocType: 'All',
+            allMaterials: [],
+            pendingDeleteId: null
         };
 
-        // --- 3. UI Utility Functions ---
-        const escapeHtml = (str) => {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m]))
-                      .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, c => c);
+        // --- UI METADATA FOR SUBJECTS ---
+        const subjectMeta = {
+            "Physics": { icon: "fa-atom", color: "bg-[#4834df]", iconCol: "text-[#c2baff]" },
+            "Chemistry": { icon: "fa-flask", color: "bg-[#e84393]", iconCol: "text-[#ffb8d9]" },
+            "Mathematics": { icon: "fa-superscript", color: "bg-[#6c5ce7]", iconCol: "text-[#d1caff]" },
+            "Biology": { icon: "fa-leaf", color: "bg-[#d63031]", iconCol: "text-[#ffc2c2]" },
+            "Inorganic Chemistry": { icon: "fa-cubes", color: "bg-[#8e44ad]", iconCol: "text-[#e8c8ff]" },
+            "Organic Chemistry": { icon: "fa-hexagon-nodes", color: "bg-[#c0392b]", iconCol: "text-[#ffc4be]" }
         };
 
-        const formatTimeAgo = (ts) => {
-            const diff = Math.floor((Date.now() - ts) / 1000);
-            if (diff < 60) return 'just now';
-            if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
-            if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
-            return `${Math.floor(diff/86400)}d ago`;
-        };
+        const fallbackMeta = { icon: "fa-book", color: "bg-gray-700", iconCol: "text-gray-300" };
 
-        const showToast = (message, type = 'success') => {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const color = type === 'error' ? 'border-red-500/50 text-red-200' : (type === 'info' ? 'border-indigo-500/50 text-indigo-100 bg-indigo-900/90' : 'border-emerald-500/50 text-emerald-100');
-            let icon = '✓';
-            if (type === 'error') icon = '⚠️';
-            else if (type === 'info') icon = 'ℹ️';
-            
-            toast.className = `toast-enter ${type !== 'info' ? 'bg-slate-900/90' : ''} backdrop-blur-md border ${color} px-5 py-3 rounded-full shadow-2xl text-sm font-medium flex items-center gap-2`;
-            toast.innerHTML = `<span>${icon}</span> ${escapeHtml(message)}`;
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.replace('toast-enter', 'toast-exit');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        };
-
-        // --- 4. Navigation & Role Management ---
-        const switchTab = (tabId) => {
-            // Update nav buttons
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.tab === tabId) btn.classList.add('active');
-            });
-            // Update content areas
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-                if (content.id === `tab-${tabId}`) content.classList.add('active');
-            });
-            // Update Title
-            const titles = { dashboard: 'Dashboard', live: 'Live Classes', schedule: 'Class Schedule', materials: 'Study Vault' };
-            document.getElementById('topbar-title').innerText = titles[tabId];
-            
-            // Scroll top
-            document.getElementById('main-scroll-area').scrollTop = 0;
-        };
-
+        // --- 3. CORE LOGIC ---
+        
         const loginAs = (role) => {
             state.role = role;
-            
-            // Transition from Auth Screen to App View
-            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('app-wrapper').classList.remove('hidden');
             
-            const isStudent = role === 'student';
-            
-            // Update Profile UI
-            document.getElementById('profile-avatar').innerText = isStudent ? 'S' : 'A';
-            document.getElementById('profile-avatar').className = isStudent 
-                ? 'w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shrink-0 shadow-lg'
-                : 'w-10 h-10 rounded-full bg-gradient-to-tr from-rose-500 to-orange-500 flex items-center justify-center font-bold text-white shrink-0 shadow-lg';
-            document.getElementById('profile-name').innerText = isStudent ? 'Student Dashboard' : 'Admin Portal';
-
-            // Toggle visibility of admin-specific features
-            document.querySelectorAll('.admin-only-element').forEach(el => {
-                isStudent ? el.classList.add('hidden') : el.classList.remove('hidden');
+            // Toggle Admin elements
+            document.querySelectorAll('.admin-only').forEach(el => {
+                role === 'admin' ? el.classList.remove('hidden') : el.classList.add('hidden');
             });
             
-            // Handle Live controls & Schedules
-            document.getElementById('admin-live-controls').classList.toggle('hidden', isStudent);
-            document.getElementById('admin-schedule-form').classList.toggle('hidden', isStudent);
-
-            // Re-render data views
-            renderMaterials();
-            renderSchedule();
-            renderLiveState();
-            
-            // Default to dashboard tab
-            switchTab('dashboard');
-            showToast(`Welcome to the ${isStudent ? 'Student' : 'Teacher'} Portal`);
+            switchTab('home');
+            showToast(`Logged in as ${role === 'admin' ? 'Teacher' : 'Student'}`);
         };
 
         const logout = () => {
             state.role = null;
             document.getElementById('app-wrapper').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
-            showToast("Signed out successfully");
+            document.getElementById('view-auth').classList.remove('hidden');
         };
 
-        // --- 5. Firebase Listeners & Renderers: MATERIALS ---
+        const switchTab = (tabId) => {
+            state.currentTab = tabId;
+            
+            // Update Nav UI
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isMatch = btn.dataset.tab === tabId;
+                btn.classList.toggle('text-appPink', isMatch);
+                btn.classList.toggle('text-textMuted', !isMatch);
+            });
+
+            // Update Views
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-notes').classList.add('hidden');
+            document.getElementById('view-subject-detail').classList.add('hidden');
+            
+            // Header config
+            const backBtn = document.getElementById('btn-back');
+            const titleEl = document.getElementById('header-title');
+
+            if (tabId === 'home') {
+                document.getElementById('view-home').classList.remove('hidden');
+                backBtn.classList.add('hidden');
+                titleEl.innerHTML = 'MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span>';
+            } else if (tabId === 'notes') {
+                document.getElementById('view-notes').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                titleEl.innerHTML = 'Notes';
+            }
+        };
+
+        const goBack = () => {
+            if (state.currentTab === 'subject') {
+                switchTab('notes');
+            } else if (state.currentTab === 'notes') {
+                switchTab('home');
+            }
+        };
+
+        // --- 4. FIREBASE DATA HANDLING ---
         refMaterials.on('value', snap => {
             const data = snap.val() || {};
-            state.materials = { notes: [], dpp: [], homework: [] };
+            state.allMaterials = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            state.allMaterials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             
-            for (let [id, entry] of Object.entries(data)) {
-                if (!entry.category) continue;
-                state.materials[entry.category].push({ id, ...entry });
+            if (state.role) {
+                renderHomeRecents();
+                renderNotesMain();
+                if (state.currentTab === 'subject' && state.selectedSubject) {
+                    renderSubjectDetail();
+                }
             }
-            
-            // Sort desc
-            const sortFn = (a, b) => b.timestamp - a.timestamp;
-            state.materials.notes.sort(sortFn);
-            state.materials.dpp.sort(sortFn);
-            state.materials.homework.sort(sortFn);
-            
-            renderMaterials();
         });
 
-        const renderMaterials = () => {
-            // Update Tab Counts
-            document.getElementById('mat-notes-count').innerText = state.materials.notes.length;
-            document.getElementById('mat-dpp-count').innerText = state.materials.dpp.length;
-            document.getElementById('mat-hw-count').innerText = state.materials.homework.length;
+        // --- RENDERERS ---
 
-            // Render Columns
-            const renderCol = (arr, elId, typeColorClass, emptyMsg, folderIconColor) => {
-                const container = document.getElementById(elId);
-                if (!arr.length) {
-                    container.innerHTML = `<div class="text-center text-slate-500 text-sm py-6 italic">${emptyMsg}</div>`;
-                    return;
-                }
-                
-                // Group items by subject to create folders
-                const grouped = arr.reduce((acc, item) => {
-                    const subj = item.subject || 'General';
-                    if (!acc[subj]) acc[subj] = [];
-                    acc[subj].push(item);
-                    return acc;
-                }, {});
-
-                let html = '';
-                for (const [subj, items] of Object.entries(grouped)) {
-                    html += `
-                    <details class="mb-3 group bg-slate-800/40 rounded-xl border border-slate-700/50 overflow-hidden" open>
-                        <summary class="w-full flex justify-between items-center bg-slate-800/80 p-3 text-white font-bold cursor-pointer list-none select-none hover:bg-slate-700/80 transition-colors [&::-webkit-details-marker]:hidden">
-                            <span class="flex items-center text-sm">
-                                <i class="fa-solid fa-folder ${folderIconColor} mr-2.5 text-lg"></i> ${escapeHtml(subj)} 
-                                <span class="ml-2 text-[10px] bg-slate-900 border border-slate-700 px-2 py-0.5 rounded-full text-slate-400">${items.length}</span>
-                            </span>
-                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition-transform"></i>
-                        </summary>
-                        <div class="mt-1 space-y-2 p-2">
-                    `;
-
-                    items.forEach(item => {
-                        const isAdmin = state.role === 'admin';
-                        const delBtn = isAdmin ? `<button onclick="deleteMaterial('${item.id}')" class="text-slate-500 hover:text-rose-400 ml-2 p-1" title="Delete"><i class="fa-solid fa-trash-can text-xs"></i></button>` : '';
-                        
-                        const top = item.topic || 'Untitled Topic';
-                        const dispDate = item.dateStr ? new Date(item.dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : new Date(item.timestamp).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-
-                        // Check if a whiteboard code exists to display the "View PDF" button
-                        const pdfButton = item.code ? `
-                            <button onclick="viewWhiteboardPdf('${escapeHtml(item.code)}')" class="mt-2 text-xs bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 px-3 py-1.5 rounded-lg transition-all flex items-center w-fit gap-1.5">
-                                <i class="fa-solid fa-file-pdf"></i> View PDF (Code: ${escapeHtml(item.code)})
-                            </button>
-                        ` : '';
-
-                        html += `
-                            <div class="bg-slate-900/60 p-3 rounded-lg border-l-2 ${typeColorClass} border-r border-t border-b border-slate-700/50 hover:bg-slate-800 transition-colors flex flex-col gap-1.5 relative group/item">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-sm font-bold text-white leading-snug">${escapeHtml(top)}</h3>
-                                    ${delBtn}
-                                </div>
-                                <p class="text-xs text-slate-400 whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(item.text)}</p>
-                                ${pdfButton}
-                                <div class="mt-2 pt-2 border-t border-slate-700/50 flex justify-between items-center text-[10px] text-slate-500 font-medium">
-                                    <span class="flex items-center gap-1.5 text-slate-400"><i class="fa-regular fa-calendar"></i> ${dispDate}</span>
-                                    <span class="uppercase tracking-wider">${formatTimeAgo(item.timestamp)}</span>
-                                </div>
-                            </div>`;
-                    });
-
-                    html += `</div></details>`;
-                }
-                container.innerHTML = html;
-            };
-
-            renderCol(state.materials.notes, 'col-notes-list', 'border-l-emerald-500', '📭 No notes uploaded yet.', 'text-emerald-400');
-            renderCol(state.materials.dpp, 'col-dpp-list', 'border-l-amber-500', '⚡ No practice problems yet.', 'text-amber-400');
-            renderCol(state.materials.homework, 'col-hw-list', 'border-l-rose-500', '📌 No homework assigned.', 'text-rose-400');
-
-            // Dashboard Recent List
-            const recentAll = [...state.materials.notes, ...state.materials.dpp, ...state.materials.homework]
-                .sort((a, b) => b.timestamp - a.timestamp).slice(0, 3);
+        const renderHomeRecents = () => {
+            const container = document.getElementById('home-recent-list');
+            const recent = state.allMaterials.slice(0, 5); // top 5
             
-            const dashRecentList = document.getElementById('dash-recent-list');
-            if(!recentAll.length) {
-                dashRecentList.innerHTML = '<div class="text-slate-500 text-sm">No recent materials added.</div>';
-            } else {
-                dashRecentList.innerHTML = recentAll.map(item => {
-                    let icon = item.category === 'notes' ? '📘' : (item.category === 'dpp' ? '📝' : '📋');
-                    let subj = escapeHtml(item.subject || 'Material Update');
-                    let top = escapeHtml(item.topic || item.text);
-                    let dispDate = item.dateStr ? new Date(item.dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) : 'Recent';
-                    
-                    return `
-                    <div class="flex items-start gap-3 p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-indigo-500/30 transition-colors">
-                        <div class="mt-0.5 text-xl">${icon}</div>
-                        <div class="flex-1 overflow-hidden">
-                            <div class="text-[10px] text-indigo-400 font-bold mb-0.5 uppercase tracking-wider">${subj}</div>
-                            <div class="text-sm font-semibold text-slate-200 line-clamp-1">${top}</div>
-                            <div class="text-[10px] text-slate-500 mt-1.5 flex justify-between items-center">
-                                <span class="flex items-center gap-1"><i class="fa-regular fa-calendar text-[9px]"></i> ${dispDate}</span>
-                                <span class="text-slate-600">${formatTimeAgo(item.timestamp)}</span>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
+            if (!recent.length) {
+                container.innerHTML = `<div class="w-full text-center py-4 text-textMuted text-xs bg-appCard rounded-xl border border-gray-800">No PDFs available yet.</div>`;
+                return;
             }
+
+            container.innerHTML = recent.map(item => `
+                <div class="min-w-[130px] w-[130px] bg-appCard border border-gray-800 rounded-2xl p-3 flex flex-col shrink-0">
+                    <div class="w-10 h-12 bg-appPink rounded-lg flex items-center justify-center text-white font-bold text-[10px] mb-3 relative shadow-md shadow-appPink/20">
+                        PDF
+                        <div class="absolute top-1 right-1 w-2 h-1 bg-white/30 rounded-full"></div>
+                    </div>
+                    <h4 class="text-xs font-bold text-white truncate w-full">${escapeHtml(item.topic)}</h4>
+                    <p class="text-[9px] text-textMuted truncate w-full mt-0.5">${escapeHtml(item.docType || 'Class Notes')}</p>
+                    <div class="mt-3 flex justify-between items-end">
+                        <span class="text-[9px] text-gray-500">${escapeHtml(item.size || '1.2 MB')}</span>
+                        <button onclick="viewPDF('${escapeHtml(item.code)}')" class="text-appPink hover:text-white transition-colors"><i class="fa-solid fa-download"></i></button>
+                    </div>
+                </div>
+            `).join('');
         };
 
-        const addMaterial = async (category) => {
-            const subjectEl = document.getElementById(`input-${category}-subject`);
-            const dateEl = document.getElementById(`input-${category}-date`);
-            const topicEl = document.getElementById(`input-${category}-topic`);
-            const descEl = document.getElementById(`input-${category}-desc`);
-            const codeEl = document.getElementById(`input-${category}-code`);
+        const renderNotesMain = () => {
+            const container = document.getElementById('subject-list');
             
-            const subject = subjectEl.value.trim();
-            const dateStr = dateEl.value;
-            const topic = topicEl.value.trim();
-            const text = descEl.value.trim();
-            const code = codeEl ? codeEl.value.trim() : '';
+            // Define fixed subjects from design, calculate counts
+            const subjectsToRender = ["Physics", "Chemistry", "Mathematics", "Biology", "Inorganic Chemistry", "Organic Chemistry"];
             
-            if (!subject || !topic || !text) return showToast("Please fill Subject, Topic and Description.", "error");
+            let html = '';
+            subjectsToRender.forEach(subjName => {
+                const count = state.allMaterials.filter(m => m.subject === subjName).length;
+                const meta = subjectMeta[subjName] || fallbackMeta;
+
+                html += `
+                <div onclick="openSubject('${subjName}')" class="bg-appCard border border-gray-800 rounded-2xl p-4 flex items-center gap-4 active:bg-gray-800 transition-colors cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner ${meta.color}">
+                        <i class="fa-solid ${meta.icon} text-white/90"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-white">${subjName} Notes</h3>
+                        <p class="text-[10px] text-textMuted mt-0.5">${count} PDFs</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
+                </div>`;
+            });
+            container.innerHTML = html;
+        };
+
+        const openSubject = (subjName) => {
+            state.selectedSubject = subjName;
+            state.selectedDocType = 'All'; // Reset tab
+            state.currentTab = 'subject';
             
+            // Header Update
+            document.getElementById('header-title').innerText = subjName;
+            document.getElementById('btn-back').classList.remove('hidden');
+            
+            // Views
+            document.getElementById('view-notes').classList.add('hidden');
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-subject-detail').classList.remove('hidden');
+
+            renderSubjectDetail();
+            setupDetailTabs();
+        };
+
+        const setupDetailTabs = () => {
+            const tabs = document.querySelectorAll('.detail-tab');
+            tabs.forEach(tab => {
+                // reset styling
+                tab.className = 'detail-tab pb-3 text-sm font-medium text-textMuted whitespace-nowrap border-b-2 border-transparent';
+                if(tab.dataset.type === state.selectedDocType) {
+                    tab.className = 'detail-tab pb-3 text-sm font-semibold text-appPink border-b-2 border-appPink whitespace-nowrap active';
+                }
+                
+                tab.onclick = () => {
+                    state.selectedDocType = tab.dataset.type;
+                    setupDetailTabs(); // refresh tabs
+                    renderSubjectDetail(); // refresh list
+                };
+            });
+        };
+
+        const renderSubjectDetail = () => {
+            const meta = subjectMeta[state.selectedSubject] || fallbackMeta;
+            
+            // Update Subject Hero
+            document.getElementById('detail-subj-icon-container').className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${meta.color}`;
+            document.getElementById('detail-subj-icon').className = `fa-solid ${meta.icon} text-white/90`;
+            document.getElementById('detail-subj-title').innerText = `${state.selectedSubject} Notes`;
+
+            // Filter data
+            let filtered = state.allMaterials.filter(m => m.subject === state.selectedSubject);
+            document.getElementById('detail-subj-count').innerText = `${filtered.length} PDFs`; // Total for subject
+
+            if (state.selectedDocType !== 'All') {
+                filtered = filtered.filter(m => (m.docType || 'Class Notes') === state.selectedDocType);
+            }
+
+            const container = document.getElementById('detail-pdf-list');
+            if (!filtered.length) {
+                container.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-folder-open text-4xl text-gray-800 mb-2"></i><p class="text-sm text-textMuted">No ${state.selectedDocType} found.</p></div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => {
+                const isAdmin = state.role === 'admin';
+                const delBtn = isAdmin ? `<button onclick="confirmDelete('${item.id}')" class="ml-2 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-500 rounded-full"><i class="fa-solid fa-trash-can"></i></button>` : '';
+
+                return `
+                <div class="bg-appCard border border-gray-800 rounded-2xl p-3.5 flex items-center gap-4 transition-colors">
+                    <div class="w-10 h-12 bg-appPink/20 rounded-lg flex items-center justify-center border border-appPink/30 shrink-0">
+                        <span class="text-[10px] font-bold text-appPink">PDF</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold text-white truncate leading-tight">${escapeHtml(item.topic)}</h4>
+                        <p class="text-[10px] text-textMuted mt-1">${escapeHtml(item.docType || 'Class Notes')}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <button onclick="viewPDF('${escapeHtml(item.code)}')" class="w-10 h-10 flex items-center justify-center text-appPink hover:bg-appPink/10 rounded-full transition-colors"><i class="fa-solid fa-download text-lg"></i></button>
+                        ${delBtn}
+                    </div>
+                </div>`;
+            }).join('');
+        };
+
+        // --- ADMIN UPLOAD ---
+        const openUploadModal = () => {
+            document.getElementById('modal-upload').classList.remove('hidden');
+            if(state.selectedSubject) {
+                document.getElementById('up-subject').value = state.selectedSubject;
+            }
+        };
+        const closeUploadModal = () => {
+            document.getElementById('modal-upload').classList.add('hidden');
+            document.getElementById('upload-form').reset();
+        };
+
+        const handleUpload = async (e) => {
+            e.preventDefault();
+            const subject = document.getElementById('up-subject').value;
+            const docType = document.getElementById('up-doctype').value;
+            const topic = document.getElementById('up-topic').value.trim();
+            const size = document.getElementById('up-size').value.trim() || '1.5 MB';
+            const code = document.getElementById('up-code').value.trim();
+
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+
             try {
+                // Keep backward compatibility with previous DB structure, add new fields
                 await refMaterials.push({ 
-                    subject, 
-                    topic, 
-                    dateStr: dateStr || new Date().toISOString().split('T')[0], 
-                    text, 
-                    code, // Save whiteboard code along with material
-                    category, 
+                    subject, topic, docType, size, code, category: 'notes', 
                     timestamp: Date.now() 
                 });
-                
-                subjectEl.value = '';
-                dateEl.value = '';
-                topicEl.value = '';
-                descEl.value = '';
-                if(codeEl) codeEl.value = '';
-                showToast(`${category.toUpperCase()} added successfully!`);
-            } catch(e) {
-                showToast("Failed to add", "error");
+                closeUploadModal();
+                showToast("PDF Uploaded Successfully");
+            } catch(err) {
+                showToast("Upload failed", true);
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF';
             }
         };
 
-        const deleteMaterial = async (id) => {
+        // --- DELETE ---
+        const confirmDelete = (id) => {
+            state.pendingDeleteId = id;
+            document.getElementById('modal-delete').classList.remove('hidden');
+        };
+        const closeDeleteModal = () => {
+            state.pendingDeleteId = null;
+            document.getElementById('modal-delete').classList.add('hidden');
+        };
+        
+        document.getElementById('btn-confirm-del').addEventListener('click', async () => {
+            if(!state.pendingDeleteId) return;
             try {
-                await refMaterials.child(id).remove();
-                showToast("Deleted entry");
+                await refMaterials.child(state.pendingDeleteId).remove();
+                showToast("File Deleted");
             } catch(e) {
-                showToast("Delete failed", "error");
+                showToast("Failed to delete", true);
             }
-        };
-
-        // Replicates Ai Whiteboard PDF fetching functionality (With CORS Bypass Fallback)
-        const viewWhiteboardPdf = async (fileCode) => {
-            if (!fileCode) return;
-            
-            showToast("Verifying and fetching PDF link...", "info");
-            
-            const apiUrl = `https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode=${encodeURIComponent(fileCode)}`;
-            
-            try {
-                let data = null;
-                
-                try {
-                    // Attempt 1: Direct fetch (Will fail if browser enforces strict CORS)
-                    const response = await fetch(apiUrl, {
-                        headers: { 'Accept': 'application/json' }
-                    });
-                    
-                    if (response.ok) {
-                        data = await response.json();
-                    } else {
-                        throw new Error("Direct request blocked or failed");
-                    }
-                } catch (directError) {
-                    console.warn("Direct connection blocked by CORS, switching to proxy bypass...");
-                    
-                    // Attempt 2: Use an open CORS proxy as a reliable fallback
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                    const proxyResponse = await fetch(proxyUrl);
-                    
-                    if (proxyResponse.ok) {
-                        data = await proxyResponse.json();
-                    } else {
-                        throw new Error("Proxy request failed");
-                    }
-                }
-                
-                // Process the retrieved data from BrightClass
-                if (data && data.cdnUrl) {
-                    // Create an invisible anchor tag to initiate the download/view 
-                    const a = document.createElement('a');
-                    a.href = data.cdnUrl;
-                    a.target = "_blank"; // Open in new tab securely
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    showToast("PDF opened successfully!");
-                } else {
-                    showToast("Invalid code or PDF not found.", "error");
-                }
-            } catch (error) {
-                console.error("Error fetching PDF:", error);
-                showToast("Failed to connect to BrightClass server.", "error");
-            }
-        };
-
-        // --- 6. Firebase Listeners & Renderers: SCHEDULE ---
-        refSchedule.on('value', snap => {
-            const data = snap.val() || {};
-            state.schedule = Object.entries(data).map(([id, val]) => ({ id, ...val }))
-                                   .sort((a,b) => a.timeStr.localeCompare(b.timeStr)); // Simple time string sort
-            renderSchedule();
+            closeDeleteModal();
         });
 
-        const renderSchedule = () => {
-            const renderList = (containerId, limit = null) => {
-                const container = document.getElementById(containerId);
-                const items = limit ? state.schedule.slice(0, limit) : state.schedule;
-                
-                if (!items.length) {
-                    container.innerHTML = `<div class="text-center text-slate-500 text-sm py-4">No upcoming classes scheduled.</div>`;
-                    return;
-                }
-
-                container.innerHTML = items.map(item => {
-                    const isAdmin = state.role === 'admin';
-                    const delBtn = isAdmin ? `<button onclick="deleteSchedule('${item.id}')" class="text-slate-500 hover:text-rose-400 ml-3"><i class="fa-solid fa-trash-can"></i></button>` : '';
-                    
-                    // Format time nice
-                    let timeDisplay = item.timeStr;
-                    try {
-                        const [h, m] = item.timeStr.split(':');
-                        const date = new Date(); date.setHours(h); date.setMinutes(m);
-                        timeDisplay = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    }catch(e){}
-
-                    return `
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-indigo-500/30 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-indigo-500/20 text-indigo-300 font-bold py-2 px-3 rounded-lg text-sm min-w-[80px] text-center border border-indigo-500/20">
-                                ${timeDisplay}
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-white text-sm md:text-base">${escapeHtml(item.title)}</h4>
-                                <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-video text-indigo-400 mr-1"></i> Live Session</p>
-                            </div>
-                        </div>
-                        <div>${delBtn}</div>
-                    </div>`;
-                }).join('');
-            };
-
-            renderList('full-schedule-list');
-            renderList('dash-schedule-list', 3);
+        // --- UTILS ---
+        const escapeHtml = (str) => {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m]));
         };
 
-        const addSchedule = async () => {
-            const title = document.getElementById('sch-title').value.trim();
-            const timeStr = document.getElementById('sch-time').value;
-
-            if(!title || !timeStr) return showToast("Please fill title and time", "error");
-
-            try {
-                await refSchedule.push({ title, timeStr, timestamp: Date.now() });
-                document.getElementById('sch-title').value = '';
-                document.getElementById('sch-time').value = '';
-                showToast("Class scheduled!");
-            } catch(e) { showToast("Error scheduling", "error"); }
-        };
-
-        const deleteSchedule = async (id) => {
-            try {
-                await refSchedule.child(id).remove();
-                showToast("Schedule removed");
-            } catch(e) { showToast("Delete failed", "error"); }
-        };
-
-        // --- 7. Firebase Listeners & Renderers: LIVE CLASS ---
-        refLive.on('value', snap => {
-            const data = snap.val() || { isLive: false, topic: '' };
-            state.live = data;
-            renderLiveState();
-        });
-
-        const renderLiveState = () => {
-            const { isLive, topic } = state.live;
+        const showToast = (msg, isError = false) => {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
             
-            // Sidebar Dot
-            const dot = document.getElementById('nav-live-dot');
-            isLive ? dot.classList.remove('hidden') : dot.classList.add('hidden');
-
-            // Video Area
-            const offlineState = document.getElementById('offline-state');
-            const streamState = document.getElementById('streaming-state');
-            const statusBadge = document.getElementById('live-badge');
-            const statusText = document.getElementById('live-status-text');
-            const liveDot = document.getElementById('live-dot');
-            const viewersBadge = document.getElementById('live-viewers-badge');
-            const currentTopic = document.getElementById('current-live-topic');
-            const btnLive = document.getElementById('btn-start-live');
-
-            if (isLive) {
-                offlineState.classList.add('hidden');
-                streamState.classList.remove('hidden');
-                currentTopic.innerText = topic || "Live Class";
-                
-                statusBadge.classList.replace('border-slate-700', 'border-red-500/50');
-                statusText.innerText = "LIVE";
-                statusText.classList.add('text-red-400');
-                liveDot.classList.replace('bg-slate-500', 'bg-red-500');
-                liveDot.classList.add('live-pulse');
-                viewersBadge.classList.remove('hidden');
-
-                if (state.role === 'admin') {
-                    btnLive.innerHTML = '<i class="fa-solid fa-stop"></i> <span>End Stream</span>';
-                    btnLive.classList.replace('bg-red-600', 'bg-slate-700');
-                    btnLive.classList.replace('hover:bg-red-500', 'hover:bg-slate-600');
-                    btnLive.classList.replace('shadow-red-900/30', 'shadow-none');
-                }
+            const icon = document.getElementById('toast-icon');
+            if(isError) {
+                icon.className = 'fa-solid fa-circle-exclamation text-red-500';
             } else {
-                offlineState.classList.remove('hidden');
-                streamState.classList.add('hidden');
-                
-                statusBadge.classList.replace('border-red-500/50', 'border-slate-700');
-                statusText.innerText = "OFFLINE";
-                statusText.classList.remove('text-red-400');
-                liveDot.classList.replace('bg-red-500', 'bg-slate-500');
-                liveDot.classList.remove('live-pulse');
-                viewersBadge.classList.add('hidden');
-
-                if (state.role === 'admin') {
-                    btnLive.innerHTML = '<i class="fa-solid fa-video"></i> <span>Go Live</span>';
-                    btnLive.classList.replace('bg-slate-700', 'bg-red-600');
-                    btnLive.classList.replace('hover:bg-slate-600', 'hover:bg-red-500');
-                    btnLive.classList.replace('shadow-none', 'shadow-red-900/30');
-                }
+                icon.className = 'fa-solid fa-circle-check text-appPink';
             }
-        };
 
-        const toggleLiveStream = async () => {
-            if (state.role !== 'admin') return;
-
-            const newLiveState = !state.live.isLive;
-            const topicInput = document.getElementById('live-topic-input').value.trim();
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
             
-            if (newLiveState && !topicInput) {
-                return showToast("Please enter a class topic to go live.", "error");
-            }
-
-            try {
-                await refLive.set({
-                    isLive: newLiveState,
-                    topic: newLiveState ? topicInput : '',
-                    startedAt: newLiveState ? Date.now() : null
-                });
-                
-                if(!newLiveState) document.getElementById('live-topic-input').value = '';
-                showToast(newLiveState ? "Stream started!" : "Stream ended.");
-            } catch(e) {
-                showToast("Error updating stream status", "error");
-            }
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, -20px)';
+            }, 3000);
         };
 
-        // Start Firebase listeners immediately on load
+        // PDF Viewer Simulator
+        const viewPDF = (code) => {
+            if(!code) return;
+            // Agar code http se start hota hai, directly link open karo
+            if(code.startsWith('http')) {
+                window.open(code, '_blank');
+                return;
+            }
+            // Warna pehle wala BrightClass logic
+            showToast("Opening Document...");
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
+            fetch(proxyUrl).then(res => res.json()).then(data => {
+                if(data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
+                else showToast("Invalid Code", true);
+            }).catch(() => showToast("Failed to fetch document", true));
+        };
+
     </script>
 </body>
 </html>
