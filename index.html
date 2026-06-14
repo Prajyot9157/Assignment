@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MHT CET | Professional Control Panel</title>
+    <title>MHT CET Class 12 | Student App</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -23,245 +24,374 @@
                         appPinkDark: '#e11d48',
                         textMuted: '#8b8d9c'
                     },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
                 }
             }
         }
     </script>
 
     <style>
-        body { 
-            background-color: #090a10; 
-            color: #fff; 
-            margin: 0; 
-            padding: 0; 
-            height: 100dvh; 
+        body {
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100dvh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .slide-in-right { animation: slideInRight 0.3s ease forwards; }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .app-container { 
+            width: 100%; 
+            max-width: 1200px; 
+            height: 100%; 
+            position: relative; 
+            background: #090a10; 
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); 
             display: flex; 
             flex-direction: column; 
             overflow: hidden; 
-            -webkit-tap-highlight-color: transparent; 
         }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .fade-in { animation: fadeIn 0.25s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .admin-input { 
-            width: 100%; 
-            background: #1a1b26; 
-            border: 1px solid #2d2e3d; 
-            border-radius: 0.75rem; 
-            padding: 0.875rem; 
-            color: white; 
-            font-size: 0.875rem; 
-            outline: none; 
-            transition: all 0.2s; 
-        }
-        .admin-input:focus { 
-            border-color: #f43f5e; 
-            box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2); 
-        }
-        select.admin-input { 
-            appearance: none; 
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b8d9c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); 
-            background-repeat: no-repeat; 
-            background-position: right 1rem center; 
-            background-size: 1em; 
-        }
+
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        #sidebar.open { transform: translateX(0); }
     </style>
 </head>
 <body>
 
-    <!-- Professional Admin Header -->
-    <header class="p-5 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-appCard border-b border-gray-800 shrink-0 relative z-20">
-        <div class="flex items-center gap-4">
-            <!-- Circular Admin Logo -->
-            <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Admin Logo" class="w-12 h-12 rounded-full border-2 border-appPink shadow-lg object-cover shrink-0">
-            
-            <div class="min-w-0">
-                <h1 class="text-xl font-bold leading-none text-white tracking-wide truncate">Control Center</h1>
-                <p class="text-xs text-appPink mt-1 font-medium truncate">Manage Zoom Meetings, YouTube & PDFs</p>
+    <div id="app-wrapper" class="app-container">
+
+        <!-- Sidebar Drawer -->
+        <div id="sidebar" class="absolute inset-y-0 left-0 w-64 bg-appCard border-r border-gray-800 transform -translate-x-full z-[100] flex flex-col">
+            <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-[#0d0e15]">
+                <div class="flex items-center gap-3">
+                    <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Logo" class="w-10 h-10 rounded-full border-2 border-appPink/40 object-cover shadow-lg">
+                    <h2 class="text-white font-bold text-lg leading-tight">MHT CET<br><span class="text-xs font-medium text-appPink">Learning Hub</span></h2>
+                </div>
+                <button onclick="toggleSidebar()" class="text-textMuted hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-gray-800/50"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-2">
+                <button onclick="toggleSidebar(); switchTab('profile')" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-user text-appPink w-5 text-center"></i> My Profile</button>
+                <button onclick="toggleSidebar(); switchTab('saved')" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-bookmark text-appPink w-5 text-center"></i> Saved Items</button>
+                <button onclick="toggleSidebar(); switchTab('performance')" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-chart-line text-appPink w-5 text-center"></i> My Performance</button>
+                <button onclick="toggleSidebar(); switchTab('calendar')" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-calendar-days text-appPink w-5 text-center"></i> Class Timeline</button>
+                <hr class="border-gray-800 my-2">
+                <button onclick="reloadApp()" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-rotate-right text-appPink w-5 text-center"></i> Refresh Data</button>
+                <button onclick="shareApp()" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-share-nodes text-appPink w-5 text-center"></i> Share App</button>
+            </div>
+            <div class="p-4 border-t border-gray-800 text-xs text-textMuted text-center bg-[#0d0e15]">
+                MHT CET Learning App<br>Version 2.0.0
             </div>
         </div>
-        <div class="flex gap-2 w-full sm:w-auto">
-            <button onclick="openUploadModal()" class="flex-1 sm:flex-none px-5 py-3 bg-appPink hover:bg-appPinkDark text-white text-sm font-bold rounded-xl shadow-md shadow-appPink/20 flex items-center justify-center gap-2 transition-all shrink-0">
-                <i class="fa-solid fa-plus"></i> Add New Material
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity"></div>
+
+        <!-- Header -->
+        <header class="pt-8 pb-4 px-5 flex justify-between items-center bg-appBg z-10 shrink-0 border-b border-gray-800/50">
+            <div class="flex items-center gap-3">
+                <button id="btn-back" onclick="goBack()" class="hidden text-white text-xl pr-2"><i class="fa-solid fa-arrow-left"></i></button>
+                <div class="flex items-center gap-3" id="main-header-content">
+                    <i class="fa-solid fa-bars text-xl text-white/90 cursor-pointer hover:text-appPink transition-colors mr-1" id="menu-icon" onclick="toggleSidebar()"></i>
+                    <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Logo" class="w-8 h-8 rounded-full border border-appPink/30 object-cover shadow-sm hidden sm:block">
+                    <h1 id="header-title" class="text-lg font-bold text-white tracking-wide truncate max-w-[200px] md:max-w-none">MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span></h1>
+                </div>
+            </div>
+            <div class="flex gap-4 text-xl text-white/90 shrink-0">
+                <i class="fa-solid fa-gift hover:text-appPink transition-colors cursor-pointer"></i>
+                <div class="relative cursor-pointer hover:text-appPink transition-colors">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-appPink rounded-full border border-appBg"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Views Area -->
+        <div class="flex-1 overflow-hidden relative">
+            
+            <!-- VIEW: HOME (Dashboard) -->
+            <main id="view-home" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view fade-in">
+                <!-- Greeting Card -->
+                <div class="mx-5 mt-4 p-5 rounded-3xl bg-gradient-to-br from-[#2a1738] to-appCard relative overflow-hidden border border-white/5 shadow-lg max-w-4xl xl:mx-auto">
+                    <div class="relative z-10">
+                        <h2 class="text-xl font-bold text-white mb-1">Hello, Student <span class="text-yellow-400">👋</span></h2>
+                        <p class="text-xs text-gray-400 mb-5">Access all your study materials here.</p>
+                        
+                        <div class="flex gap-6 text-left">
+                            <div>
+                                <div class="text-xs text-appPink mb-1 flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-[10px]"></i> Total Materials</div>
+                                <div class="font-bold text-2xl text-white" id="stat-total">0</div>
+                            </div>
+                            <div class="w-px h-10 bg-white/10 my-auto"></div>
+                            <div>
+                                <div class="text-xs text-appPink mb-1 flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-[10px]"></i> New This Week</div>
+                                <div class="font-bold text-2xl text-white" id="stat-recent">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right Decorative Button -->
+                    <div class="absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#361e47] to-transparent flex flex-col items-center justify-center border-l border-white/5 cursor-pointer hover:bg-white/5 transition-colors" onclick="switchTab('notes')">
+                        <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Materials Logo" class="w-12 h-12 rounded-full border-2 border-appPink/40 object-cover shadow-[0_0_15px_rgba(244,63,94,0.3)] mb-1">
+                        <div class="text-[10px] text-center font-bold text-white mt-1">Materials</div>
+                    </div>
+                </div>
+
+                <!-- Quick Access Grid -->
+                <div class="px-5 mt-6 max-w-4xl xl:mx-auto">
+                    <h3 class="text-sm font-semibold text-white mb-4">Quick Access</h3>
+                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-6 gap-x-2">
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('live')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-tv"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">Live Classes</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('tests')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-pen"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">Tests</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('notes')">
+                            <div class="w-14 h-14 rounded-2xl bg-[#2a1738] border border-appPink/30 flex items-center justify-center text-appPink text-xl shadow-inner"><i class="fa-solid fa-book"></i></div>
+                            <span class="text-[10px] text-white font-medium whitespace-nowrap">Notes</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('pyq')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-bullseye"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">PYQ Bank</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('practice')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-crosshairs"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">Practice</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('formula')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-file-lines"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">Formula Sheet</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('mindmaps')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-network-wired"></i></div>
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">Mind Maps</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('calendar')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors shadow-[0_0_15px_rgba(244,63,94,0.15)]"><i class="fa-solid fa-calendar-days"></i></div>
+                            <span class="text-[10px] text-appPink font-bold whitespace-nowrap">Timeline</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Added Materials -->
+                <div class="mt-8 max-w-4xl xl:mx-auto">
+                    <div class="px-5 flex justify-between items-end mb-4">
+                        <h3 class="text-sm font-semibold text-white">Recently Added</h3>
+                    </div>
+                    <div class="flex overflow-x-auto hide-scrollbar px-5 gap-4 pb-2" id="home-recent-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- VIEW: CALENDAR TIMELINE -->
+            <main id="view-calendar" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in flex-col max-w-5xl mx-auto w-full">
+                <div class="bg-appCard border-b border-gray-800 shrink-0 px-5 py-4">
+                    <h3 class="text-white font-bold text-sm mb-1">Class Timeline</h3>
+                    <p class="text-xs text-textMuted mb-4">See what was taught on any given day</p>
+                    
+                    <div class="flex overflow-x-auto hide-scrollbar gap-3 pb-2" id="calendar-date-strip">
+                        <!-- Dates populated via JS -->
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto hide-scrollbar px-5 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 content-start" id="calendar-content-list">
+                    <!-- Daily content populated via JS -->
+                </div>
+            </main>
+
+            <!-- VIEW: CATEGORY SUBJECTS (Reused for Notes, PYQ, Tests, Practice etc) -->
+            <main id="view-category-subjects" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 max-w-5xl mx-auto w-full">
+                <div class="flex items-center gap-3 mb-6 mt-4">
+                    <div class="flex-1 bg-appCard border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3 focus-within:border-appPink transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-textMuted text-sm"></i>
+                        <input type="text" placeholder="Search subjects..." class="bg-transparent border-none outline-none text-sm text-white w-full placeholder-textMuted">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="subject-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </main>
+
+            <!-- VIEW: SUBJECT DETAIL -->
+            <main id="view-subject-detail" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden slide-in-right flex-col max-w-5xl mx-auto w-full">
+                <div class="px-5 flex items-center gap-4 mb-4 mt-4">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg shrink-0" id="detail-subj-icon-container">
+                        <i class="fa-solid fa-atom text-white" id="detail-subj-icon"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white leading-tight" id="detail-subj-title">Physics Items</h2>
+                        <p class="text-xs text-textMuted mt-0.5" id="detail-subj-count">0 Items</p>
+                    </div>
+                </div>
+                <div class="px-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 content-start flex-1 overflow-y-auto hide-scrollbar" id="detail-pdf-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </main>
+
+            <!-- VIEW: SAVED ITEMS -->
+            <main id="view-saved" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 max-w-5xl mx-auto w-full">
+                <h2 class="text-lg font-bold text-white mt-4 mb-4">Saved Materials</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 content-start" id="saved-list-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </main>
+
+            <!-- VIEW: MY PERFORMANCE -->
+            <main id="view-performance" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 max-w-3xl mx-auto w-full">
+                <h2 class="text-lg font-bold text-white mt-4 mb-6">My Performance</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-appCard border border-gray-800 rounded-2xl p-4 text-center shadow-lg">
+                        <div class="text-3xl font-black text-white" id="perf-tests-taken">0</div>
+                        <div class="text-[10px] text-textMuted uppercase tracking-wider font-bold mt-1">Tests Taken</div>
+                    </div>
+                    <div class="bg-appCard border border-gray-800 rounded-2xl p-4 text-center shadow-lg">
+                        <div class="text-3xl font-black text-appPink" id="perf-avg-score">0%</div>
+                        <div class="text-[10px] text-textMuted uppercase tracking-wider font-bold mt-1">Completion %</div>
+                    </div>
+                    <div class="bg-appCard border border-gray-800 rounded-2xl p-4 text-center shadow-lg">
+                        <div class="text-3xl font-black text-blue-400" id="perf-materials-read">0</div>
+                        <div class="text-[10px] text-textMuted uppercase tracking-wider font-bold mt-1">Materials Read</div>
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-semibold text-white mb-3">Subject Wise Progress</h3>
+                <div class="space-y-5 bg-appCard border border-gray-800 rounded-2xl p-5 mb-8 shadow-lg" id="perf-subject-mastery">
+                    <!-- Populated Dynamically -->
+                </div>
+            </main>
+
+            <!-- Profile View -->
+            <main id="view-profile" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 w-full">
+                <div class="flex flex-col items-center mt-8 mb-8">
+                    <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Profile Logo" class="w-24 h-24 rounded-full border-4 border-appCard shadow-2xl object-cover mb-4">
+                    <h2 class="text-2xl font-bold text-white">Student Hub</h2>
+                    <p class="text-sm text-appPink font-medium mt-1">MHT CET Target Batch</p>
+                </div>
+                
+                <div class="space-y-3 w-full max-w-lg mx-auto">
+                    <button onclick="switchTab('saved')" class="w-full bg-appCard border border-gray-800 hover:border-gray-700 p-4 rounded-xl flex items-center justify-between text-white transition-colors">
+                        <div class="flex items-center gap-3"><i class="fa-solid fa-bookmark text-appPink w-5 text-center"></i> Saved Items</div>
+                        <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
+                    </button>
+                    <button onclick="switchTab('performance')" class="w-full bg-appCard border border-gray-800 hover:border-gray-700 p-4 rounded-xl flex items-center justify-between text-white transition-colors">
+                        <div class="flex items-center gap-3"><i class="fa-solid fa-chart-line text-appPink w-5 text-center"></i> My Performance</div>
+                        <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
+                    </button>
+                    <button onclick="switchTab('calendar')" class="w-full bg-appCard border border-gray-800 hover:border-gray-700 p-4 rounded-xl flex items-center justify-between text-white transition-colors">
+                        <div class="flex items-center gap-3"><i class="fa-solid fa-calendar-check text-appPink w-5 text-center"></i> Study Timeline</div>
+                        <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
+                    </button>
+                </div>
+            </main>
+
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="shrink-0 h-[70px] bg-[#0c0d14] border-t border-gray-800 flex items-center justify-around z-20 pb-1 w-full relative">
+            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-appPink w-16" data-tab="home">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Home</span>
             </button>
-        </div>
-    </header>
+            <button onclick="switchTab('tests')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white w-16 transition-colors" data-tab="tests">
+                <i class="fa-solid fa-file-pen text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Tests</span>
+            </button>
+            <button onclick="switchTab('notes')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white w-16 transition-colors" data-tab="notes">
+                <i class="fa-solid fa-book text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Notes</span>
+            </button>
+            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center gap-1 text-textMuted hover:text-white w-16 transition-colors" data-tab="profile">
+                <i class="fa-solid fa-user text-xl"></i>
+                <span class="text-[10px] font-medium mt-0.5">Profile</span>
+            </button>
+        </nav>
 
-    <!-- Stat Dashboard Section -->
-    <section class="px-5 pt-4 grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Total Items</p>
-            <h3 class="text-2xl font-black text-white mt-1" id="stat-total">0</h3>
-        </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Zoom Meetings</p>
-            <h3 class="text-2xl font-black text-blue-400 mt-1" id="stat-zoom">0</h3>
-        </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">YouTube Videos</p>
-            <h3 class="text-2xl font-black text-red-500 mt-1" id="stat-youtube">0</h3>
-        </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Active PDFs</p>
-            <h3 class="text-2xl font-black text-sky-400 mt-1" id="stat-pdf">0</h3>
-        </div>
-    </section>
-
-    <!-- Filters and Live Search Controls -->
-    <section class="p-5 pb-2 flex flex-col lg:flex-row gap-3 shrink-0">
-        <div class="flex-1 relative w-full">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-textMuted">
-                <i class="fa-solid fa-magnifying-glass text-sm"></i>
-            </span>
-            <input type="text" id="admin-search" oninput="filterAndSearchData()" placeholder="Search topics, papers or links..." class="w-full bg-appCard border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-appPink transition-all">
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-            <select id="filter-type" onchange="filterAndSearchData()" class="flex-1 sm:flex-none bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
-                <option value="all">All Material Types</option>
-                <option value="pdf">PDF Documents</option>
-                <option value="youtube">YouTube Videos</option>
-                <option value="zoom">Zoom Streams</option>
-            </select>
-            <select id="filter-category" onchange="filterAndSearchData()" class="flex-1 sm:flex-none bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
-                <option value="all">All Categories</option>
-                <option value="notes">Notes</option>
-                <option value="live">Live Classes</option>
-                <option value="tests">Mock Tests</option>
-                <option value="pyq">PYQ Bank</option>
-                <option value="practice">Practice Sets</option>
-                <option value="formula">Formula Sheets</option>
-                <option value="mindmaps">Mind Maps</option>
-                <option value="dpps">DPPs</option>
-            </select>
-        </div>
-    </section>
-
-    <!-- List Container -->
-    <!-- Transformed to Grid layout for Desktop optimization -->
-    <main class="flex-1 overflow-y-auto hide-scrollbar px-5 pb-6 grid grid-cols-1 xl:grid-cols-2 gap-4 content-start" id="admin-list">
-        <div class="col-span-1 xl:col-span-2 text-center py-12 text-textMuted w-full">
-            <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-appPink"></i>
-            <p class="text-sm">Retrieving active repository...</p>
-        </div>
-    </main>
-
-    <!-- Upload/Edit Modal -->
-    <div id="modal-upload" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity p-2 sm:p-4">
-        <div class="bg-appCard w-full sm:max-w-xl sm:rounded-3xl rounded-3xl p-6 shadow-2xl border border-gray-800 fade-in max-h-[95dvh] overflow-y-auto hide-scrollbar">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white" id="modal-title">Upload Asset</h3>
-                <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
+        <!-- PDF & YouTube Embedded Preview Modal -->
+        <div id="modal-preview" class="hidden absolute inset-0 z-[80] bg-appBg flex flex-col fade-in">
+            <div class="h-14 shrink-0 flex items-center justify-between px-4 bg-appCard border-b border-gray-800 shadow-md relative z-20">
+                <div class="flex items-center gap-3 w-[80%]">
+                    <span id="preview-icon-wrapper"><i class="fa-solid fa-file-pdf text-appPink text-lg"></i></span>
+                    <h3 class="text-white font-bold text-sm truncate" id="preview-title">Document Preview</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openExternalPreviewLink()" title="Open externally" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-textMuted hover:text-white transition-colors">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </button>
+                    <button onclick="closePreview()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-textMuted hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
             </div>
-            
-            <form id="upload-form" onsubmit="handleUpload(event)" class="space-y-4">
-                <input type="hidden" id="edit-id" value="">
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Asset Placement Category</label>
-                        <select id="up-category" class="admin-input" required>
-                            <option value="notes">Notes</option>
-                            <option value="live">Live Classes</option>
-                            <option value="tests">Mock Tests</option>
-                            <option value="pyq">PYQ Bank</option>
-                            <option value="practice">Practice Sets</option>
-                            <option value="formula">Formula Sheet</option>
-                            <option value="mindmaps">Mind Maps</option>
-                            <option value="dpps">DPPs</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Academic Subject</label>
-                        <select id="up-subject" class="admin-input" required>
-                            <option value="Physics">Physics</option>
-                            <option value="Chemistry">Chemistry</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Biology">Biology</option>
-                            <option value="Inorganic Chemistry">Inorganic Chemistry</option>
-                            <option value="Organic Chemistry">Organic Chemistry</option>
-                            <option value="Full Syllabus">Full Syllabus / General</option>
-                        </select>
-                    </div>
+            <div class="flex-1 w-full relative bg-[#12131a]">
+                <div id="preview-loader" class="absolute inset-0 flex flex-col items-center justify-center text-appPink z-0">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                    <p class="text-xs text-textMuted">Loading preview...</p>
                 </div>
-
-                <!-- Integrated Material Link Type Dropper -->
-                <div>
-                    <label class="block text-xs text-textMuted mb-1 ml-1">Link Integration Target</label>
-                    <select id="up-link-type" onchange="toggleFormInputs()" class="admin-input" required>
-                        <option value="pdf">Standard Document / PDF Link</option>
-                        <option value="youtube">YouTube Video Embed Stream</option>
-                        <option value="zoom">Zoom Live Stream Meeting</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-xs text-textMuted mb-1 ml-1">Topic Title / Name</label>
-                    <input type="text" id="up-topic" placeholder="e.g. Rotational Dynamics L-2" class="admin-input" required>
-                </div>
-                
-                <div>
-                    <label class="block text-xs text-textMuted mb-1 ml-1" id="link-label">Resource Link (PDF Link or Code)</label>
-                    <input type="text" id="up-code" placeholder="Resource link URL..." class="admin-input" required>
-                </div>
-
-                <!-- Zoom Secondary Information Panel (Dynamic) -->
-                <div id="zoom-fields" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0d0e15] p-3 rounded-2xl border border-gray-800">
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Meeting ID</label>
-                        <input type="text" id="up-zoom-id" placeholder="845 2332 9494" class="admin-input">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Passcode</label>
-                        <input type="text" id="up-zoom-pass" placeholder="123456" class="admin-input">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Display Metadata</label>
-                        <input type="text" id="up-size" placeholder="e.g. 1.8 MB or 90 Mins" class="admin-input">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Timeline Target Date (Optional)</label>
-                        <input type="date" id="up-date" class="admin-input text-textMuted" title="Leave blank to use today's date for timeline sorting">
-                    </div>
-                </div>
-
-                <button type="submit" id="btn-submit" class="w-full mt-4 bg-appPink hover:bg-appPinkDark text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Save Asset
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="modal-delete" class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm px-5">
-        <div class="bg-appCard w-full max-w-sm rounded-3xl p-6 text-center border border-gray-800 shadow-2xl fade-in">
-            <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
-                <i class="fa-solid fa-trash"></i>
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2">Delete Item?</h3>
-            <p class="text-textMuted text-sm mb-6">This item will be instantly removed from the Student app.</p>
-            <div class="flex gap-3">
-                <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-800 rounded-xl text-white font-medium">Cancel</button>
-                <button id="btn-confirm-del" class="flex-1 py-3 bg-red-500 rounded-xl text-white font-medium shadow-lg shadow-red-500/20">Delete</button>
+                <iframe id="preview-iframe" class="w-full h-full border-none z-10 relative bg-transparent" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen onload="document.getElementById('preview-loader').classList.add('hidden')"></iframe>
             </div>
         </div>
-    </div>
 
-    <!-- Toast Banner -->
-    <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px] max-w-xs w-max">
-        <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
-        <span id="toast-msg">Success</span>
+        <!-- Zoom Meeting Info Popup Modal -->
+        <div id="modal-zoom" class="hidden absolute inset-0 z-[85] bg-black/80 backdrop-blur-sm flex items-center justify-center px-6">
+            <div class="bg-appCard border border-gray-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl fade-in text-center relative">
+                <div class="w-16 h-16 bg-[#2D8CFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#2D8CFF] text-3xl">
+                    <i class="fa-solid fa-video"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-1" id="zoom-topic">Live Class</h3>
+                <p class="text-xs text-textMuted mb-6" id="zoom-subject">Subject Info</p>
+
+                <div class="bg-[#090a10] border border-gray-800 rounded-2xl p-4 space-y-3 text-left mb-6 font-mono text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="text-textMuted">Meeting ID:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-bold" id="zoom-id">--- --- ----</span>
+                            <button onclick="copyToClipboard('zoom-id')" class="text-appPink hover:text-white p-1"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-textMuted">Passcode:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-bold" id="zoom-passcode">------</span>
+                            <button onclick="copyToClipboard('zoom-passcode')" class="text-appPink hover:text-white p-1"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="closeZoomModal()" class="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold transition-all">Cancel</button>
+                    <a id="zoom-join-btn" href="#" target="_blank" class="flex-1 py-3 bg-[#2D8CFF] hover:bg-[#1a75e8] text-white rounded-xl font-bold shadow-lg shadow-[#2D8CFF]/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-play"></i> Join Zoom
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[110] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px] max-w-xs w-max">
+            <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
+            <span id="toast-msg" class="truncate">Success</span>
+        </div>
+
     </div>
 
     <script>
-        // --- 1. FIREBASE SETUP ---
+        // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
             authDomain: "studiment-tracking.firebaseapp.com",
@@ -273,286 +403,685 @@
         const db = firebase.database();
         const refMaterials = db.ref('study_text_entries');
 
-        // --- 2. GLOBAL STATE ---
-        let allData = [];
-        let filteredData = [];
-        let pendingDeleteId = null;
-
-        const categoryLabels = {
-            "notes": "Notes", "live": "Live Class", "tests": "Mock Test", 
-            "pyq": "PYQ Bank", "practice": "Practice", "formula": "Formula", 
-            "mindmaps": "Mind Map", "dpps": "DPP"
+        // --- APP STATE & LOCAL STORAGE ---
+        const state = {
+            currentTab: 'home',
+            currentCategory: 'notes', 
+            selectedSubject: null,
+            selectedCalendarDate: null, 
+            activePreviewLink: null,
+            allMaterials: [],
         };
 
-        // --- 3. FETCH AND STATISTICS ENGINE ---
-        refMaterials.on('value', snap => {
-            const data = snap.val() || {};
-            allData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-            allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            
-            calculateStats();
-            filterAndSearchData();
+        // Local Storage for Bookmarks and Completed Items
+        let savedItems = JSON.parse(localStorage.getItem('mhtCetSavedItems')) || [];
+        let completedItems = JSON.parse(localStorage.getItem('mhtCetCompletedItems')) || [];
+
+        const subjectMeta = {
+            "Physics": { icon: "fa-atom", color: "bg-[#4834df]" },
+            "Chemistry": { icon: "fa-flask", color: "bg-[#e84393]" },
+            "Mathematics": { icon: "fa-superscript", color: "bg-[#6c5ce7]" },
+            "Biology": { icon: "fa-leaf", color: "bg-[#d63031]" },
+            "Inorganic Chemistry": { icon: "fa-cubes", color: "bg-[#8e44ad]" },
+            "Organic Chemistry": { icon: "fa-hexagon-nodes", color: "bg-[#c0392b]" },
+            "Full Syllabus": { icon: "fa-book-open-reader", color: "bg-[#f39c12]" }
+        };
+
+        const categoryMeta = {
+            "notes": { title: "Notes", icon: "fa-book" },
+            "live": { title: "Live Classes", icon: "fa-tv" },
+            "tests": { title: "Mock Tests", icon: "fa-file-pen" },
+            "pyq": { title: "PYQ Bank", icon: "fa-bullseye" },
+            "practice": { title: "Practice Sets", icon: "fa-crosshairs" },
+            "formula": { title: "Formula Sheets", icon: "fa-file-lines" },
+            "mindmaps": { title: "Mind Maps", icon: "fa-network-wired" },
+            "dpps": { title: "DPPs", icon: "fa-list-check" }
+        };
+
+        const categoriesWithSubjects = ['notes', 'live', 'tests', 'pyq', 'practice', 'formula', 'mindmaps', 'dpps'];
+
+        const fallbackMeta = { icon: "fa-folder", color: "bg-gray-700" };
+
+        const getLocalYMD = (dateObj) => {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        state.selectedCalendarDate = getLocalYMD(new Date());
+
+        // --- HISTORY API ROUTING ENGINE (Smart Back Button) ---
+        
+        // Push exact app state directly into browser history
+        const pushHistoryState = (view, payload = {}) => {
+            history.pushState({ view, ...payload }, "", "");
+        };
+
+        // Intercept Phone Hardware Back Button
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.view) {
+                renderView(event.state.view, event.state);
+            } else {
+                renderView('home', {});
+            }
         });
 
-        const calculateStats = () => {
-            document.getElementById('stat-total').innerText = allData.length;
-            document.getElementById('stat-zoom').innerText = allData.filter(d => d.linkType === 'zoom').length;
-            document.getElementById('stat-youtube').innerText = allData.filter(d => d.linkType === 'youtube').length;
-            document.getElementById('stat-pdf').innerText = allData.filter(d => d.linkType === 'pdf' || !d.linkType).length;
-        };
-
-        // --- DYNAMIC FORM PANEL CONTROLLER ---
-        const toggleFormInputs = () => {
-            const targetType = document.getElementById('up-link-type').value;
-            const zoomFields = document.getElementById('zoom-fields');
-            const linkLabel = document.getElementById('link-label');
-            const linkInput = document.getElementById('up-code');
-
-            if (targetType === 'zoom') {
-                zoomFields.classList.remove('hidden');
-                linkLabel.innerText = 'Zoom Meeting Launch Link';
-                linkInput.placeholder = 'https://zoom.us/j/84523329494...';
-            } else if (targetType === 'youtube') {
-                zoomFields.classList.add('hidden');
-                linkLabel.innerText = 'YouTube Video URL (Share or Browser Link)';
-                linkInput.placeholder = 'https://www.youtube.com/watch?v=...';
+        // The core view router
+        const renderView = (view, payload = {}) => {
+            state.currentTab = view;
+            
+            // Highlight bottom nav correctly
+            const navIds = ['home', 'tests', 'notes', 'profile'];
+            if(navIds.includes(view)) {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    const isMatch = btn.dataset.tab === view;
+                    btn.classList.toggle('text-appPink', isMatch);
+                    btn.classList.toggle('text-textMuted', !isMatch);
+                });
             } else {
-                zoomFields.classList.add('hidden');
-                linkLabel.innerText = 'Resource Link (PDF Link or Code)';
-                linkInput.placeholder = 'PDF url or BrightClass code';
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('text-appPink');
+                    btn.classList.add('text-textMuted');
+                });
+            }
+
+            // Hide all pages
+            document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
+
+            const backBtn = document.getElementById('btn-back');
+            const menuIcon = document.getElementById('menu-icon');
+            const titleEl = document.getElementById('header-title');
+
+            if (view === 'home') {
+                document.getElementById('view-home').classList.remove('hidden');
+                backBtn.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                titleEl.innerHTML = 'MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span>';
+            } 
+            else if (view === 'profile') {
+                document.getElementById('view-profile').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'My Profile';
+            }
+            else if (view === 'calendar') {
+                document.getElementById('view-calendar').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'Study Timeline';
+                renderCalendarView();
+            }
+            else if (view === 'saved') {
+                document.getElementById('view-saved').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'Saved Items';
+                renderSavedItems();
+            }
+            else if (view === 'performance') {
+                document.getElementById('view-performance').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'My Performance';
+                renderPerformanceStats();
+            }
+            else if (view === 'category-subjects') {
+                state.currentCategory = payload.category || 'notes';
+                document.getElementById('view-category-subjects').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                
+                const catMeta = categoryMeta[state.currentCategory] || { title: state.currentCategory.toUpperCase() };
+                titleEl.innerHTML = catMeta.title;
+                
+                renderCategorySubjects(state.currentCategory);
+            }
+            else if (view === 'subject-detail') {
+                state.currentCategory = payload.category;
+                state.selectedSubject = payload.subject;
+                
+                document.getElementById('view-subject-detail').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                
+                // Keep the title dynamic and translated correctly
+                const catTitle = categoryMeta[state.currentCategory]?.title || 'Notes';
+                titleEl.innerHTML = `${payload.subject}`;
+                
+                renderSubjectDetail();
             }
         };
 
-        // --- 4. MULTI-LEVEL REAL-TIME FILTERING ---
-        const filterAndSearchData = () => {
-            const searchVal = document.getElementById('admin-search').value.toLowerCase().trim();
-            const catVal = document.getElementById('filter-category').value;
-            const typeVal = document.getElementById('filter-type').value;
-
-            filteredData = allData.filter(item => {
-                const matchesSearch = item.topic ? item.topic.toLowerCase().includes(searchVal) : false;
-                const matchesCategory = (catVal === 'all') || (item.category === catVal);
-                
-                // Link type normalizer
-                const normalizedType = item.linkType || 'pdf';
-                const matchesType = (typeVal === 'all') || (normalizedType === typeVal);
-                
-                return matchesSearch && matchesCategory && matchesType;
-            });
-
-            renderAdminList();
+        // Main Tab Switcher Wrapper
+        const switchTab = (tabId) => {
+            if (categoriesWithSubjects.includes(tabId)) {
+                pushHistoryState('category-subjects', { category: tabId });
+                renderView('category-subjects', { category: tabId });
+            } else {
+                pushHistoryState(tabId, {});
+                renderView(tabId, {});
+            }
         };
 
-        // --- 5. COMPONENT RENDERER ---
-        const renderAdminList = () => {
-            const container = document.getElementById('admin-list');
-            if (filteredData.length === 0) {
+        const goBack = () => {
+            // Uses browser's actual back logic to support the hardware back button perfectly
+            window.history.back();
+        };
+
+        // --- SIDEBAR DRAWER ---
+        let sidebarOpen = false;
+        const toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebarOpen = !sidebarOpen;
+            
+            if(sidebarOpen) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    sidebar.classList.add('open');
+                }, 10);
+            } else {
+                sidebar.classList.remove('open');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+        };
+
+        const reloadApp = () => {
+            toggleSidebar();
+            showToast("Fetching latest database entries...");
+            setTimeout(() => {
+                renderHomeStats();
+                showToast("System fully updated");
+            }, 800);
+        };
+
+        const shareApp = () => {
+            toggleSidebar();
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MHT CET Prep Hub',
+                    text: 'Explore detailed study maps, PDFs, classes & tests!',
+                    url: window.location.href,
+                }).catch((err) => console.log('Sharing error', err));
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showToast("Link copied to clipboard!");
+            }
+        };
+
+        // --- SAVED & COMPLETED LOGIC ---
+        const toggleSave = (id, event) => {
+            if(event) event.stopPropagation();
+            if(savedItems.includes(id)) {
+                savedItems = savedItems.filter(i => i !== id);
+                showToast("Removed from saved items");
+            } else {
+                savedItems.push(id);
+                showToast("Added to saved items!");
+            }
+            localStorage.setItem('mhtCetSavedItems', JSON.stringify(savedItems));
+            updateUIAfterAction();
+        };
+
+        const toggleComplete = (id, event) => {
+            if(event) event.stopPropagation();
+            if(completedItems.includes(id)) {
+                completedItems = completedItems.filter(i => i !== id);
+                showToast("Marked as unread");
+            } else {
+                completedItems.push(id);
+                showToast("Great! Marked as read.");
+            }
+            localStorage.setItem('mhtCetCompletedItems', JSON.stringify(completedItems));
+            updateUIAfterAction();
+            if(state.currentTab === 'performance') renderPerformanceStats();
+        };
+
+        const updateUIAfterAction = () => {
+            // Re-render currently visible list to update icons instantly
+            if (state.currentTab === 'saved') renderSavedItems();
+            else if (state.currentTab === 'subject-detail') renderSubjectDetail();
+            else if (state.currentTab === 'home') renderHomeRecents();
+            else if (state.currentTab === 'calendar') renderCalendarContent();
+        };
+
+
+        // --- REAL-TIME DATABASE LISTENER ---
+        refMaterials.on('value', snap => {
+            const data = snap.val() || {};
+            state.allMaterials = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            state.allMaterials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            
+            renderHomeStats();
+            renderHomeRecents();
+            
+            // Re-render active view
+            if (state.currentTab === 'category-subjects') renderCategorySubjects(state.currentCategory);
+            else if (state.currentTab === 'subject-detail') renderSubjectDetail();
+            else if (state.currentTab === 'calendar') renderCalendarContent();
+            else if (state.currentTab === 'saved') renderSavedItems();
+            else if (state.currentTab === 'performance') renderPerformanceStats();
+        });
+
+        // --- CALENDAR TIMELINE ENGINE ---
+        const renderCalendarView = () => {
+            renderCalendarDates();
+            renderCalendarContent();
+        };
+
+        const renderCalendarDates = () => {
+            const strip = document.getElementById('calendar-date-strip');
+            let html = '';
+            
+            const daysToGenerate = 45;
+            const today = new Date();
+
+            for(let i = daysToGenerate - 1; i >= 0; i--) {
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() - i);
+                
+                const ymd = getLocalYMD(targetDate);
+                const dayName = targetDate.toLocaleDateString('en-US', { weekday: 'short' });
+                const dateNum = targetDate.getDate();
+                
+                const isSelected = state.selectedCalendarDate === ymd;
+                const baseClass = isSelected 
+                    ? 'bg-appPink text-white shadow-lg shadow-appPink/30 border-transparent' 
+                    : 'bg-appCard text-textMuted border-gray-800 hover:border-appPink/50 hover:text-white';
+
+                html += `
+                <button onclick="selectCalendarDate('${ymd}')" class="flex flex-col items-center justify-center p-2 rounded-xl border min-w-[64px] transition-all ${baseClass}">
+                    <span class="text-[10px] uppercase font-bold tracking-wider mb-1 opacity-80">${dayName}</span>
+                    <span class="text-xl font-black leading-none">${dateNum}</span>
+                </button>`;
+            }
+            strip.innerHTML = html;
+            
+            setTimeout(() => { strip.scrollLeft = strip.scrollWidth; }, 50);
+        };
+
+        const selectCalendarDate = (ymd) => {
+            state.selectedCalendarDate = ymd;
+            renderCalendarDates(); 
+            renderCalendarContent();
+        };
+
+        const renderCalendarContent = () => {
+            const container = document.getElementById('calendar-content-list');
+            
+            const filtered = state.allMaterials.filter(item => {
+                if(!item.timestamp) return false;
+                return getLocalYMD(new Date(item.timestamp)) === state.selectedCalendarDate;
+            });
+
+            if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-1 xl:col-span-2 text-center py-16 text-textMuted bg-appCard border border-gray-800/80 rounded-2xl w-full">
-                        <i class="fa-solid fa-magnifying-glass-chart text-4xl mb-3 text-gray-700"></i>
-                        <p class="font-semibold text-white">No matching resources</p>
-                        <p class="text-xs mt-1 text-textMuted">Adjust your filters or add a new material.</p>
+                    <div class="col-span-full text-center py-16 flex flex-col items-center bg-appCard border border-gray-800/50 rounded-2xl w-full">
+                        <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center text-2xl text-gray-600 mb-3">
+                            <i class="fa-solid fa-mug-hot"></i>
+                        </div>
+                        <h3 class="text-white font-bold mb-1">Rest Day</h3>
+                        <p class="text-xs text-textMuted max-w-[200px]">No materials or classes were added on this date.</p>
                     </div>`;
                 return;
             }
 
-            container.innerHTML = filteredData.map(item => {
-                const badge = getLinkTypeBadge(item.linkType);
-                const timelineDate = item.timestamp ? new Date(item.timestamp).toLocaleDateString('en-CA') : 'N/A';
-                
+            container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
+        };
+
+
+        // --- CORE UI GENERATOR ENGINE ---
+        const renderHomeStats = () => {
+            document.getElementById('stat-total').innerText = state.allMaterials.length;
+            const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+            const recentItems = state.allMaterials.filter(item => item.timestamp > oneWeekAgo).length;
+            document.getElementById('stat-recent').innerText = recentItems;
+        };
+
+        const renderHomeRecents = () => {
+            const container = document.getElementById('home-recent-list');
+            const recent = state.allMaterials.slice(0, 5); 
+            
+            if (!recent.length) {
+                container.innerHTML = `<div class="w-full text-center py-6 text-textMuted text-sm bg-appCard rounded-xl border border-gray-800">Database is empty right now.</div>`;
+                return;
+            }
+
+            container.innerHTML = recent.map(item => {
+                const visual = getVisualProperties(item.linkType);
                 return `
-                <div class="bg-appCard border border-gray-800/80 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:border-gray-700 transition-colors w-full">
-                    <div class="flex-1 min-w-0 w-full">
-                        <div class="flex flex-wrap items-center gap-2 mb-2">
-                            <span class="text-[9px] uppercase tracking-wider font-extrabold text-white bg-appPink px-2.5 py-1 rounded-md shadow-sm shadow-appPink/10">${categoryLabels[item.category] || 'Notes'}</span>
-                            <span class="text-[10px] text-gray-400 bg-gray-800/80 border border-gray-800 px-2 py-0.5 rounded-md font-medium">${escapeHtml(item.subject)}</span>
-                            ${badge}
-                            ${item.size ? `<span class="text-[10px] text-textMuted"><i class="fa-solid fa-circle-info text-[8px] mr-1"></i>${escapeHtml(item.size)}</span>` : ''}
-                        </div>
-                        <h4 class="text-sm font-bold text-white truncate max-w-full md:max-w-md w-full">${escapeHtml(item.topic)}</h4>
-                        <div class="text-[10px] text-textMuted mt-1.5 flex gap-3 overflow-hidden">
-                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 font-mono truncate max-w-[150px] sm:max-w-[200px]">Target: ${escapeHtml(item.code)}</span>
-                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 text-appPink shrink-0"><i class="fa-regular fa-calendar mr-1"></i> ${timelineDate}</span>
-                        </div>
+                <div class="min-w-[180px] w-[180px] sm:min-w-[220px] sm:w-[220px] bg-appCard border border-gray-800 rounded-2xl p-3 flex flex-col shrink-0 cursor-pointer hover:border-gray-600 transition-colors" onclick="handleAction('${item.id}')">
+                    <div class="w-10 h-10 ${visual.bg} rounded-lg flex items-center justify-center ${visual.color} mb-3 shadow-sm border ${visual.border}">
+                        <i class="fa-solid ${visual.icon}"></i>
                     </div>
-                    <div class="flex items-center justify-end gap-2 self-stretch md:self-auto pt-3 md:pt-0 border-t border-gray-800/40 md:border-none w-full md:w-auto shrink-0">
-                        <button onclick="testLink('${item.id}')" title="Test Link / Stream" class="flex-1 md:flex-none h-10 px-3.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-all text-xs font-bold flex items-center justify-center gap-1.5 border border-gray-700 shrink-0">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Preview
-                        </button>
-                        <button onclick="openEditModal('${item.id}')" title="Edit Properties" class="w-10 h-10 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-indigo-500/20 shrink-0">
-                            <i class="fa-solid fa-pencil text-sm"></i>
-                        </button>
-                        <button onclick="confirmDelete('${item.id}')" title="Remove Asset" class="w-10 h-10 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20 shrink-0">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
-                        </button>
+                    <h4 class="text-xs font-bold text-white truncate w-full">${escapeHtml(item.topic)}</h4>
+                    <p class="text-[9px] text-textMuted truncate w-full mt-0.5">${escapeHtml(item.subject)} | ${categoryMeta[item.category]?.title || 'Notes'}</p>
+                    <div class="mt-3 pt-2 border-t border-gray-800 flex justify-between items-center gap-1.5">
+                        <span class="text-[10px] text-appPink font-bold flex-1"><i class="fa-solid ${visual.actionIcon} mr-1"></i> ${visual.actionText}</span>
                     </div>
                 </div>
             `}).join('');
         };
 
-        const getLinkTypeBadge = (linkType) => {
-            switch(linkType) {
-                case 'zoom':
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">Zoom</span>`;
-                case 'youtube':
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">YouTube</span>`;
-                case 'pdf':
-                default:
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded">PDF</span>`;
-            }
-        };
-
-        // --- 6. FORM DISPATCH ENGINE ---
-        const openEditModal = (id) => {
-            const item = allData.find(d => d.id === id);
-            if (!item) return;
-
-            document.getElementById('modal-title').innerText = "Edit Asset Properties";
-            document.getElementById('edit-id').value = item.id;
-            document.getElementById('up-category').value = item.category || 'notes';
-            document.getElementById('up-subject').value = item.subject || 'Physics';
-            document.getElementById('up-link-type').value = item.linkType || 'pdf';
-            document.getElementById('up-topic').value = item.topic || '';
-            document.getElementById('up-code').value = item.code || '';
-            document.getElementById('up-size').value = item.size || '';
+        const renderCategorySubjects = (category) => {
+            const container = document.getElementById('subject-list');
+            const subjectsToRender = ["Physics", "Chemistry", "Mathematics", "Biology", "Inorganic Chemistry", "Organic Chemistry", "Full Syllabus"];
             
-            // Zoom secondary fields mapping
-            document.getElementById('up-zoom-id').value = item.meetingId || '';
-            document.getElementById('up-zoom-pass').value = item.passcode || '';
+            container.innerHTML = subjectsToRender.map(subjName => {
+                const count = state.allMaterials.filter(m => m.subject === subjName && (m.category === category || (!m.category && category === 'notes'))).length;
+                const meta = subjectMeta[subjName] || fallbackMeta;
 
-            // Handle Timeline Date Extraction
-            if(item.timestamp) {
-                const itemDate = new Date(item.timestamp);
-                const localDateStr = `${itemDate.getFullYear()}-${String(itemDate.getMonth()+1).padStart(2,'0')}-${String(itemDate.getDate()).padStart(2,'0')}`;
-                document.getElementById('up-date').value = localDateStr;
-            } else {
-                document.getElementById('up-date').value = '';
-            }
-
-            toggleFormInputs();
-            document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Changes';
-            openUploadModal();
+                return `
+                <div onclick="openSubject('${subjName}')" class="bg-appCard border border-gray-800 rounded-2xl p-4 flex items-center gap-4 hover:bg-gray-800 transition-colors cursor-pointer w-full">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner shrink-0 ${meta.color}">
+                        <i class="fa-solid ${meta.icon} text-white/90"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-bold text-white truncate">${subjName}</h3>
+                        <p class="text-[10px] text-textMuted mt-0.5">${count} items available</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-textMuted text-xs shrink-0"></i>
+                </div>`;
+            }).join('');
         };
 
-        const testLink = (id) => {
-            const item = allData.find(d => d.id === id);
-            if (!item) return;
-            const code = item.code;
+        const openSubject = (subjName) => {
+            pushHistoryState('subject-detail', { category: state.currentCategory, subject: subjName });
+            renderView('subject-detail', { category: state.currentCategory, subject: subjName });
+        };
 
-            if (item.linkType === 'youtube') {
-                let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                let match = code.match(regExp);
-                if (match && match[2].length === 11) {
-                    window.open(`https://www.youtube.com/embed/${match[2]}`, '_blank');
-                } else {
-                    window.open(code, '_blank');
-                }
+        const renderSubjectDetail = () => {
+            const meta = subjectMeta[state.selectedSubject] || fallbackMeta;
+            
+            document.getElementById('detail-subj-icon-container').className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg shrink-0 ${meta.color}`;
+            document.getElementById('detail-subj-icon').className = `fa-solid ${meta.icon} text-white/90`;
+            
+            const catTitle = categoryMeta[state.currentCategory]?.title || 'Notes';
+            document.getElementById('detail-subj-title').innerText = `${state.selectedSubject} (${catTitle})`;
+
+            let filtered = state.allMaterials.filter(m => m.subject === state.selectedSubject && (m.category === state.currentCategory || (!m.category && state.currentCategory === 'notes')));
+            document.getElementById('detail-subj-count').innerText = `${filtered.length} Items`;
+
+            const container = document.getElementById('detail-pdf-list');
+            if (!filtered.length) {
+                container.innerHTML = `<div class="col-span-full text-center py-10"><i class="fa-solid fa-folder-open text-4xl text-gray-800 mb-3"></i><p class="text-sm text-textMuted">No material uploaded in this module yet.</p></div>`;
                 return;
             }
 
-            if (code.startsWith('http')) {
+            container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
+        };
+
+        const renderSavedItems = () => {
+            const container = document.getElementById('saved-list-container');
+            const filtered = state.allMaterials.filter(m => savedItems.includes(m.id));
+            
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-16 flex flex-col items-center">
+                        <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center text-3xl text-gray-600 mb-4">
+                            <i class="fa-regular fa-bookmark"></i>
+                        </div>
+                        <h3 class="text-white font-bold mb-1">No Saved Items</h3>
+                        <p class="text-xs text-textMuted max-w-[200px]">Tap the bookmark icon on any material to save it here.</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
+        };
+        
+        const renderPerformanceStats = () => {
+            // Count tests taken
+            const completedTestsCount = completedItems.filter(id => {
+                const item = state.allMaterials.find(m => m.id === id);
+                return item && item.category === 'tests';
+            }).length;
+            document.getElementById('perf-tests-taken').innerText = completedTestsCount;
+
+            // Completion Percentage
+            const totalItems = state.allMaterials.length;
+            const readItems = completedItems.length;
+            const completionPercent = totalItems > 0 ? Math.round((readItems / totalItems) * 100) : 0;
+            document.getElementById('perf-avg-score').innerText = completionPercent + '%';
+
+            // Items Read
+            document.getElementById('perf-materials-read').innerText = readItems;
+
+            // Subject wise Progress
+            const subjects = ["Physics", "Chemistry", "Mathematics", "Biology"];
+            let subjectHtml = '';
+            
+            subjects.forEach(sub => {
+                const subTotal = state.allMaterials.filter(m => m.subject === sub).length;
+                const subCompleted = completedItems.filter(id => {
+                    const item = state.allMaterials.find(m => m.id === id);
+                    return item && item.subject === sub;
+                }).length;
+                
+                const percent = subTotal > 0 ? Math.round((subCompleted / subTotal) * 100) : 0;
+                
+                let colorClass = 'bg-blue-500';
+                if(sub === 'Chemistry') colorClass = 'bg-pink-500';
+                else if(sub === 'Mathematics') colorClass = 'bg-purple-500';
+                else if(sub === 'Biology') colorClass = 'bg-green-500';
+
+                subjectHtml += `
+                <div>
+                    <div class="flex justify-between text-xs font-bold text-white mb-1.5">
+                        <span>${sub} <span class="text-textMuted font-medium text-[10px]">(${subCompleted}/${subTotal})</span></span>
+                        <span>${percent}%</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
+                        <div class="${colorClass} h-2.5 rounded-full transition-all duration-1000" style="width: ${percent}%"></div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('perf-subject-mastery').innerHTML = subjectHtml;
+        };
+
+        const generateItemCard = (item) => {
+            const visual = getVisualProperties(item.linkType);
+            const isSaved = savedItems.includes(item.id);
+            const saveIcon = isSaved ? 'fa-solid fa-bookmark text-appPink' : 'fa-regular fa-bookmark text-gray-400';
+            
+            const isCompleted = completedItems.includes(item.id);
+            const completeIcon = isCompleted ? 'fa-solid fa-circle-check text-green-500' : 'fa-regular fa-circle-check text-gray-500';
+            
+            return `
+            <div class="bg-appCard border ${isCompleted ? 'border-green-500/30' : 'border-gray-800'} rounded-2xl p-3.5 flex items-center gap-4 transition-colors w-full relative overflow-hidden group">
+                ${isCompleted ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500 rounded-l-2xl"></div>' : ''}
+                
+                <div class="w-10 h-10 ${visual.bg} rounded-lg flex items-center justify-center shrink-0 ${visual.color} border ${visual.border}">
+                    <i class="fa-solid ${visual.icon}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-bold ${isCompleted ? 'text-gray-300' : 'text-white'} truncate leading-tight">${escapeHtml(item.topic)}</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] text-textMuted bg-appBg px-2 py-0.5 rounded-md border border-gray-800">${escapeHtml(item.subject)}</span>
+                        ${item.size ? `<span class="text-[9px] text-gray-500">${escapeHtml(item.size)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <!-- Mark as Read Button -->
+                    <button onclick="toggleComplete('${item.id}', event)" title="Mark as Read" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors shrink-0">
+                        <i class="${completeIcon} text-[13px]"></i>
+                    </button>
+                    <!-- Bookmark Button -->
+                    <button onclick="toggleSave('${item.id}', event)" title="Save Item" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors shrink-0">
+                        <i class="${saveIcon} text-[13px]"></i>
+                    </button>
+                    <!-- Watch/View Action -->
+                    <button onclick="handleAction('${item.id}')" class="px-3 py-2 ${visual.btnBg} hover:opacity-90 ${visual.btnTextColor} rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hidden sm:flex">
+                        <i class="fa-solid ${visual.actionIcon}"></i> ${visual.actionText}
+                    </button>
+                    <button onclick="handleAction('${item.id}')" class="w-8 h-8 flex sm:hidden items-center justify-center ${visual.btnBg} hover:opacity-90 ${visual.btnTextColor} rounded-xl text-xs font-bold transition-all shadow-sm shrink-0">
+                        <i class="fa-solid ${visual.actionIcon}"></i>
+                    </button>
+                </div>
+            </div>`;
+        };
+
+        // --- VISUAL STRATEGY PARSER ---
+        const getVisualProperties = (linkType) => {
+            switch(linkType) {
+                case 'youtube':
+                    return {
+                        bg: 'bg-red-500/10', color: 'text-red-500', border: 'border-red-500/20',
+                        icon: 'fa-play', actionIcon: 'fa-circle-play', actionText: 'Watch',
+                        btnBg: 'bg-red-500/20', btnTextColor: 'text-red-400'
+                    };
+                case 'zoom':
+                    return {
+                        bg: 'bg-[#2D8CFF]/10', color: 'text-[#2D8CFF]', border: 'border-[#2D8CFF]/20',
+                        icon: 'fa-video', actionIcon: 'fa-video', actionText: 'Join',
+                        btnBg: 'bg-[#2D8CFF]/20', btnTextColor: 'text-[#2D8CFF]'
+                    };
+                case 'pdf':
+                default:
+                    return {
+                        bg: 'bg-rose-500/10', color: 'text-rose-500', border: 'border-rose-500/20',
+                        icon: 'fa-file-pdf', actionIcon: 'fa-eye', actionText: 'View',
+                        btnBg: 'bg-rose-500/20', btnTextColor: 'text-rose-400'
+                    };
+            }
+        };
+
+        // --- ROUTING ACTIONS ---
+        const handleAction = (id) => {
+            const item = state.allMaterials.find(m => m.id === id);
+            if (!item) return;
+
+            // Automatically mark as read if they open it
+            if(!completedItems.includes(id)) {
+                toggleComplete(id, null);
+            }
+
+            if (item.linkType === 'zoom') {
+                openZoomModal(item);
+            } else if (item.linkType === 'youtube') {
+                previewYouTube(item);
+            } else {
+                previewPDF(item.code, item.topic);
+            }
+        };
+
+        const openLink = (code) => {
+            if(!code) return;
+            if(code.startsWith('http')) {
                 window.open(code, '_blank');
                 return;
             }
-
-            showToast("Resolving brightclass proxy...");
+            showToast("Resolving external link...");
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
             fetch(proxyUrl).then(res => res.json()).then(data => {
-                if (data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
-                else showToast("Code could not resolve", true);
-            }).catch(() => showToast("Proxy request failed", true));
+                if(data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
+                else showToast("Invalid Document Link", true);
+            }).catch(() => showToast("Network error occurred", true));
         };
 
-        // --- 7. MODERATION LOGICS ---
-        const openUploadModal = () => {
-            document.getElementById('modal-upload').classList.remove('hidden');
-        };
-        
-        const closeUploadModal = () => {
-            document.getElementById('modal-upload').classList.add('hidden');
-            document.getElementById('upload-form').reset();
-            document.getElementById('edit-id').value = "";
-            document.getElementById('modal-title').innerText = "Upload Asset";
-            document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Asset';
-            toggleFormInputs();
+        // --- ZOOM MEETING POPUP ---
+        const openZoomModal = (item) => {
+            document.getElementById('zoom-topic').innerText = item.topic;
+            document.getElementById('zoom-subject').innerText = item.subject;
+            document.getElementById('zoom-id').innerText = item.meetingId || 'Direct Link Only';
+            document.getElementById('zoom-passcode').innerText = item.passcode || 'N/A';
+            document.getElementById('zoom-join-btn').href = item.code;
+            document.getElementById('modal-zoom').classList.remove('hidden');
         };
 
-        const handleUpload = async (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('edit-id').value;
-            const category = document.getElementById('up-category').value;
-            const subject = document.getElementById('up-subject').value;
-            const linkType = document.getElementById('up-link-type').value;
-            const topic = document.getElementById('up-topic').value.trim();
-            const code = document.getElementById('up-code').value.trim();
-            const size = document.getElementById('up-size').value.trim();
-            
-            // Timeline processing
-            const customDateInput = document.getElementById('up-date').value;
-            let targetTimestamp = Date.now();
-            if (customDateInput) {
-                // Creates date at midnight local time for the selected day
-                const [year, month, day] = customDateInput.split('-');
-                targetTimestamp = new Date(year, month - 1, day, 12, 0, 0).getTime();
+        const closeZoomModal = () => {
+            document.getElementById('modal-zoom').classList.add('hidden');
+        };
+
+        // --- YOUTUBE PREVIEW ENGINE ---
+        const previewYouTube = (item) => {
+            const embedUrl = getYouTubeEmbedUrl(item.code);
+            if (!embedUrl) {
+                window.open(item.code, '_blank');
+                return;
             }
+            
+            document.getElementById('preview-icon-wrapper').innerHTML = '<i class="fa-brands fa-youtube text-red-500 text-lg"></i>';
+            document.getElementById('preview-title').innerText = item.topic;
+            state.activePreviewLink = item.code; 
+            document.getElementById('modal-preview').classList.remove('hidden');
+            document.getElementById('preview-loader').classList.remove('hidden');
+            
+            document.getElementById('preview-iframe').src = embedUrl;
+        };
 
-            // Zoom payload values
-            const meetingId = document.getElementById('up-zoom-id').value.trim();
-            const passcode = document.getElementById('up-zoom-pass').value.trim();
+        const getYouTubeEmbedUrl = (url) => {
+            if (!url) return '';
+            let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            let match = url.match(regExp);
+            if (match && match[2].length === 11) {
+                return 'https://www.youtube.com/embed/' + match[2] + '?autoplay=1';
+            }
+            return '';
+        };
 
-            const btn = document.getElementById('btn-submit');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Storing Transaction...';
-            btn.disabled = true;
-
-            const payload = {
-                category, subject, linkType, topic, code, size,
-                meetingId: linkType === 'zoom' ? meetingId : null,
-                passcode: linkType === 'zoom' ? passcode : null,
+        // --- PDF PREVIEW SYSTEM ---
+        const previewPDF = (code, title) => {
+            if(!code) return;
+            document.getElementById('preview-icon-wrapper').innerHTML = '<i class="fa-solid fa-file-pdf text-appPink text-lg"></i>';
+            document.getElementById('preview-title').innerText = title || "Document";
+            
+            document.getElementById('modal-preview').classList.remove('hidden');
+            document.getElementById('preview-loader').classList.remove('hidden');
+            
+            const iframe = document.getElementById('preview-iframe');
+            
+            const loadIframe = (url) => {
+                state.activePreviewLink = url; 
+                const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+                iframe.src = viewerUrl;
             };
 
-            try {
-                if (editId) {
-                    payload.timestamp = targetTimestamp; // Apply custom or existing date
-                    payload.lastModified = Date.now();
-                    await refMaterials.child(editId).update(payload);
-                    showToast("Asset properties updated");
-                } else {
-                    payload.timestamp = targetTimestamp;
-                    await refMaterials.push(payload);
-                    showToast("Asset saved to live repository");
-                }
-                closeUploadModal();
-            } catch(err) {
-                showToast("Live transaction aborted", true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+            if(code.startsWith('http')) {
+                loadIframe(code);
+            } else {
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
+                fetch(proxyUrl)
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data && data.cdnUrl) loadIframe(data.cdnUrl);
+                        else {
+                            closePreview();
+                            showToast("Corrupted File Code", true);
+                        }
+                    }).catch(() => {
+                        closePreview();
+                        showToast("Stream blocked due to network fault.", true);
+                    });
             }
         };
 
-        // --- 8. REMOVAL LOGIC ---
-        const confirmDelete = (id) => {
-            pendingDeleteId = id;
-            document.getElementById('modal-delete').classList.remove('hidden');
-        };
-        const closeDeleteModal = () => {
-            pendingDeleteId = null;
-            document.getElementById('modal-delete').classList.add('hidden');
-        };
-        
-        document.getElementById('btn-confirm-del').addEventListener('click', async () => {
-            if(!pendingDeleteId) return;
-            try {
-                await refMaterials.child(pendingDeleteId).remove();
-                showToast("Asset deleted permanently");
-            } catch(e) {
-                showToast("Aborted deletion", true);
+        const openExternalPreviewLink = () => {
+            if(state.activePreviewLink) {
+                window.open(state.activePreviewLink, '_blank');
             }
-            closeDeleteModal();
-        });
+        };
 
-        // --- 9. UTILITIES ---
+        const closePreview = () => {
+            document.getElementById('modal-preview').classList.add('hidden');
+            document.getElementById('preview-iframe').src = ""; 
+            state.activePreviewLink = null;
+        };
+
+        // --- HELPERS ---
+        const copyToClipboard = (elementId) => {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy", true);
+            });
+        };
+
         const escapeHtml = (str) => {
             if (!str) return '';
             return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m]));
@@ -561,8 +1090,13 @@
         const showToast = (msg, isError = false) => {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;
+            
             const icon = document.getElementById('toast-icon');
-            icon.className = isError ? 'fa-solid fa-circle-exclamation text-red-500' : 'fa-solid fa-circle-check text-appPink';
+            if(isError) {
+                icon.className = 'fa-solid fa-circle-exclamation text-red-500';
+            } else {
+                icon.className = 'fa-solid fa-circle-check text-appPink';
+            }
 
             toast.style.opacity = '1';
             toast.style.transform = 'translate(-50%, 0)';
@@ -570,8 +1104,15 @@
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translate(-50%, -20px)';
-            }, 2500);
+            }, 3000);
         };
+
+        // On Boot: Set Initial State for history API
+        window.onload = () => {
+            history.replaceState({ view: 'home' }, '', '');
+        };
+
     </script>
 </body>
 </html>
+
