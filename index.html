@@ -66,27 +66,27 @@
             overflow: hidden; 
         }
 
-        /* Sidebar styles */
         #sidebar { transition: transform 0.3s ease-in-out; }
         #sidebar.open { transform: translateX(0); }
-        #sidebar-overlay { transition: opacity 0.3s ease-in-out; }
     </style>
 </head>
 <body>
 
     <div id="app-wrapper" class="app-container">
 
-        <!-- Functional Sidebar Drawer -->
+        <!-- Sidebar Drawer -->
         <div id="sidebar" class="absolute inset-y-0 left-0 w-64 bg-appCard border-r border-gray-800 transform -translate-x-full z-[100] flex flex-col">
             <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-[#0d0e15]">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-appPink flex items-center justify-center text-white font-bold"><i class="fa-solid fa-user-graduate text-sm"></i></div>
-                    <h2 class="text-white font-bold text-lg">Menu</h2>
+                    <!-- Circular Logo -->
+                    <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Logo" class="w-10 h-10 rounded-full border-2 border-appPink/40 object-cover shadow-lg">
+                    <h2 class="text-white font-bold text-lg leading-tight">MHT CET<br><span class="text-xs font-medium text-appPink">Learning Hub</span></h2>
                 </div>
                 <button onclick="toggleSidebar()" class="text-textMuted hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-gray-800/50"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="flex-1 overflow-y-auto p-4 space-y-2">
                 <button onclick="toggleSidebar(); switchTab('profile')" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-user text-appPink w-5 text-center"></i> My Profile</button>
+                <button onclick="toggleSidebar(); switchTab('calendar')" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-calendar-days text-appPink w-5 text-center"></i> Class Timeline</button>
                 <button onclick="toggleSidebar(); switchTab('notes')" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-book text-appPink w-5 text-center"></i> All Notes</button>
                 <hr class="border-gray-800 my-2">
                 <button onclick="reloadApp()" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-rotate-right text-appPink w-5 text-center"></i> Refresh Data</button>
@@ -94,23 +94,22 @@
                 <button onclick="contactSupport()" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-headset text-appPink w-5 text-center"></i> Help & Support</button>
             </div>
             <div class="p-4 border-t border-gray-800 text-xs text-textMuted text-center bg-[#0d0e15]">
-                MHT CET Learning App<br>Version 1.0.0
+                MHT CET Learning App<br>Version 1.3.0
             </div>
         </div>
-        <!-- Sidebar Overlay (Click to close) -->
-        <div id="sidebar-overlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden opacity-0"></div>
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity"></div>
 
-        
         <!-- Header -->
         <header class="pt-8 pb-4 px-5 flex justify-between items-center bg-appBg z-10 shrink-0 border-b border-gray-800/50">
             <div class="flex items-center gap-3">
                 <button id="btn-back" onclick="goBack()" class="hidden text-white text-xl pr-2"><i class="fa-solid fa-arrow-left"></i></button>
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-bars text-xl text-white/90 cursor-pointer hover:text-appPink transition-colors" id="menu-icon" onclick="toggleSidebar()"></i>
-                    <h1 id="header-title" class="text-lg font-bold text-white ml-2 tracking-wide">MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span></h1>
+                <div class="flex items-center gap-3" id="main-header-content">
+                    <i class="fa-solid fa-bars text-xl text-white/90 cursor-pointer hover:text-appPink transition-colors mr-1" id="menu-icon" onclick="toggleSidebar()"></i>
+                    <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Logo" class="w-8 h-8 rounded-full border border-appPink/30 object-cover shadow-sm hidden sm:block">
+                    <h1 id="header-title" class="text-lg font-bold text-white tracking-wide truncate max-w-[200px]">MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span></h1>
                 </div>
             </div>
-            <div class="flex gap-4 text-xl text-white/90">
+            <div class="flex gap-4 text-xl text-white/90 shrink-0">
                 <i class="fa-solid fa-gift"></i>
                 <div class="relative">
                     <i class="fa-regular fa-bell"></i>
@@ -124,13 +123,12 @@
             
             <!-- VIEW: HOME (Dashboard) -->
             <main id="view-home" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view fade-in">
-                <!-- Greeting Card (Updated with Useful Stats) -->
+                <!-- Greeting Card -->
                 <div class="mx-5 mt-4 p-5 rounded-3xl bg-gradient-to-br from-[#2a1738] to-appCard relative overflow-hidden border border-white/5 shadow-lg">
                     <div class="relative z-10">
                         <h2 class="text-xl font-bold text-white mb-1">Hello, Student <span class="text-yellow-400">👋</span></h2>
                         <p class="text-xs text-gray-400 mb-5">Access all your study resources here.</p>
                         
-                        <!-- Useful Stats linked to Server Data -->
                         <div class="flex gap-6 text-left">
                             <div>
                                 <div class="text-xs text-appPink mb-1 flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-[10px]"></i> Total Materials</div>
@@ -143,12 +141,10 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Right Decorative Button -->
-                    <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#361e47] to-transparent flex flex-col items-center justify-center border-l border-white/5 cursor-pointer hover:bg-white/5 transition-colors" onclick="switchTab('notes')">
-                        <div class="w-10 h-12 bg-appPink rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-appPink/50 mb-2 relative">
-                            PDF
-                        </div>
-                        <div class="text-[10px] text-center font-bold text-white">Materials</div>
+                    <!-- Right Decorative Button with Custom Logo -->
+                    <div class="absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#361e47] to-transparent flex flex-col items-center justify-center border-l border-white/5 cursor-pointer hover:bg-white/5 transition-colors" onclick="switchTab('notes')">
+                        <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Materials Logo" class="w-12 h-12 rounded-full border-2 border-appPink/40 object-cover shadow-[0_0_15px_rgba(244,63,94,0.3)] mb-1">
+                        <div class="text-[10px] text-center font-bold text-white mt-1">Materials</div>
                     </div>
                 </div>
 
@@ -184,9 +180,9 @@
                             <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-network-wired"></i></div>
                             <span class="text-[10px] text-gray-400 font-medium">Mind Maps</span>
                         </div>
-                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('dpps')">
-                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors"><i class="fa-solid fa-list-check"></i></div>
-                            <span class="text-[10px] text-gray-400 font-medium">DPPs</span>
+                        <div class="flex flex-col items-center gap-2 cursor-pointer group" onclick="switchTab('calendar')">
+                            <div class="w-14 h-14 rounded-2xl bg-appCard flex items-center justify-center text-appPink text-xl group-hover:bg-[#2a1738] transition-colors shadow-[0_0_15px_rgba(244,63,94,0.15)]"><i class="fa-solid fa-calendar-days"></i></div>
+                            <span class="text-[10px] text-appPink font-bold">Timeline</span>
                         </div>
                     </div>
                 </div>
@@ -197,8 +193,25 @@
                         <h3 class="text-sm font-semibold text-white">Recently Added</h3>
                     </div>
                     <div class="flex overflow-x-auto hide-scrollbar px-5 gap-4 pb-2" id="home-recent-list">
-                        <!-- Populated by JS -->
+                        <!-- Populated dynamically -->
                     </div>
+                </div>
+            </main>
+
+            <!-- VIEW: CALENDAR TIMELINE -->
+            <main id="view-calendar" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in flex-col">
+                <div class="bg-appCard border-b border-gray-800 shrink-0 px-5 py-4">
+                    <h3 class="text-white font-bold text-sm mb-1">Class Timeline</h3>
+                    <p class="text-xs text-textMuted mb-4">See what was taught on any given day</p>
+                    
+                    <!-- Scrollable Date Strip -->
+                    <div class="flex overflow-x-auto hide-scrollbar gap-3 pb-2" id="calendar-date-strip">
+                        <!-- Dates populated via JS -->
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto hide-scrollbar px-5 pt-4 space-y-3" id="calendar-content-list">
+                    <!-- Daily content populated via JS -->
                 </div>
             </main>
 
@@ -211,11 +224,11 @@
                     </div>
                 </div>
                 <div class="space-y-3" id="subject-list">
-                    <!-- Populated by JS -->
+                    <!-- Populated dynamically -->
                 </div>
             </main>
 
-            <!-- VIEW: SUBJECT DETAIL (For Notes primarily) -->
+            <!-- VIEW: SUBJECT DETAIL -->
             <main id="view-subject-detail" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden slide-in-right flex-col">
                 <div class="px-5 flex items-center gap-4 mb-4 mt-4">
                     <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg" id="detail-subj-icon-container">
@@ -227,11 +240,11 @@
                     </div>
                 </div>
                 <div class="px-5 space-y-3 flex-1 overflow-y-auto hide-scrollbar" id="detail-pdf-list">
-                    <!-- Populated by JS -->
+                    <!-- Populated dynamically -->
                 </div>
             </main>
 
-            <!-- GENERIC LIST VIEW (For Live Classes, Tests, PYQ, Practice, etc.) -->
+            <!-- GENERIC LIST VIEW -->
             <main id="view-generic-list" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5">
                 <h2 class="text-lg font-bold text-white mt-4 mb-4" id="generic-list-title">Category Name</h2>
                 <div class="space-y-3" id="generic-list-container">
@@ -241,13 +254,12 @@
 
             <!-- Profile View -->
             <main id="view-profile" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5">
-                <div class="flex items-center gap-4 mt-6 mb-8 bg-appCard p-4 rounded-2xl border border-gray-800">
-                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center text-2xl text-appPink"><i class="fa-solid fa-user"></i></div>
-                    <div>
-                        <h2 class="text-xl font-bold text-white">Student User</h2>
-                        <p class="text-xs text-textMuted">MHT CET Batch</p>
-                    </div>
+                <div class="flex flex-col items-center mt-8 mb-8">
+                    <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Profile Logo" class="w-24 h-24 rounded-full border-4 border-appCard shadow-2xl object-cover mb-4">
+                    <h2 class="text-2xl font-bold text-white">Student Hub</h2>
+                    <p class="text-sm text-appPink font-medium mt-1">MHT CET Target Batch</p>
                 </div>
+                
                 <div class="space-y-3">
                     <button class="w-full bg-appCard border border-gray-800 hover:border-gray-700 p-4 rounded-xl flex items-center justify-between text-white transition-colors">
                         <div class="flex items-center gap-3"><i class="fa-solid fa-bookmark text-appPink w-5"></i> Saved Items</div>
@@ -255,6 +267,10 @@
                     </button>
                     <button class="w-full bg-appCard border border-gray-800 hover:border-gray-700 p-4 rounded-xl flex items-center justify-between text-white transition-colors">
                         <div class="flex items-center gap-3"><i class="fa-solid fa-chart-line text-appPink w-5"></i> My Performance</div>
+                        <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
+                    </button>
+                    <button onclick="switchTab('calendar')" class="w-full bg-appCard border border-gray-800 hover:border-gray-700 p-4 rounded-xl flex items-center justify-between text-white transition-colors">
+                        <div class="flex items-center gap-3"><i class="fa-solid fa-calendar-check text-appPink w-5"></i> Study Timeline</div>
                         <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
                     </button>
                 </div>
@@ -282,27 +298,67 @@
             </button>
         </nav>
 
-        <!-- PDF Preview Modal -->
+        <!-- PDF & YouTube Embedded Preview Modal -->
         <div id="modal-preview" class="hidden absolute inset-0 z-[80] bg-appBg flex flex-col fade-in">
             <div class="h-14 shrink-0 flex items-center justify-between px-4 bg-appCard border-b border-gray-800 shadow-md relative z-20">
                 <div class="flex items-center gap-3 w-[80%]">
-                    <i class="fa-solid fa-file-pdf text-appPink text-lg"></i>
+                    <span id="preview-icon-wrapper"><i class="fa-solid fa-file-pdf text-appPink text-lg"></i></span>
                     <h3 class="text-white font-bold text-sm truncate" id="preview-title">Document Preview</h3>
                 </div>
-                <button onclick="closePreview()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-textMuted hover:text-white transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="openExternalPreviewLink()" title="Open externally" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-textMuted hover:text-white transition-colors">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </button>
+                    <button onclick="closePreview()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-textMuted hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
             </div>
-            <div class="flex-1 w-full relative bg-[#1e1e1e]">
+            <div class="flex-1 w-full relative bg-[#12131a]">
                 <div id="preview-loader" class="absolute inset-0 flex flex-col items-center justify-center text-appPink z-0">
                     <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
-                    <p class="text-xs text-textMuted">Loading document...</p>
+                    <p class="text-xs text-textMuted">Loading preview...</p>
                 </div>
-                <iframe id="preview-iframe" class="w-full h-full border-none z-10 relative bg-transparent" onload="document.getElementById('preview-loader').classList.add('hidden')"></iframe>
+                <iframe id="preview-iframe" class="w-full h-full border-none z-10 relative bg-transparent" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen onload="document.getElementById('preview-loader').classList.add('hidden')"></iframe>
             </div>
         </div>
 
-        <!-- Toast -->
+        <!-- Zoom Meeting Info Popup Modal -->
+        <div id="modal-zoom" class="hidden absolute inset-0 z-[85] bg-black/80 backdrop-blur-sm flex items-center justify-center px-6">
+            <div class="bg-appCard border border-gray-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl fade-in text-center relative">
+                <div class="w-16 h-16 bg-[#2D8CFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#2D8CFF] text-3xl">
+                    <i class="fa-solid fa-video"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-1" id="zoom-topic">Live Class</h3>
+                <p class="text-xs text-textMuted mb-6" id="zoom-subject">Subject Info</p>
+
+                <div class="bg-[#090a10] border border-gray-800 rounded-2xl p-4 space-y-3 text-left mb-6 font-mono text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="text-textMuted">Meeting ID:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-bold" id="zoom-id">--- --- ----</span>
+                            <button onclick="copyToClipboard('zoom-id')" class="text-appPink hover:text-white p-1"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-textMuted">Passcode:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-bold" id="zoom-passcode">------</span>
+                            <button onclick="copyToClipboard('zoom-passcode')" class="text-appPink hover:text-white p-1"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="closeZoomModal()" class="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold transition-all">Cancel</button>
+                    <a id="zoom-join-btn" href="#" target="_blank" class="flex-1 py-3 bg-[#2D8CFF] hover:bg-[#1a75e8] text-white rounded-xl font-bold shadow-lg shadow-[#2D8CFF]/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-play"></i> Join Zoom
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
         <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[110] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
             <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
             <span id="toast-msg">Success</span>
@@ -311,7 +367,7 @@
     </div>
 
     <script>
-        // --- FIREBASE SETUP ---
+        // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyCpG-jibUuhZbqzqHCDR7PeSOddxoNF4sg",
             authDomain: "studiment-tracking.firebaseapp.com",
@@ -323,10 +379,12 @@
         const db = firebase.database();
         const refMaterials = db.ref('study_text_entries');
 
-        // --- STATE ---
+        // --- APP STATE ---
         const state = {
             currentTab: 'home',
             selectedSubject: null,
+            selectedCalendarDate: null, 
+            activePreviewLink: null,
             allMaterials: [],
         };
 
@@ -352,7 +410,16 @@
 
         const fallbackMeta = { icon: "fa-folder", color: "bg-gray-700" };
 
-        // --- SIDEBAR MENU LOGIC ---
+        const getLocalYMD = (dateObj) => {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        state.selectedCalendarDate = getLocalYMD(new Date());
+
+        // --- SIDEBAR DRAWER ---
         let sidebarOpen = false;
         const toggleSidebar = () => {
             const sidebar = document.getElementById('sidebar');
@@ -361,7 +428,6 @@
             
             if(sidebarOpen) {
                 overlay.classList.remove('hidden');
-                // Small delay to allow display:block to apply before animation
                 setTimeout(() => {
                     overlay.classList.remove('opacity-0');
                     sidebar.classList.add('open');
@@ -377,11 +443,10 @@
 
         const reloadApp = () => {
             toggleSidebar();
-            showToast("Fetching latest data...");
-            // Simulate reloading effect
+            showToast("Fetching latest database entries...");
             setTimeout(() => {
                 renderHomeStats();
-                showToast("Data is up to date");
+                showToast("System fully updated");
             }, 800);
         };
 
@@ -389,24 +454,22 @@
             toggleSidebar();
             if (navigator.share) {
                 navigator.share({
-                    title: 'MHT CET Learning App',
-                    text: 'Check out this awesome app for MHT CET Class 12 preparation!',
+                    title: 'MHT CET Prep Hub',
+                    text: 'Explore detailed study maps, PDFs, classes & tests!',
                     url: window.location.href,
-                }).catch((error) => console.log('Error sharing', error));
+                }).catch((err) => console.log('Sharing error', err));
             } else {
-                showToast("Link copied to clipboard!");
-                // Fallback copying to clipboard
                 navigator.clipboard.writeText(window.location.href);
+                showToast("Link saved to clipboard!");
             }
         };
 
         const contactSupport = () => {
             toggleSidebar();
-            window.location.href = "mailto:support@mhtcetapp.com?subject=Support Request - MHT CET App";
+            window.location.href = "mailto:support@mhtcetapp.com?subject=Class 12 Prep Portal Query";
         };
 
-
-        // --- NAVIGATION LOGIC ---
+        // --- TAB & SCREEN SWITCHER ---
         const switchTab = (tabId) => {
             state.currentTab = tabId;
             
@@ -416,6 +479,11 @@
                     const isMatch = btn.dataset.tab === tabId;
                     btn.classList.toggle('text-appPink', isMatch);
                     btn.classList.toggle('text-textMuted', !isMatch);
+                });
+            } else {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('text-appPink');
+                    btn.classList.add('text-textMuted');
                 });
             }
 
@@ -443,8 +511,14 @@
                 menuIcon.classList.add('hidden');
                 titleEl.innerHTML = 'Profile';
             }
+            else if (tabId === 'calendar') {
+                document.getElementById('view-calendar').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'Study Timeline';
+                renderCalendarView();
+            }
             else {
-                // Dynamic Category Views (live, tests, pyq, etc.)
                 document.getElementById('view-generic-list').classList.remove('hidden');
                 backBtn.classList.remove('hidden');
                 menuIcon.classList.add('hidden');
@@ -465,7 +539,7 @@
             }
         };
 
-        // --- FIREBASE FETCH ---
+        // --- REAL-TIME DATABASE LISTENER ---
         refMaterials.on('value', snap => {
             const data = snap.val() || {};
             state.allMaterials = Object.keys(data).map(key => ({ id: key, ...data[key] }));
@@ -477,18 +551,83 @@
             
             if (state.currentTab === 'subject' && state.selectedSubject) {
                 renderSubjectDetail();
+            } else if (state.currentTab === 'calendar') {
+                renderCalendarContent();
             } else if (categoryMeta[state.currentTab]) {
                 renderGenericList(state.currentTab);
             }
         });
 
-        // --- RENDERERS ---
+        // --- CALENDAR TIMELINE ENGINE (EXTENDED TO 45 DAYS) ---
+        const renderCalendarView = () => {
+            renderCalendarDates();
+            renderCalendarContent();
+        };
 
+        const renderCalendarDates = () => {
+            const strip = document.getElementById('calendar-date-strip');
+            let html = '';
+            
+            const daysToGenerate = 45; // Increased length up to 45 days
+            const today = new Date();
+
+            for(let i = daysToGenerate - 1; i >= 0; i--) {
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() - i);
+                
+                const ymd = getLocalYMD(targetDate);
+                const dayName = targetDate.toLocaleDateString('en-US', { weekday: 'short' });
+                const dateNum = targetDate.getDate();
+                
+                const isSelected = state.selectedCalendarDate === ymd;
+                const baseClass = isSelected 
+                    ? 'bg-appPink text-white shadow-lg shadow-appPink/30 border-transparent' 
+                    : 'bg-appCard text-textMuted border-gray-800 hover:border-appPink/50 hover:text-white';
+
+                html += `
+                <button onclick="selectCalendarDate('${ymd}')" class="flex flex-col items-center justify-center p-2 rounded-xl border min-w-[64px] transition-all ${baseClass}">
+                    <span class="text-[10px] uppercase font-bold tracking-wider mb-1 opacity-80">${dayName}</span>
+                    <span class="text-xl font-black leading-none">${dateNum}</span>
+                </button>`;
+            }
+            strip.innerHTML = html;
+            
+            setTimeout(() => { strip.scrollLeft = strip.scrollWidth; }, 50);
+        };
+
+        const selectCalendarDate = (ymd) => {
+            state.selectedCalendarDate = ymd;
+            renderCalendarDates(); 
+            renderCalendarContent();
+        };
+
+        const renderCalendarContent = () => {
+            const container = document.getElementById('calendar-content-list');
+            
+            const filtered = state.allMaterials.filter(item => {
+                if(!item.timestamp) return false;
+                return getLocalYMD(new Date(item.timestamp)) === state.selectedCalendarDate;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 flex flex-col items-center bg-appCard border border-gray-800/50 rounded-2xl">
+                        <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center text-2xl text-gray-600 mb-3">
+                            <i class="fa-solid fa-mug-hot"></i>
+                        </div>
+                        <h3 class="text-white font-bold mb-1">Rest Day</h3>
+                        <p class="text-xs text-textMuted max-w-[200px]">No materials or classes were added on this date.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
+        };
+
+
+        // --- CORE UI GENERATOR ENGINE ---
         const renderHomeStats = () => {
-            // Update total materials
             document.getElementById('stat-total').innerText = state.allMaterials.length;
-
-            // Calculate items added in the last 7 days
             const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
             const recentItems = state.allMaterials.filter(item => item.timestamp > oneWeekAgo).length;
             document.getElementById('stat-recent').innerText = recentItems;
@@ -499,22 +638,25 @@
             const recent = state.allMaterials.slice(0, 5); 
             
             if (!recent.length) {
-                container.innerHTML = `<div class="w-full text-center py-6 text-textMuted text-sm bg-appCard rounded-xl border border-gray-800">No materials available yet.</div>`;
+                container.innerHTML = `<div class="w-full text-center py-6 text-textMuted text-sm bg-appCard rounded-xl border border-gray-800">Database is empty. No resources available yet.</div>`;
                 return;
             }
 
             container.innerHTML = recent.map(item => {
                 const catInfo = categoryMeta[item.category || 'notes'] || fallbackMeta;
+                const visual = getVisualProperties(item.linkType);
                 return `
-                <div class="min-w-[140px] w-[140px] bg-appCard border border-gray-800 rounded-2xl p-3 flex flex-col shrink-0">
-                    <div class="w-10 h-10 bg-appPink/10 rounded-lg flex items-center justify-center text-appPink mb-3 shadow-sm border border-appPink/20">
-                        <i class="fa-solid ${catInfo.icon}"></i>
+                <div class="min-w-[150px] w-[150px] bg-appCard border border-gray-800 rounded-2xl p-3 flex flex-col shrink-0">
+                    <div class="w-10 h-10 ${visual.bg} rounded-lg flex items-center justify-center ${visual.color} mb-3 shadow-sm border ${visual.border}">
+                        <i class="fa-solid ${visual.icon}"></i>
                     </div>
                     <h4 class="text-xs font-bold text-white truncate w-full">${escapeHtml(item.topic)}</h4>
                     <p class="text-[9px] text-textMuted truncate w-full mt-0.5">${escapeHtml(item.subject)}</p>
-                    <div class="mt-3 flex justify-between items-end border-t border-gray-800 pt-2">
-                        <button onclick="previewPDF('${escapeHtml(item.code)}', '${escapeHtml(item.topic)}')" class="text-gray-400 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fa-solid fa-eye"></i> View</button>
-                        <button onclick="openLink('${escapeHtml(item.code)}')" class="text-appPink hover:text-white transition-colors"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></button>
+                    <div class="mt-3 flex justify-between items-center border-t border-gray-800 pt-2 gap-2">
+                        <button onclick="handleAction('${item.id}')" class="text-gray-400 hover:text-white transition-colors text-[11px] font-medium flex items-center gap-1.5 flex-1"><i class="fa-solid ${visual.actionIcon}"></i> ${visual.actionText}</button>
+                        <button onclick="openLink('${escapeHtml(item.code)}')" title="Redirect Link" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-800 hover:bg-gray-700 text-appPink hover:text-white transition-colors shrink-0">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </button>
                     </div>
                 </div>
             `}).join('');
@@ -525,7 +667,6 @@
             const subjectsToRender = ["Physics", "Chemistry", "Mathematics", "Biology", "Inorganic Chemistry", "Organic Chemistry"];
             
             container.innerHTML = subjectsToRender.map(subjName => {
-                // Filter only notes for the subject view
                 const count = state.allMaterials.filter(m => m.subject === subjName && (m.category === 'notes' || !m.category)).length;
                 const meta = subjectMeta[subjName] || fallbackMeta;
 
@@ -536,7 +677,7 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-sm font-bold text-white">${subjName}</h3>
-                        <p class="text-[10px] text-textMuted mt-0.5">${count} Items available</p>
+                        <p class="text-[10px] text-textMuted mt-0.5">${count} items available</p>
                     </div>
                     <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
                 </div>`;
@@ -569,7 +710,7 @@
 
             const container = document.getElementById('detail-pdf-list');
             if (!filtered.length) {
-                container.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-folder-open text-4xl text-gray-800 mb-3"></i><p class="text-sm text-textMuted">No materials found for this subject.</p></div>`;
+                container.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-folder-open text-4xl text-gray-800 mb-3"></i><p class="text-sm text-textMuted">No material uploaded in this module.</p></div>`;
                 return;
             }
 
@@ -586,8 +727,8 @@
                         <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center text-3xl text-gray-600 mb-4">
                             <i class="fa-solid fa-box-open"></i>
                         </div>
-                        <h3 class="text-white font-bold mb-1">Nothing here yet</h3>
-                        <p class="text-xs text-textMuted max-w-[200px]">Content for this section has not been uploaded by the admin.</p>
+                        <h3 class="text-white font-bold mb-1">Nothing uploaded yet</h3>
+                        <p class="text-xs text-textMuted max-w-[200px]">Content for this tab is pending admin dispatch.</p>
                     </div>`;
                 return;
             }
@@ -596,12 +737,12 @@
         };
 
         const generateItemCard = (item) => {
-            const catIcon = (categoryMeta[item.category] && categoryMeta[item.category].icon) ? categoryMeta[item.category].icon : 'fa-file';
+            const visual = getVisualProperties(item.linkType);
             
             return `
             <div class="bg-appCard border border-gray-800 rounded-2xl p-3.5 flex items-center gap-4 transition-colors">
-                <div class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center shrink-0 text-appPink">
-                    <i class="fa-solid ${catIcon}"></i>
+                <div class="w-10 h-10 ${visual.bg} rounded-lg flex items-center justify-center shrink-0 ${visual.color} border ${visual.border}">
+                    <i class="fa-solid ${visual.icon}"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-bold text-white truncate leading-tight">${escapeHtml(item.topic)}</h4>
@@ -610,37 +751,128 @@
                         ${item.size ? `<span class="text-[9px] text-gray-500">${escapeHtml(item.size)}</span>` : ''}
                     </div>
                 </div>
-                <div class="flex items-center gap-1 shrink-0">
-                    <button onclick="previewPDF('${escapeHtml(item.code)}', '${escapeHtml(item.topic)}')" class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"><i class="fa-solid fa-eye text-xs"></i></button>
-                    <button onclick="openLink('${escapeHtml(item.code)}')" class="w-9 h-9 flex items-center justify-center text-appPink bg-appPink/10 hover:bg-appPink/20 rounded-full transition-colors"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></button>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <!-- Main In-App Action Button -->
+                    <button onclick="handleAction('${item.id}')" class="px-3 py-2 ${visual.btnBg} hover:opacity-90 ${visual.btnTextColor} rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid ${visual.actionIcon}"></i> ${visual.actionText}
+                    </button>
+                    <!-- Redirect External Link Button -->
+                    <button onclick="openLink('${escapeHtml(item.code)}')" title="Redirect / Open External" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded-xl transition-colors">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                    </button>
                 </div>
             </div>`;
         };
 
-        // --- PREVIEW & OPEN LOGIC ---
+        // --- VISUAL STRATEGY PARSER ---
+        const getVisualProperties = (linkType) => {
+            switch(linkType) {
+                case 'youtube':
+                    return {
+                        bg: 'bg-red-500/10', color: 'text-red-500', border: 'border-red-500/20',
+                        icon: 'fa-play', actionIcon: 'fa-circle-play', actionText: 'Watch',
+                        btnBg: 'bg-red-500/20', btnTextColor: 'text-red-400'
+                    };
+                case 'zoom':
+                    return {
+                        bg: 'bg-[#2D8CFF]/10', color: 'text-[#2D8CFF]', border: 'border-[#2D8CFF]/20',
+                        icon: 'fa-video', actionIcon: 'fa-video', actionText: 'Join',
+                        btnBg: 'bg-[#2D8CFF]/20', btnTextColor: 'text-[#2D8CFF]'
+                    };
+                case 'pdf':
+                default:
+                    return {
+                        bg: 'bg-rose-500/10', color: 'text-rose-500', border: 'border-rose-500/20',
+                        icon: 'fa-file-pdf', actionIcon: 'fa-eye', actionText: 'View',
+                        btnBg: 'bg-rose-500/20', btnTextColor: 'text-rose-400'
+                    };
+            }
+        };
+
+        // --- ROUTING ACTIONS ---
+        const handleAction = (id) => {
+            const item = state.allMaterials.find(m => m.id === id);
+            if (!item) return;
+
+            if (item.linkType === 'zoom') {
+                openZoomModal(item);
+            } else if (item.linkType === 'youtube') {
+                previewYouTube(item);
+            } else {
+                previewPDF(item.code, item.topic);
+            }
+        };
+
+        const openLink = (code) => {
+            if(!code) return;
+            if(code.startsWith('http')) {
+                window.open(code, '_blank');
+                return;
+            }
+            showToast("Resolving external link...");
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
+            fetch(proxyUrl).then(res => res.json()).then(data => {
+                if(data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
+                else showToast("Invalid Document Link", true);
+            }).catch(() => showToast("Network error during redirect", true));
+        };
+
+        // --- ZOOM MEETING POPUP ---
+        const openZoomModal = (item) => {
+            document.getElementById('zoom-topic').innerText = item.topic;
+            document.getElementById('zoom-subject').innerText = item.subject;
+            document.getElementById('zoom-id').innerText = item.meetingId || 'Direct Link Only';
+            document.getElementById('zoom-passcode').innerText = item.passcode || 'N/A';
+            document.getElementById('zoom-join-btn').href = item.code;
+            document.getElementById('modal-zoom').classList.remove('hidden');
+        };
+
+        const closeZoomModal = () => {
+            document.getElementById('modal-zoom').classList.add('hidden');
+        };
+
+        // --- YOUTUBE PREVIEW ENGINE ---
+        const previewYouTube = (item) => {
+            const embedUrl = getYouTubeEmbedUrl(item.code);
+            if (!embedUrl) {
+                window.open(item.code, '_blank');
+                return;
+            }
+            
+            document.getElementById('preview-icon-wrapper').innerHTML = '<i class="fa-brands fa-youtube text-red-500 text-lg"></i>';
+            document.getElementById('preview-title').innerText = item.topic;
+            state.activePreviewLink = item.code; 
+            document.getElementById('modal-preview').classList.remove('hidden');
+            document.getElementById('preview-loader').classList.remove('hidden');
+            
+            document.getElementById('preview-iframe').src = embedUrl;
+        };
+
+        const getYouTubeEmbedUrl = (url) => {
+            if (!url) return '';
+            let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            let match = url.match(regExp);
+            if (match && match[2].length === 11) {
+                return 'https://www.youtube.com/embed/' + match[2] + '?autoplay=1';
+            }
+            return '';
+        };
+
+        // --- PDF PREVIEW SYSTEM ---
         const previewPDF = (code, title) => {
             if(!code) return;
+            document.getElementById('preview-icon-wrapper').innerHTML = '<i class="fa-solid fa-file-pdf text-appPink text-lg"></i>';
             document.getElementById('preview-title').innerText = title || "Document";
+            
             document.getElementById('modal-preview').classList.remove('hidden');
             document.getElementById('preview-loader').classList.remove('hidden');
             
             const iframe = document.getElementById('preview-iframe');
             
             const loadIframe = (url) => {
-                // Determine if it's a Youtube link or PDF
-                if(url.includes('youtube.com') || url.includes('youtu.be')) {
-                    // Extract Video ID and use embed URL
-                    let videoId = url.split('v=')[1];
-                    if(!videoId) videoId = url.split('youtu.be/')[1];
-                    const ampersandPosition = videoId ? videoId.indexOf('&') : -1;
-                    if(ampersandPosition !== -1) videoId = videoId.substring(0, ampersandPosition);
-                    
-                    iframe.src = `https://www.youtube.com/embed/${videoId}`;
-                } else {
-                    // Try to load as PDF via Google Docs
-                    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
-                    iframe.src = viewerUrl;
-                }
+                state.activePreviewLink = url; 
+                const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+                iframe.src = viewerUrl;
             };
 
             if(code.startsWith('http')) {
@@ -653,35 +885,37 @@
                         if(data && data.cdnUrl) loadIframe(data.cdnUrl);
                         else {
                             closePreview();
-                            showToast("Invalid Document Link", true);
+                            showToast("Corrupted File Code", true);
                         }
                     }).catch(() => {
                         closePreview();
-                        showToast("Error loading document", true);
+                        showToast("Stream blocked. Network fault.", true);
                     });
+            }
+        };
+
+        const openExternalPreviewLink = () => {
+            if(state.activePreviewLink) {
+                window.open(state.activePreviewLink, '_blank');
             }
         };
 
         const closePreview = () => {
             document.getElementById('modal-preview').classList.add('hidden');
             document.getElementById('preview-iframe').src = ""; 
+            state.activePreviewLink = null;
         };
 
-        const openLink = (code) => {
-            if(!code) return;
-            if(code.startsWith('http')) {
-                window.open(code, '_blank');
-                return;
-            }
-            showToast("Opening Link...");
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
-            fetch(proxyUrl).then(res => res.json()).then(data => {
-                if(data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
-                else showToast("Invalid Code", true);
-            }).catch(() => showToast("Network error", true));
+        // --- HELPERS ---
+        const copyToClipboard = (elementId) => {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy", true);
+            });
         };
 
-        // --- UTILS ---
         const escapeHtml = (str) => {
             if (!str) return '';
             return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m]));
