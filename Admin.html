@@ -74,18 +74,18 @@
 <body>
 
     <!-- Professional Admin Header -->
-    <header class="p-5 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-appCard border-b border-gray-800 shrink-0">
+    <header class="p-5 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-appCard border-b border-gray-800 shrink-0 relative z-20">
         <div class="flex items-center gap-4">
             <!-- Circular Admin Logo -->
-            <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Admin Logo" class="w-12 h-12 rounded-full border-2 border-appPink shadow-lg object-cover">
+            <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Admin Logo" class="w-12 h-12 rounded-full border-2 border-appPink shadow-lg object-cover shrink-0">
             
-            <div>
-                <h1 class="text-xl font-bold leading-none text-white tracking-wide">Control Center</h1>
-                <p class="text-xs text-appPink mt-1 font-medium">Manage Zoom Meetings, YouTube & PDFs</p>
+            <div class="min-w-0">
+                <h1 class="text-xl font-bold leading-none text-white tracking-wide truncate">Control Center</h1>
+                <p class="text-xs text-appPink mt-1 font-medium truncate">Manage Zoom Meetings, YouTube & PDFs</p>
             </div>
         </div>
         <div class="flex gap-2 w-full sm:w-auto">
-            <button onclick="openUploadModal()" class="flex-1 sm:flex-none px-5 py-3 bg-appPink hover:bg-appPinkDark text-white text-sm font-bold rounded-xl shadow-md shadow-appPink/20 flex items-center justify-center gap-2 transition-all">
+            <button onclick="openUploadModal()" class="flex-1 sm:flex-none px-5 py-3 bg-appPink hover:bg-appPinkDark text-white text-sm font-bold rounded-xl shadow-md shadow-appPink/20 flex items-center justify-center gap-2 transition-all shrink-0">
                 <i class="fa-solid fa-plus"></i> Add New Material
             </button>
         </div>
@@ -93,40 +93,40 @@
 
     <!-- Stat Dashboard Section -->
     <section class="px-5 pt-4 grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">Total Items</p>
+        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
+            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Total Items</p>
             <h3 class="text-2xl font-black text-white mt-1" id="stat-total">0</h3>
         </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">Zoom Meetings</p>
+        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
+            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Zoom Meetings</p>
             <h3 class="text-2xl font-black text-blue-400 mt-1" id="stat-zoom">0</h3>
         </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">YouTube Videos</p>
+        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
+            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">YouTube Videos</p>
             <h3 class="text-2xl font-black text-red-500 mt-1" id="stat-youtube">0</h3>
         </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">Active PDFs</p>
+        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
+            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Active PDFs</p>
             <h3 class="text-2xl font-black text-sky-400 mt-1" id="stat-pdf">0</h3>
         </div>
     </section>
 
     <!-- Filters and Live Search Controls -->
-    <section class="p-5 pb-2 flex flex-col md:flex-row gap-3 shrink-0">
-        <div class="flex-1 relative">
+    <section class="p-5 pb-2 flex flex-col lg:flex-row gap-3 shrink-0">
+        <div class="flex-1 relative w-full">
             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-textMuted">
                 <i class="fa-solid fa-magnifying-glass text-sm"></i>
             </span>
             <input type="text" id="admin-search" oninput="filterAndSearchData()" placeholder="Search topics, papers or links..." class="w-full bg-appCard border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-appPink transition-all">
         </div>
-        <div class="flex gap-2">
-            <select id="filter-type" onchange="filterAndSearchData()" class="bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
+        <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+            <select id="filter-type" onchange="filterAndSearchData()" class="flex-1 sm:flex-none bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
                 <option value="all">All Material Types</option>
                 <option value="pdf">PDF Documents</option>
                 <option value="youtube">YouTube Videos</option>
                 <option value="zoom">Zoom Streams</option>
             </select>
-            <select id="filter-category" onchange="filterAndSearchData()" class="bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
+            <select id="filter-category" onchange="filterAndSearchData()" class="flex-1 sm:flex-none bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
                 <option value="all">All Categories</option>
                 <option value="notes">Notes</option>
                 <option value="live">Live Classes</option>
@@ -141,49 +141,52 @@
     </section>
 
     <!-- List Container -->
-    <main class="flex-1 overflow-y-auto hide-scrollbar px-5 pb-6 space-y-3" id="admin-list">
-        <div class="text-center py-12 text-textMuted">
+    <!-- Transformed to Grid layout for Desktop optimization -->
+    <main class="flex-1 overflow-y-auto hide-scrollbar px-5 pb-6 grid grid-cols-1 xl:grid-cols-2 gap-4 content-start" id="admin-list">
+        <div class="col-span-1 xl:col-span-2 text-center py-12 text-textMuted w-full">
             <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-appPink"></i>
             <p class="text-sm">Retrieving active repository...</p>
         </div>
     </main>
 
     <!-- Upload/Edit Modal -->
-    <div id="modal-upload" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity p-2 sm:p-0">
-        <div class="bg-appCard w-full sm:max-w-md sm:rounded-3xl rounded-3xl p-6 shadow-2xl border border-gray-800 fade-in max-h-[95dvh] overflow-y-auto hide-scrollbar">
+    <div id="modal-upload" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity p-2 sm:p-4">
+        <div class="bg-appCard w-full sm:max-w-xl sm:rounded-3xl rounded-3xl p-6 shadow-2xl border border-gray-800 fade-in max-h-[95dvh] overflow-y-auto hide-scrollbar">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-bold text-white" id="modal-title">Upload Asset</h3>
-                <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
             <form id="upload-form" onsubmit="handleUpload(event)" class="space-y-4">
                 <input type="hidden" id="edit-id" value="">
                 
-                <div>
-                    <label class="block text-xs text-textMuted mb-1 ml-1">Asset Placement Category</label>
-                    <select id="up-category" class="admin-input" required>
-                        <option value="notes">Notes</option>
-                        <option value="live">Live Classes</option>
-                        <option value="tests">Mock Tests</option>
-                        <option value="pyq">PYQ Bank</option>
-                        <option value="practice">Practice Sets</option>
-                        <option value="formula">Formula Sheet</option>
-                        <option value="mindmaps">Mind Maps</option>
-                        <option value="dpps">DPPs</option>
-                    </select>
-                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Asset Placement Category</label>
+                        <select id="up-category" class="admin-input" required>
+                            <option value="notes">Notes</option>
+                            <option value="live">Live Classes</option>
+                            <option value="tests">Mock Tests</option>
+                            <option value="pyq">PYQ Bank</option>
+                            <option value="practice">Practice Sets</option>
+                            <option value="formula">Formula Sheet</option>
+                            <option value="mindmaps">Mind Maps</option>
+                            <option value="dpps">DPPs</option>
+                        </select>
+                    </div>
 
-                <div>
-                    <label class="block text-xs text-textMuted mb-1 ml-1">Academic Subject</label>
-                    <select id="up-subject" class="admin-input" required>
-                        <option value="Physics">Physics</option>
-                        <option value="Chemistry">Chemistry</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Biology">Biology</option>
-                        <option value="Inorganic Chemistry">Inorganic Chemistry</option>
-                        <option value="Organic Chemistry">Organic Chemistry</option>
-                        <option value="Full Syllabus">Full Syllabus / General</option>
-                    </select>
+                    <div>
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Academic Subject</label>
+                        <select id="up-subject" class="admin-input" required>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Biology">Biology</option>
+                            <option value="Inorganic Chemistry">Inorganic Chemistry</option>
+                            <option value="Organic Chemistry">Organic Chemistry</option>
+                            <option value="Full Syllabus">Full Syllabus / General</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Integrated Material Link Type Dropper -->
@@ -207,7 +210,7 @@
                 </div>
 
                 <!-- Zoom Secondary Information Panel (Dynamic) -->
-                <div id="zoom-fields" class="hidden grid grid-cols-2 gap-3 bg-[#0d0e15] p-3 rounded-2xl border border-gray-800">
+                <div id="zoom-fields" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0d0e15] p-3 rounded-2xl border border-gray-800">
                     <div>
                         <label class="block text-xs text-textMuted mb-1 ml-1">Meeting ID</label>
                         <input type="text" id="up-zoom-id" placeholder="845 2332 9494" class="admin-input">
@@ -218,15 +221,15 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs text-textMuted mb-1 ml-1">Display Metadata (e.g., File size or Duration)</label>
-                    <input type="text" id="up-size" placeholder="e.g. 1.8 MB or 90 Mins" class="admin-input">
-                </div>
-
-                <!-- NEW: Backdating override for Timeline feature -->
-                <div>
-                    <label class="block text-xs text-textMuted mb-1 ml-1">Timeline Target Date (Optional)</label>
-                    <input type="date" id="up-date" class="admin-input text-textMuted" title="Leave blank to use today's date for timeline sorting">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Display Metadata</label>
+                        <input type="text" id="up-size" placeholder="e.g. 1.8 MB or 90 Mins" class="admin-input">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-textMuted mb-1 ml-1">Timeline Target Date (Optional)</label>
+                        <input type="date" id="up-date" class="admin-input text-textMuted" title="Leave blank to use today's date for timeline sorting">
+                    </div>
                 </div>
 
                 <button type="submit" id="btn-submit" class="w-full mt-4 bg-appPink hover:bg-appPinkDark text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
@@ -252,7 +255,7 @@
     </div>
 
     <!-- Toast Banner -->
-    <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+    <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px] max-w-xs w-max">
         <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
         <span id="toast-msg">Success</span>
     </div>
@@ -345,7 +348,7 @@
             const container = document.getElementById('admin-list');
             if (filteredData.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-16 text-textMuted bg-appCard border border-gray-800/80 rounded-2xl">
+                    <div class="col-span-1 xl:col-span-2 text-center py-16 text-textMuted bg-appCard border border-gray-800/80 rounded-2xl w-full">
                         <i class="fa-solid fa-magnifying-glass-chart text-4xl mb-3 text-gray-700"></i>
                         <p class="font-semibold text-white">No matching resources</p>
                         <p class="text-xs mt-1 text-textMuted">Adjust your filters or add a new material.</p>
@@ -358,28 +361,28 @@
                 const timelineDate = item.timestamp ? new Date(item.timestamp).toLocaleDateString('en-CA') : 'N/A';
                 
                 return `
-                <div class="bg-appCard border border-gray-800/80 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:border-gray-700 transition-colors">
-                    <div class="flex-1 min-w-0">
+                <div class="bg-appCard border border-gray-800/80 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:border-gray-700 transition-colors w-full">
+                    <div class="flex-1 min-w-0 w-full">
                         <div class="flex flex-wrap items-center gap-2 mb-2">
                             <span class="text-[9px] uppercase tracking-wider font-extrabold text-white bg-appPink px-2.5 py-1 rounded-md shadow-sm shadow-appPink/10">${categoryLabels[item.category] || 'Notes'}</span>
                             <span class="text-[10px] text-gray-400 bg-gray-800/80 border border-gray-800 px-2 py-0.5 rounded-md font-medium">${escapeHtml(item.subject)}</span>
                             ${badge}
                             ${item.size ? `<span class="text-[10px] text-textMuted"><i class="fa-solid fa-circle-info text-[8px] mr-1"></i>${escapeHtml(item.size)}</span>` : ''}
                         </div>
-                        <h4 class="text-sm font-bold text-white truncate max-w-sm md:max-w-md">${escapeHtml(item.topic)}</h4>
-                        <div class="text-[10px] text-textMuted mt-1.5 flex gap-3 truncate max-w-xs md:max-w-md">
-                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 font-mono truncate">Target: ${escapeHtml(item.code)}</span>
-                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 text-appPink"><i class="fa-regular fa-calendar mr-1"></i> ${timelineDate}</span>
+                        <h4 class="text-sm font-bold text-white truncate max-w-full md:max-w-md w-full">${escapeHtml(item.topic)}</h4>
+                        <div class="text-[10px] text-textMuted mt-1.5 flex gap-3 overflow-hidden">
+                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 font-mono truncate max-w-[150px] sm:max-w-[200px]">Target: ${escapeHtml(item.code)}</span>
+                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 text-appPink shrink-0"><i class="fa-regular fa-calendar mr-1"></i> ${timelineDate}</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 self-stretch md:self-auto pt-2 md:pt-0 border-t border-gray-800/40 md:border-none">
-                        <button onclick="testLink('${item.id}')" title="Test Link / Stream" class="flex-1 md:flex-none h-10 px-3.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-all text-xs font-bold flex items-center justify-center gap-1.5 border border-gray-700">
+                    <div class="flex items-center justify-end gap-2 self-stretch md:self-auto pt-3 md:pt-0 border-t border-gray-800/40 md:border-none w-full md:w-auto shrink-0">
+                        <button onclick="testLink('${item.id}')" title="Test Link / Stream" class="flex-1 md:flex-none h-10 px-3.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-all text-xs font-bold flex items-center justify-center gap-1.5 border border-gray-700 shrink-0">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i> Preview
                         </button>
-                        <button onclick="openEditModal('${item.id}')" title="Edit Properties" class="w-10 h-10 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-indigo-500/20">
+                        <button onclick="openEditModal('${item.id}')" title="Edit Properties" class="w-10 h-10 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-indigo-500/20 shrink-0">
                             <i class="fa-solid fa-pencil text-sm"></i>
                         </button>
-                        <button onclick="confirmDelete('${item.id}')" title="Remove Asset" class="w-10 h-10 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20">
+                        <button onclick="confirmDelete('${item.id}')" title="Remove Asset" class="w-10 h-10 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20 shrink-0">
                             <i class="fa-solid fa-trash-can text-sm"></i>
                         </button>
                     </div>
@@ -390,12 +393,12 @@
         const getLinkTypeBadge = (linkType) => {
             switch(linkType) {
                 case 'zoom':
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">Zoom Meeting</span>`;
+                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">Zoom</span>`;
                 case 'youtube':
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">YouTube Embed</span>`;
+                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">YouTube</span>`;
                 case 'pdf':
                 default:
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded">PDF Doc</span>`;
+                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded">PDF</span>`;
             }
         };
 
@@ -572,3 +575,5 @@
     </script>
 </body>
 </html>
+
+
