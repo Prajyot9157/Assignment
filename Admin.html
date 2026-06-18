@@ -7,6 +7,9 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -73,10 +76,8 @@
 </head>
 <body>
 
-    <!-- Professional Admin Header -->
     <header class="p-5 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-appCard border-b border-gray-800 shrink-0 relative z-20">
         <div class="flex items-center gap-4">
-            <!-- Circular Admin Logo -->
             <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Admin Logo" class="w-12 h-12 rounded-full border-2 border-appPink shadow-lg object-cover shrink-0">
             
             <div class="min-w-0">
@@ -91,7 +92,6 @@
         </div>
     </header>
 
-    <!-- Stat Dashboard Section -->
     <section class="px-5 pt-4 grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
         <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
             <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Total Items</p>
@@ -111,7 +111,6 @@
         </div>
     </section>
 
-    <!-- Filters and Live Search Controls -->
     <section class="p-5 pb-2 flex flex-col lg:flex-row gap-3 shrink-0">
         <div class="flex-1 relative w-full">
             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-textMuted">
@@ -140,8 +139,6 @@
         </div>
     </section>
 
-    <!-- List Container -->
-    <!-- Transformed to Grid layout for Desktop optimization -->
     <main class="flex-1 overflow-y-auto hide-scrollbar px-5 pb-6 grid grid-cols-1 xl:grid-cols-2 gap-4 content-start" id="admin-list">
         <div class="col-span-1 xl:col-span-2 text-center py-12 text-textMuted w-full">
             <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-appPink"></i>
@@ -149,7 +146,6 @@
         </div>
     </main>
 
-    <!-- Upload/Edit Modal -->
     <div id="modal-upload" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity p-2 sm:p-4">
         <div class="bg-appCard w-full sm:max-w-xl sm:rounded-3xl rounded-3xl p-6 shadow-2xl border border-gray-800 fade-in max-h-[95dvh] overflow-y-auto hide-scrollbar">
             <div class="flex justify-between items-center mb-6">
@@ -189,7 +185,6 @@
                     </div>
                 </div>
 
-                <!-- Integrated Material Link Type Dropper -->
                 <div>
                     <label class="block text-xs text-textMuted mb-1 ml-1">Link Integration Target</label>
                     <select id="up-link-type" onchange="toggleFormInputs()" class="admin-input" required>
@@ -203,13 +198,18 @@
                     <label class="block text-xs text-textMuted mb-1 ml-1">Topic Title / Name</label>
                     <input type="text" id="up-topic" placeholder="e.g. Rotational Dynamics L-2" class="admin-input" required>
                 </div>
+
+                <div id="file-upload-container" class="bg-[#0d0e15] p-3 rounded-2xl border border-gray-800 mb-2 hidden">
+                    <label class="block text-xs text-textMuted mb-2 ml-1">Upload Local Document (Supabase Storage)</label>
+                    <input type="file" id="up-file" class="w-full text-sm text-textMuted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-appPink/20 file:text-appPink hover:file:bg-appPink/30 cursor-pointer transition-all">
+                    <div class="text-center text-[10px] text-textMuted mt-2 font-bold tracking-wider uppercase">- OR PASTE LINK BELOW -</div>
+                </div>
                 
-                <div>
+                <div id="link-input-container">
                     <label class="block text-xs text-textMuted mb-1 ml-1" id="link-label">Resource Link (PDF Link or Code)</label>
-                    <input type="text" id="up-code" placeholder="Resource link URL..." class="admin-input" required>
+                    <input type="text" id="up-code" placeholder="Resource link URL..." class="admin-input">
                 </div>
 
-                <!-- Zoom Secondary Information Panel (Dynamic) -->
                 <div id="zoom-fields" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0d0e15] p-3 rounded-2xl border border-gray-800">
                     <div>
                         <label class="block text-xs text-textMuted mb-1 ml-1">Meeting ID</label>
@@ -239,7 +239,6 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <div id="modal-delete" class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm px-5">
         <div class="bg-appCard w-full max-w-sm rounded-3xl p-6 text-center border border-gray-800 shadow-2xl fade-in">
             <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
@@ -254,7 +253,6 @@
         </div>
     </div>
 
-    <!-- Toast Banner -->
     <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px] max-w-xs w-max">
         <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
         <span id="toast-msg">Success</span>
@@ -272,6 +270,14 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const refMaterials = db.ref('study_text_entries');
+
+        // --- 1.5. SUPABASE SETUP ---
+        const supabaseUrl = 'https://kwqlrxjvxyxajfhkuajj.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3cWxyeGp2eHl4YWpmaGt1YWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzA3NjcsImV4cCI6MjA5NzAwNjc2N30.rN24yvnTZbkqcJZBgDzqpN3Pt_ANhl_R-RyRIPf1Wso';
+        const supa = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // * Ensure you have a public bucket created in Supabase with this name *
+        const SUPABASE_BUCKET = 'materials'; 
 
         // --- 2. GLOBAL STATE ---
         let allData = [];
@@ -305,21 +311,28 @@
         const toggleFormInputs = () => {
             const targetType = document.getElementById('up-link-type').value;
             const zoomFields = document.getElementById('zoom-fields');
+            const fileContainer = document.getElementById('file-upload-container');
             const linkLabel = document.getElementById('link-label');
             const linkInput = document.getElementById('up-code');
 
             if (targetType === 'zoom') {
                 zoomFields.classList.remove('hidden');
+                fileContainer.classList.add('hidden');
                 linkLabel.innerText = 'Zoom Meeting Launch Link';
                 linkInput.placeholder = 'https://zoom.us/j/84523329494...';
+                linkInput.required = true;
             } else if (targetType === 'youtube') {
                 zoomFields.classList.add('hidden');
+                fileContainer.classList.add('hidden');
                 linkLabel.innerText = 'YouTube Video URL (Share or Browser Link)';
                 linkInput.placeholder = 'https://www.youtube.com/watch?v=...';
+                linkInput.required = true;
             } else {
                 zoomFields.classList.add('hidden');
-                linkLabel.innerText = 'Resource Link (PDF Link or Code)';
+                fileContainer.classList.remove('hidden');
+                linkLabel.innerText = 'External Resource Link (Leave blank if uploading above)';
                 linkInput.placeholder = 'PDF url or BrightClass code';
+                linkInput.required = false; // Because they might upload a file instead
             }
         };
 
@@ -333,7 +346,6 @@
                 const matchesSearch = item.topic ? item.topic.toLowerCase().includes(searchVal) : false;
                 const matchesCategory = (catVal === 'all') || (item.category === catVal);
                 
-                // Link type normalizer
                 const normalizedType = item.linkType || 'pdf';
                 const matchesType = (typeVal === 'all') || (normalizedType === typeVal);
                 
@@ -398,7 +410,7 @@
                     return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">YouTube</span>`;
                 case 'pdf':
                 default:
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded">PDF</span>`;
+                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded">PDF / FILE</span>`;
             }
         };
 
@@ -415,12 +427,11 @@
             document.getElementById('up-topic').value = item.topic || '';
             document.getElementById('up-code').value = item.code || '';
             document.getElementById('up-size').value = item.size || '';
+            document.getElementById('up-file').value = ''; // Clear file input
             
-            // Zoom secondary fields mapping
             document.getElementById('up-zoom-id').value = item.meetingId || '';
             document.getElementById('up-zoom-pass').value = item.passcode || '';
 
-            // Handle Timeline Date Extraction
             if(item.timestamp) {
                 const itemDate = new Date(item.timestamp);
                 const localDateStr = `${itemDate.getFullYear()}-${String(itemDate.getMonth()+1).padStart(2,'0')}-${String(itemDate.getDate()).padStart(2,'0')}`;
@@ -430,6 +441,8 @@
             }
 
             toggleFormInputs();
+            // Trigger toggle twice specifically to fix UI states if opening fresh
+            setTimeout(toggleFormInputs, 10);
             document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Changes';
             openUploadModal();
         };
@@ -471,6 +484,7 @@
         const closeUploadModal = () => {
             document.getElementById('modal-upload').classList.add('hidden');
             document.getElementById('upload-form').reset();
+            document.getElementById('up-file').value = ''; 
             document.getElementById('edit-id').value = "";
             document.getElementById('modal-title').innerText = "Upload Asset";
             document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Asset';
@@ -484,36 +498,69 @@
             const subject = document.getElementById('up-subject').value;
             const linkType = document.getElementById('up-link-type').value;
             const topic = document.getElementById('up-topic').value.trim();
-            const code = document.getElementById('up-code').value.trim();
-            const size = document.getElementById('up-size').value.trim();
             
-            // Timeline processing
-            const customDateInput = document.getElementById('up-date').value;
-            let targetTimestamp = Date.now();
-            if (customDateInput) {
-                // Creates date at midnight local time for the selected day
-                const [year, month, day] = customDateInput.split('-');
-                targetTimestamp = new Date(year, month - 1, day, 12, 0, 0).getTime();
-            }
+            let code = document.getElementById('up-code').value.trim();
+            let size = document.getElementById('up-size').value.trim();
+            
+            const fileInput = document.getElementById('up-file');
+            const hasFileToUpload = linkType === 'pdf' && fileInput.files.length > 0;
 
-            // Zoom payload values
-            const meetingId = document.getElementById('up-zoom-id').value.trim();
-            const passcode = document.getElementById('up-zoom-pass').value.trim();
+            // Form Validation Fallback
+            if (linkType === 'pdf' && !code && !hasFileToUpload) {
+                showToast("Please upload a file OR provide a valid link.", true);
+                return;
+            }
 
             const btn = document.getElementById('btn-submit');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Storing Transaction...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
 
-            const payload = {
-                category, subject, linkType, topic, code, size,
-                meetingId: linkType === 'zoom' ? meetingId : null,
-                passcode: linkType === 'zoom' ? passcode : null,
-            };
-
             try {
+                // Handle Supabase File Storage First
+                if (hasFileToUpload) {
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading to Supabase...';
+                    const file = fileInput.files[0];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+                    
+                    const { data, error } = await supa.storage.from(SUPABASE_BUCKET).upload(fileName, file);
+                    if (error) {
+                        throw error;
+                    }
+                    
+                    // Generate public URL directly from Supabase
+                    const { data: publicUrlData } = supa.storage.from(SUPABASE_BUCKET).getPublicUrl(fileName);
+                    code = publicUrlData.publicUrl;
+                    
+                    // Auto-fill file size metadata if omitted by user
+                    if(!size) {
+                        size = (file.size / (1024*1024)).toFixed(2) + ' MB';
+                    }
+                }
+
+                // Timeline processing
+                const customDateInput = document.getElementById('up-date').value;
+                let targetTimestamp = Date.now();
+                if (customDateInput) {
+                    const [year, month, day] = customDateInput.split('-');
+                    targetTimestamp = new Date(year, month - 1, day, 12, 0, 0).getTime();
+                }
+
+                // Zoom payload values
+                const meetingId = document.getElementById('up-zoom-id').value.trim();
+                const passcode = document.getElementById('up-zoom-pass').value.trim();
+
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Storing Database Entry...';
+
+                const payload = {
+                    category, subject, linkType, topic, code, size,
+                    meetingId: linkType === 'zoom' ? meetingId : null,
+                    passcode: linkType === 'zoom' ? passcode : null,
+                };
+
                 if (editId) {
-                    payload.timestamp = targetTimestamp; // Apply custom or existing date
+                    payload.timestamp = targetTimestamp; 
                     payload.lastModified = Date.now();
                     await refMaterials.child(editId).update(payload);
                     showToast("Asset properties updated");
@@ -523,8 +570,10 @@
                     showToast("Asset saved to live repository");
                 }
                 closeUploadModal();
+
             } catch(err) {
-                showToast("Live transaction aborted", true);
+                console.error("Upload Error:", err);
+                showToast(err.message || "Live transaction aborted", true);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -572,8 +621,10 @@
                 toast.style.transform = 'translate(-50%, -20px)';
             }, 2500);
         };
+        
+        // Ensure UI toggles correctly on boot
+        setTimeout(toggleFormInputs, 100);
     </script>
 </body>
 </html>
-
 
