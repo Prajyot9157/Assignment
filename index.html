@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MHT CET Class 12 | Student App</title>
+    <title>Udayagiri Academy | Student App</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -69,11 +68,17 @@
 
         #sidebar { transition: transform 0.3s ease-in-out; }
         #sidebar.open { transform: translateX(0); }
+        
+        .form-input { 
+            width: 100%; background: #1a1b26; border: 1px solid #2d2e3d; border-radius: 0.75rem; 
+            padding: 0.875rem; color: white; font-size: 0.875rem; outline: none; transition: all 0.2s; 
+        }
+        .form-input:focus { border-color: #f43f5e; box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2); }
     </style>
 </head>
 <body>
 
-    <div id="app-wrapper" class="app-container">
+    <div id="app-wrapper" class="app-container hidden">
 
         <!-- Sidebar Drawer -->
         <div id="sidebar" class="absolute inset-y-0 left-0 w-64 bg-appCard border-r border-gray-800 transform -translate-x-full z-[100] flex flex-col">
@@ -94,7 +99,7 @@
                 <button onclick="shareApp()" class="w-full text-left p-3.5 rounded-xl hover:bg-gray-800 text-white font-medium flex items-center gap-4 transition-colors"><i class="fa-solid fa-share-nodes text-appPink w-5 text-center"></i> Share App</button>
             </div>
             <div class="p-4 border-t border-gray-800 text-xs text-textMuted text-center bg-[#0d0e15]">
-                MHT CET Learning App<br>Version 2.0.0
+                UDAYAGIRI Learning App<br>Version 2.0.0
             </div>
         </div>
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity"></div>
@@ -106,12 +111,12 @@
                 <div class="flex items-center gap-3" id="main-header-content">
                     <i class="fa-solid fa-bars text-xl text-white/90 cursor-pointer hover:text-appPink transition-colors mr-1" id="menu-icon" onclick="toggleSidebar()"></i>
                     <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Logo" class="w-8 h-8 rounded-full border border-appPink/30 object-cover shadow-sm hidden sm:block">
-                    <h1 id="header-title" class="text-lg font-bold text-white tracking-wide truncate max-w-[200px] md:max-w-none">MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span></h1>
+                    <h1 id="header-title" class="text-lg font-bold text-white tracking-wide truncate max-w-[200px] md:max-w-none">MHT CET <span class="text-appPink text-sm font-semibold" id="header-class-badge"></span></h1>
                 </div>
             </div>
             <div class="flex gap-4 text-xl text-white/90 shrink-0">
-                <i class="fa-solid fa-gift hover:text-appPink transition-colors cursor-pointer"></i>
-                <div class="relative cursor-pointer hover:text-appPink transition-colors">
+                <i class="fa-solid fa-gift hover:text-appPink transition-colors cursor-pointer" onclick="switchTab('gift')"></i>
+                <div class="relative cursor-pointer hover:text-appPink transition-colors" onclick="switchTab('notifications')">
                     <i class="fa-regular fa-bell"></i>
                     <span class="absolute top-0 right-0 w-2 h-2 bg-appPink rounded-full border border-appBg"></span>
                 </div>
@@ -126,7 +131,7 @@
                 <!-- Greeting Card -->
                 <div class="mx-5 mt-4 p-5 rounded-3xl bg-gradient-to-br from-[#2a1738] to-appCard relative overflow-hidden border border-white/5 shadow-lg max-w-4xl xl:mx-auto">
                     <div class="relative z-10">
-                        <h2 class="text-xl font-bold text-white mb-1">Hello, Student <span class="text-yellow-400">👋</span></h2>
+                        <h2 class="text-xl font-bold text-white mb-1">Hello, <span id="greeting-name">Student</span> <span class="text-yellow-400">👋</span></h2>
                         <p class="text-xs text-gray-400 mb-5">Access all your study materials here.</p>
                         
                         <div class="flex gap-6 text-left">
@@ -214,7 +219,7 @@
                 </div>
             </main>
 
-            <!-- VIEW: CATEGORY SUBJECTS (Reused for Notes, PYQ, Tests, Practice etc) -->
+            <!-- VIEW: CATEGORY SUBJECTS -->
             <main id="view-category-subjects" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 max-w-5xl mx-auto w-full">
                 <div class="flex items-center gap-3 mb-6 mt-4">
                     <div class="flex-1 bg-appCard border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3 focus-within:border-appPink transition-colors">
@@ -276,12 +281,15 @@
                 </div>
             </main>
 
-            <!-- Profile View -->
+            <!-- VIEW: PROFILE -->
             <main id="view-profile" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 w-full">
                 <div class="flex flex-col items-center mt-8 mb-8">
-                    <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Profile Logo" class="w-24 h-24 rounded-full border-4 border-appCard shadow-2xl object-cover mb-4">
-                    <h2 class="text-2xl font-bold text-white">Student Hub</h2>
-                    <p class="text-sm text-appPink font-medium mt-1">MHT CET Target Batch</p>
+                    <div class="w-24 h-24 rounded-full border-4 border-appCard shadow-2xl bg-[#2a1738] flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-user-graduate text-4xl text-appPink"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white" id="profile-name">Student Name</h2>
+                    <p class="text-sm text-appPink font-medium mt-1"><span id="profile-class-badge">Class --</span> Batch</p>
+                    <p class="text-xs text-textMuted mt-1" id="profile-phone">+91 ----------</p>
                 </div>
                 
                 <div class="space-y-3 w-full max-w-lg mx-auto">
@@ -297,6 +305,30 @@
                         <div class="flex items-center gap-3"><i class="fa-solid fa-calendar-check text-appPink w-5 text-center"></i> Study Timeline</div>
                         <i class="fa-solid fa-chevron-right text-textMuted text-xs"></i>
                     </button>
+                </div>
+            </main>
+
+            <!-- VIEW: GIFTS & REWARDS -->
+            <main id="view-gift" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 w-full flex flex-col items-center justify-center text-center">
+                <div class="w-32 h-32 mb-6 text-appPink text-8xl drop-shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Rewards Program</h2>
+                <p class="text-sm text-textMuted max-w-xs mx-auto mb-8">Complete tests and attend live classes to earn points. Exciting rewards are coming soon!</p>
+                <button onclick="goBack()" class="px-6 py-3 bg-appCard border border-gray-800 rounded-xl text-white font-semibold">Back to Home</button>
+            </main>
+
+            <!-- VIEW: NOTIFICATIONS -->
+            <main id="view-notifications" class="h-full overflow-y-auto hide-scrollbar pb-6 app-view hidden fade-in px-5 w-full max-w-3xl mx-auto">
+                <div class="mt-4 space-y-3">
+                    <div class="bg-appCard border border-gray-800 rounded-2xl p-4 flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-full bg-appPink/10 text-appPink flex items-center justify-center shrink-0"><i class="fa-solid fa-hand-wave"></i></div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Welcome to MHT CET App!</h4>
+                            <p class="text-xs text-textMuted mt-1">We are thrilled to have you here. Start exploring your notes and video lectures.</p>
+                            <span class="text-[10px] text-gray-500 mt-2 block">System Message</span>
+                        </div>
+                    </div>
                 </div>
             </main>
 
@@ -390,6 +422,42 @@
 
     </div>
 
+    <!-- ONBOARDING REGISTRATION MODAL (Un-skippable) -->
+    <div id="modal-onboarding" class="absolute inset-0 z-[200] bg-appBg flex flex-col justify-center items-center px-6 hidden">
+        <div class="bg-appCard border border-gray-800 w-full max-w-md rounded-3xl p-8 shadow-2xl fade-in text-center">
+            <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Logo" class="w-20 h-20 mx-auto rounded-full border-4 border-appCard shadow-2xl object-cover mb-4">
+            <h2 class="text-2xl font-bold text-white mb-1">Welcome to UDAYAGIRI ACADEMY</h2>
+            <p class="text-sm text-textMuted mb-8">Please enter your details to start learning.</p>
+            
+            <form id="onboarding-form" onsubmit="registerStudent(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-textMuted mb-1 ml-1">Full Name</label>
+                    <input type="text" id="reg-name" placeholder="Enter your name" class="form-input" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-textMuted mb-1 ml-1">Phone Number</label>
+                    <input type="tel" id="reg-phone" placeholder="10-digit mobile number" pattern="[0-9]{10}" class="form-input" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-textMuted mb-1 ml-1">Select Class</label>
+                    <select id="reg-class" class="form-input appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%238b8d9c\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:1em]" required>
+                        <option value="" disabled selected>Choose your class</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
+                    </select>
+                </div>
+                
+                <button type="submit" id="btn-register" class="w-full mt-4 bg-appPink hover:bg-appPinkDark text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-appPink/20 text-sm">
+                    Start Learning
+                </button>
+            </form>
+        </div>
+    </div>
+
+
     <script>
         // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
@@ -402,6 +470,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const refMaterials = db.ref('study_text_entries');
+        const refUsers = db.ref('users');
 
         // --- APP STATE & LOCAL STORAGE ---
         const state = {
@@ -413,7 +482,8 @@
             allMaterials: [],
         };
 
-        // Local Storage for Bookmarks and Completed Items
+        // User Data Logic
+        let currentUser = JSON.parse(localStorage.getItem('studentData')) || null;
         let savedItems = JSON.parse(localStorage.getItem('mhtCetSavedItems')) || [];
         let completedItems = JSON.parse(localStorage.getItem('mhtCetCompletedItems')) || [];
 
@@ -451,14 +521,72 @@
 
         state.selectedCalendarDate = getLocalYMD(new Date());
 
+        // --- AUTHENTICATION & ONBOARDING ---
+        const initializeApp = () => {
+            if (!currentUser) {
+                document.getElementById('modal-onboarding').classList.remove('hidden');
+                document.getElementById('app-wrapper').classList.add('hidden');
+            } else {
+                applyUserData();
+                document.getElementById('modal-onboarding').classList.add('hidden');
+                document.getElementById('app-wrapper').classList.remove('hidden');
+            }
+        };
+
+        const registerStudent = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const stdClass = document.getElementById('reg-class').value;
+
+            if(!name || !phone || !stdClass) return showToast('Please fill all fields', true);
+
+            const btn = document.getElementById('btn-register');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering...';
+            
+            const userData = { 
+                name, 
+                phone, 
+                class: stdClass, 
+                joinedAt: Date.now() 
+            };
+            
+            try {
+                // Save to firebase
+                const newRef = await refUsers.push(userData);
+                userData.id = newRef.key;
+                
+                // Save to local storage to persist login
+                localStorage.setItem('studentData', JSON.stringify(userData));
+                currentUser = userData;
+                
+                document.getElementById('modal-onboarding').classList.add('hidden');
+                document.getElementById('app-wrapper').classList.remove('hidden');
+                applyUserData();
+            } catch(err) {
+                showToast('Registration Failed. Check Network.', true);
+                btn.innerHTML = 'Start Learning';
+            }
+        };
+
+        const applyUserData = () => {
+            if(!currentUser) return;
+            const firstName = currentUser.name.split(' ')[0];
+            document.getElementById('greeting-name').innerText = firstName;
+            document.getElementById('header-class-badge').innerText = `Class ${currentUser.class}`;
+            
+            // Profile tab values
+            document.getElementById('profile-name').innerText = currentUser.name;
+            document.getElementById('profile-class-badge').innerText = `Class ${currentUser.class}`;
+            document.getElementById('profile-phone').innerText = `+91 ${currentUser.phone}`;
+        };
+
+
         // --- HISTORY API ROUTING ENGINE (Smart Back Button) ---
-        
-        // Push exact app state directly into browser history
         const pushHistoryState = (view, payload = {}) => {
             history.pushState({ view, ...payload }, "", "");
         };
 
-        // Intercept Phone Hardware Back Button
         window.addEventListener('popstate', (event) => {
             if (event.state && event.state.view) {
                 renderView(event.state.view, event.state);
@@ -467,11 +595,9 @@
             }
         });
 
-        // The core view router
         const renderView = (view, payload = {}) => {
             state.currentTab = view;
             
-            // Highlight bottom nav correctly
             const navIds = ['home', 'tests', 'notes', 'profile'];
             if(navIds.includes(view)) {
                 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -486,18 +612,19 @@
                 });
             }
 
-            // Hide all pages
             document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
 
             const backBtn = document.getElementById('btn-back');
             const menuIcon = document.getElementById('menu-icon');
             const titleEl = document.getElementById('header-title');
+            
+            const defaultHeaderClass = currentUser ? `Class ${currentUser.class}` : `12 Science`;
 
             if (view === 'home') {
                 document.getElementById('view-home').classList.remove('hidden');
                 backBtn.classList.add('hidden');
                 menuIcon.classList.remove('hidden');
-                titleEl.innerHTML = 'MHT CET <span class="text-appPink text-sm font-semibold">12 Science</span>';
+                titleEl.innerHTML = `MHT CET <span class="text-appPink text-sm font-semibold">${defaultHeaderClass}</span>`;
             } 
             else if (view === 'profile') {
                 document.getElementById('view-profile').classList.remove('hidden');
@@ -526,6 +653,18 @@
                 titleEl.innerHTML = 'My Performance';
                 renderPerformanceStats();
             }
+            else if (view === 'gift') {
+                document.getElementById('view-gift').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'Rewards';
+            }
+            else if (view === 'notifications') {
+                document.getElementById('view-notifications').classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                titleEl.innerHTML = 'Notifications';
+            }
             else if (view === 'category-subjects') {
                 state.currentCategory = payload.category || 'notes';
                 document.getElementById('view-category-subjects').classList.remove('hidden');
@@ -545,15 +684,12 @@
                 backBtn.classList.remove('hidden');
                 menuIcon.classList.add('hidden');
                 
-                // Keep the title dynamic and translated correctly
-                const catTitle = categoryMeta[state.currentCategory]?.title || 'Notes';
                 titleEl.innerHTML = `${payload.subject}`;
                 
                 renderSubjectDetail();
             }
         };
 
-        // Main Tab Switcher Wrapper
         const switchTab = (tabId) => {
             if (categoriesWithSubjects.includes(tabId)) {
                 pushHistoryState('category-subjects', { category: tabId });
@@ -565,7 +701,6 @@
         };
 
         const goBack = () => {
-            // Uses browser's actual back logic to support the hardware back button perfectly
             window.history.back();
         };
 
@@ -643,13 +778,11 @@
         };
 
         const updateUIAfterAction = () => {
-            // Re-render currently visible list to update icons instantly
             if (state.currentTab === 'saved') renderSavedItems();
             else if (state.currentTab === 'subject-detail') renderSubjectDetail();
             else if (state.currentTab === 'home') renderHomeRecents();
             else if (state.currentTab === 'calendar') renderCalendarContent();
         };
-
 
         // --- REAL-TIME DATABASE LISTENER ---
         refMaterials.on('value', snap => {
@@ -660,7 +793,6 @@
             renderHomeStats();
             renderHomeRecents();
             
-            // Re-render active view
             if (state.currentTab === 'category-subjects') renderCategorySubjects(state.currentCategory);
             else if (state.currentTab === 'subject-detail') renderSubjectDetail();
             else if (state.currentTab === 'calendar') renderCalendarContent();
@@ -701,7 +833,6 @@
                 </button>`;
             }
             strip.innerHTML = html;
-            
             setTimeout(() => { strip.scrollLeft = strip.scrollWidth; }, 50);
         };
 
@@ -713,7 +844,6 @@
 
         const renderCalendarContent = () => {
             const container = document.getElementById('calendar-content-list');
-            
             const filtered = state.allMaterials.filter(item => {
                 if(!item.timestamp) return false;
                 return getLocalYMD(new Date(item.timestamp)) === state.selectedCalendarDate;
@@ -730,10 +860,8 @@
                     </div>`;
                 return;
             }
-
             container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
         };
-
 
         // --- CORE UI GENERATOR ENGINE ---
         const renderHomeStats = () => {
@@ -797,29 +925,24 @@
 
         const renderSubjectDetail = () => {
             const meta = subjectMeta[state.selectedSubject] || fallbackMeta;
-            
             document.getElementById('detail-subj-icon-container').className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg shrink-0 ${meta.color}`;
             document.getElementById('detail-subj-icon').className = `fa-solid ${meta.icon} text-white/90`;
-            
             const catTitle = categoryMeta[state.currentCategory]?.title || 'Notes';
             document.getElementById('detail-subj-title').innerText = `${state.selectedSubject} (${catTitle})`;
 
             let filtered = state.allMaterials.filter(m => m.subject === state.selectedSubject && (m.category === state.currentCategory || (!m.category && state.currentCategory === 'notes')));
             document.getElementById('detail-subj-count').innerText = `${filtered.length} Items`;
-
             const container = document.getElementById('detail-pdf-list');
             if (!filtered.length) {
                 container.innerHTML = `<div class="col-span-full text-center py-10"><i class="fa-solid fa-folder-open text-4xl text-gray-800 mb-3"></i><p class="text-sm text-textMuted">No material uploaded in this module yet.</p></div>`;
                 return;
             }
-
             container.innerHTML = filtered.map(item => generateItemCard(item)).join('');
         };
 
         const renderSavedItems = () => {
             const container = document.getElementById('saved-list-container');
             const filtered = state.allMaterials.filter(m => savedItems.includes(m.id));
-            
             if (!filtered.length) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-16 flex flex-col items-center">
@@ -835,23 +958,19 @@
         };
         
         const renderPerformanceStats = () => {
-            // Count tests taken
             const completedTestsCount = completedItems.filter(id => {
                 const item = state.allMaterials.find(m => m.id === id);
                 return item && item.category === 'tests';
             }).length;
             document.getElementById('perf-tests-taken').innerText = completedTestsCount;
 
-            // Completion Percentage
             const totalItems = state.allMaterials.length;
             const readItems = completedItems.length;
             const completionPercent = totalItems > 0 ? Math.round((readItems / totalItems) * 100) : 0;
             document.getElementById('perf-avg-score').innerText = completionPercent + '%';
 
-            // Items Read
             document.getElementById('perf-materials-read').innerText = readItems;
 
-            // Subject wise Progress
             const subjects = ["Physics", "Chemistry", "Mathematics", "Biology"];
             let subjectHtml = '';
             
@@ -887,14 +1006,12 @@
             const visual = getVisualProperties(item.linkType);
             const isSaved = savedItems.includes(item.id);
             const saveIcon = isSaved ? 'fa-solid fa-bookmark text-appPink' : 'fa-regular fa-bookmark text-gray-400';
-            
             const isCompleted = completedItems.includes(item.id);
             const completeIcon = isCompleted ? 'fa-solid fa-circle-check text-green-500' : 'fa-regular fa-circle-check text-gray-500';
             
             return `
             <div class="bg-appCard border ${isCompleted ? 'border-green-500/30' : 'border-gray-800'} rounded-2xl p-3.5 flex items-center gap-4 transition-colors w-full relative overflow-hidden group">
                 ${isCompleted ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500 rounded-l-2xl"></div>' : ''}
-                
                 <div class="w-10 h-10 ${visual.bg} rounded-lg flex items-center justify-center shrink-0 ${visual.color} border ${visual.border}">
                     <i class="fa-solid ${visual.icon}"></i>
                 </div>
@@ -906,15 +1023,12 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                    <!-- Mark as Read Button -->
                     <button onclick="toggleComplete('${item.id}', event)" title="Mark as Read" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors shrink-0">
                         <i class="${completeIcon} text-[13px]"></i>
                     </button>
-                    <!-- Bookmark Button -->
                     <button onclick="toggleSave('${item.id}', event)" title="Save Item" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors shrink-0">
                         <i class="${saveIcon} text-[13px]"></i>
                     </button>
-                    <!-- Watch/View Action -->
                     <button onclick="handleAction('${item.id}')" class="px-3 py-2 ${visual.btnBg} hover:opacity-90 ${visual.btnTextColor} rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hidden sm:flex">
                         <i class="fa-solid ${visual.actionIcon}"></i> ${visual.actionText}
                     </button>
@@ -925,65 +1039,23 @@
             </div>`;
         };
 
-        // --- VISUAL STRATEGY PARSER ---
         const getVisualProperties = (linkType) => {
             switch(linkType) {
-                case 'youtube':
-                    return {
-                        bg: 'bg-red-500/10', color: 'text-red-500', border: 'border-red-500/20',
-                        icon: 'fa-play', actionIcon: 'fa-circle-play', actionText: 'Watch',
-                        btnBg: 'bg-red-500/20', btnTextColor: 'text-red-400'
-                    };
-                case 'zoom':
-                    return {
-                        bg: 'bg-[#2D8CFF]/10', color: 'text-[#2D8CFF]', border: 'border-[#2D8CFF]/20',
-                        icon: 'fa-video', actionIcon: 'fa-video', actionText: 'Join',
-                        btnBg: 'bg-[#2D8CFF]/20', btnTextColor: 'text-[#2D8CFF]'
-                    };
-                case 'pdf':
-                default:
-                    return {
-                        bg: 'bg-rose-500/10', color: 'text-rose-500', border: 'border-rose-500/20',
-                        icon: 'fa-file-pdf', actionIcon: 'fa-eye', actionText: 'View',
-                        btnBg: 'bg-rose-500/20', btnTextColor: 'text-rose-400'
-                    };
+                case 'youtube': return { bg: 'bg-red-500/10', color: 'text-red-500', border: 'border-red-500/20', icon: 'fa-play', actionIcon: 'fa-circle-play', actionText: 'Watch', btnBg: 'bg-red-500/20', btnTextColor: 'text-red-400' };
+                case 'zoom': return { bg: 'bg-[#2D8CFF]/10', color: 'text-[#2D8CFF]', border: 'border-[#2D8CFF]/20', icon: 'fa-video', actionIcon: 'fa-video', actionText: 'Join', btnBg: 'bg-[#2D8CFF]/20', btnTextColor: 'text-[#2D8CFF]' };
+                case 'pdf': default: return { bg: 'bg-rose-500/10', color: 'text-rose-500', border: 'border-rose-500/20', icon: 'fa-file-pdf', actionIcon: 'fa-eye', actionText: 'View', btnBg: 'bg-rose-500/20', btnTextColor: 'text-rose-400' };
             }
         };
 
-        // --- ROUTING ACTIONS ---
         const handleAction = (id) => {
             const item = state.allMaterials.find(m => m.id === id);
             if (!item) return;
-
-            // Automatically mark as read if they open it
-            if(!completedItems.includes(id)) {
-                toggleComplete(id, null);
-            }
-
-            if (item.linkType === 'zoom') {
-                openZoomModal(item);
-            } else if (item.linkType === 'youtube') {
-                previewYouTube(item);
-            } else {
-                previewPDF(item.code, item.topic);
-            }
+            if(!completedItems.includes(id)) toggleComplete(id, null);
+            if (item.linkType === 'zoom') openZoomModal(item);
+            else if (item.linkType === 'youtube') previewYouTube(item);
+            else previewPDF(item.code, item.topic);
         };
 
-        const openLink = (code) => {
-            if(!code) return;
-            if(code.startsWith('http')) {
-                window.open(code, '_blank');
-                return;
-            }
-            showToast("Resolving external link...");
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
-            fetch(proxyUrl).then(res => res.json()).then(data => {
-                if(data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
-                else showToast("Invalid Document Link", true);
-            }).catch(() => showToast("Network error occurred", true));
-        };
-
-        // --- ZOOM MEETING POPUP ---
         const openZoomModal = (item) => {
             document.getElementById('zoom-topic').innerText = item.topic;
             document.getElementById('zoom-subject').innerText = item.subject;
@@ -992,25 +1064,16 @@
             document.getElementById('zoom-join-btn').href = item.code;
             document.getElementById('modal-zoom').classList.remove('hidden');
         };
+        const closeZoomModal = () => document.getElementById('modal-zoom').classList.add('hidden');
 
-        const closeZoomModal = () => {
-            document.getElementById('modal-zoom').classList.add('hidden');
-        };
-
-        // --- YOUTUBE PREVIEW ENGINE ---
         const previewYouTube = (item) => {
             const embedUrl = getYouTubeEmbedUrl(item.code);
-            if (!embedUrl) {
-                window.open(item.code, '_blank');
-                return;
-            }
-            
+            if (!embedUrl) { window.open(item.code, '_blank'); return; }
             document.getElementById('preview-icon-wrapper').innerHTML = '<i class="fa-brands fa-youtube text-red-500 text-lg"></i>';
             document.getElementById('preview-title').innerText = item.topic;
             state.activePreviewLink = item.code; 
             document.getElementById('modal-preview').classList.remove('hidden');
             document.getElementById('preview-loader').classList.remove('hidden');
-            
             document.getElementById('preview-iframe').src = embedUrl;
         };
 
@@ -1018,101 +1081,60 @@
             if (!url) return '';
             let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             let match = url.match(regExp);
-            if (match && match[2].length === 11) {
-                return 'https://www.youtube.com/embed/' + match[2] + '?autoplay=1';
-            }
+            if (match && match[2].length === 11) return 'https://www.youtube.com/embed/' + match[2] + '?autoplay=1';
             return '';
         };
 
-        // --- PDF PREVIEW SYSTEM ---
         const previewPDF = (code, title) => {
             if(!code) return;
             document.getElementById('preview-icon-wrapper').innerHTML = '<i class="fa-solid fa-file-pdf text-appPink text-lg"></i>';
             document.getElementById('preview-title').innerText = title || "Document";
-            
             document.getElementById('modal-preview').classList.remove('hidden');
             document.getElementById('preview-loader').classList.remove('hidden');
             
-            const iframe = document.getElementById('preview-iframe');
-            
             const loadIframe = (url) => {
                 state.activePreviewLink = url; 
-                const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
-                iframe.src = viewerUrl;
+                document.getElementById('preview-iframe').src = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
             };
 
-            if(code.startsWith('http')) {
-                loadIframe(code);
-            } else {
+            if(code.startsWith('http')) { loadIframe(code); } 
+            else {
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
-                fetch(proxyUrl)
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data && data.cdnUrl) loadIframe(data.cdnUrl);
-                        else {
-                            closePreview();
-                            showToast("Corrupted File Code", true);
-                        }
-                    }).catch(() => {
-                        closePreview();
-                        showToast("Stream blocked due to network fault.", true);
-                    });
+                fetch(proxyUrl).then(res => res.json()).then(data => {
+                    if(data && data.cdnUrl) loadIframe(data.cdnUrl);
+                    else { closePreview(); showToast("Corrupted File Code", true); }
+                }).catch(() => { closePreview(); showToast("Stream blocked due to network fault.", true); });
             }
         };
 
-        const openExternalPreviewLink = () => {
-            if(state.activePreviewLink) {
-                window.open(state.activePreviewLink, '_blank');
-            }
-        };
+        const openExternalPreviewLink = () => { if(state.activePreviewLink) window.open(state.activePreviewLink, '_blank'); };
+        const closePreview = () => { document.getElementById('modal-preview').classList.add('hidden'); document.getElementById('preview-iframe').src = ""; state.activePreviewLink = null; };
 
-        const closePreview = () => {
-            document.getElementById('modal-preview').classList.add('hidden');
-            document.getElementById('preview-iframe').src = ""; 
-            state.activePreviewLink = null;
-        };
-
-        // --- HELPERS ---
         const copyToClipboard = (elementId) => {
             const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Copied to clipboard!");
-            }).catch(() => {
-                showToast("Failed to copy", true);
-            });
+            if(navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!")).catch(() => showToast("Failed to copy", true));
+            } else {
+                const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast("Copied to clipboard!");
+            }
         };
 
-        const escapeHtml = (str) => {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m]));
-        };
+        const escapeHtml = (str) => { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m])); };
 
         const showToast = (msg, isError = false) => {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;
-            
-            const icon = document.getElementById('toast-icon');
-            if(isError) {
-                icon.className = 'fa-solid fa-circle-exclamation text-red-500';
-            } else {
-                icon.className = 'fa-solid fa-circle-check text-appPink';
-            }
-
-            toast.style.opacity = '1';
-            toast.style.transform = 'translate(-50%, 0)';
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translate(-50%, -20px)';
-            }, 3000);
+            document.getElementById('toast-icon').className = isError ? 'fa-solid fa-circle-exclamation text-red-500' : 'fa-solid fa-circle-check text-appPink';
+            toast.style.opacity = '1'; toast.style.transform = 'translate(-50%, 0)';
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, -20px)'; }, 3000);
         };
 
-        // On Boot: Set Initial State for history API
+        // Boot
         window.onload = () => {
             history.replaceState({ view: 'home' }, '', '');
+            initializeApp();
         };
 
     </script>
 </body>
 </html>
-
