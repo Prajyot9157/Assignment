@@ -7,9 +7,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -72,117 +69,155 @@
             background-position: right 1rem center; 
             background-size: 1em; 
         }
+
+        .tab-btn { transition: all 0.2s; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #f43f5e; border-bottom: 2px solid #f43f5e; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <header class="p-5 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-appCard border-b border-gray-800 shrink-0 relative z-20">
-        <div class="flex items-center gap-4">
-            <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Admin Logo" class="w-12 h-12 rounded-full border-2 border-appPink shadow-lg object-cover shrink-0">
-            
-            <div class="min-w-0">
-                <h1 class="text-xl font-bold leading-none text-white tracking-wide truncate">Control Center</h1>
-                <p class="text-xs text-appPink mt-1 font-medium truncate">Manage Zoom Meetings, YouTube & PDFs</p>
+    <!-- Professional Admin Header -->
+    <header class="p-5 pb-0 flex flex-col gap-4 bg-appCard border-b border-gray-800 shrink-0">
+        <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+            <div class="flex items-center gap-4">
+                <img src="https://res.cloudinary.com/dygxni81n/image/upload/v1781399677/file_0000000016d0720b90d59b1433db483e_hhq2p2.png" alt="Admin Logo" class="w-12 h-12 rounded-full border-2 border-appPink shadow-lg object-cover">
+                <div>
+                    <h1 class="text-xl font-bold leading-none text-white tracking-wide">Control Center</h1>
+                    <p class="text-xs text-appPink mt-1 font-medium">Manage App Ecosystem</p>
+                </div>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto" id="header-action-container">
+                <button onclick="openUploadModal()" class="flex-1 sm:flex-none px-5 py-3 bg-appPink hover:bg-appPinkDark text-white text-sm font-bold rounded-xl shadow-md shadow-appPink/20 flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-plus"></i> Add New Material
+                </button>
             </div>
         </div>
-        <div class="flex gap-2 w-full sm:w-auto">
-            <button onclick="openUploadModal()" class="flex-1 sm:flex-none px-5 py-3 bg-appPink hover:bg-appPinkDark text-white text-sm font-bold rounded-xl shadow-md shadow-appPink/20 flex items-center justify-center gap-2 transition-all shrink-0">
-                <i class="fa-solid fa-plus"></i> Add New Material
+
+        <!-- Navigation Tabs -->
+        <div class="flex gap-6 mt-4">
+            <button onclick="switchAdminTab('materials')" class="tab-btn active pb-3 text-sm text-white focus:outline-none" data-tab="materials">
+                <i class="fa-solid fa-layer-group mr-1.5"></i> Material Vault
+            </button>
+            <button onclick="switchAdminTab('users')" class="tab-btn pb-3 text-sm text-textMuted hover:text-white focus:outline-none" data-tab="users">
+                <i class="fa-solid fa-users mr-1.5"></i> Student Directory
             </button>
         </div>
     </header>
 
-    <section class="px-5 pt-4 grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Total Items</p>
-            <h3 class="text-2xl font-black text-white mt-1" id="stat-total">0</h3>
-        </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Zoom Meetings</p>
-            <h3 class="text-2xl font-black text-blue-400 mt-1" id="stat-zoom">0</h3>
-        </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">YouTube Videos</p>
-            <h3 class="text-2xl font-black text-red-500 mt-1" id="stat-youtube">0</h3>
-        </div>
-        <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl w-full">
-            <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider truncate">Active PDFs</p>
-            <h3 class="text-2xl font-black text-sky-400 mt-1" id="stat-pdf">0</h3>
-        </div>
-    </section>
+    <!-- TAB 1: MATERIALS MANAGEMENT -->
+    <div id="section-materials" class="flex-1 flex flex-col overflow-hidden fade-in">
+        <section class="px-5 pt-4 grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
+            <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
+                <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">Total Items</p>
+                <h3 class="text-2xl font-black text-white mt-1" id="stat-total">0</h3>
+            </div>
+            <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
+                <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">Zoom Meetings</p>
+                <h3 class="text-2xl font-black text-blue-400 mt-1" id="stat-zoom">0</h3>
+            </div>
+            <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
+                <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">YouTube Videos</p>
+                <h3 class="text-2xl font-black text-red-500 mt-1" id="stat-youtube">0</h3>
+            </div>
+            <div class="bg-appCard border border-gray-800/80 p-3.5 rounded-2xl">
+                <p class="text-[10px] uppercase font-bold text-textMuted tracking-wider">Active PDFs</p>
+                <h3 class="text-2xl font-black text-sky-400 mt-1" id="stat-pdf">0</h3>
+            </div>
+        </section>
 
-    <section class="p-5 pb-2 flex flex-col lg:flex-row gap-3 shrink-0">
-        <div class="flex-1 relative w-full">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-textMuted">
-                <i class="fa-solid fa-magnifying-glass text-sm"></i>
-            </span>
-            <input type="text" id="admin-search" oninput="filterAndSearchData()" placeholder="Search topics, papers or links..." class="w-full bg-appCard border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-appPink transition-all">
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-            <select id="filter-type" onchange="filterAndSearchData()" class="flex-1 sm:flex-none bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
-                <option value="all">All Material Types</option>
-                <option value="pdf">PDF Documents</option>
-                <option value="youtube">YouTube Videos</option>
-                <option value="zoom">Zoom Streams</option>
-            </select>
-            <select id="filter-category" onchange="filterAndSearchData()" class="flex-1 sm:flex-none bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
-                <option value="all">All Categories</option>
-                <option value="notes">Notes</option>
-                <option value="live">Live Classes</option>
-                <option value="tests">Mock Tests</option>
-                <option value="pyq">PYQ Bank</option>
-                <option value="practice">Practice Sets</option>
-                <option value="formula">Formula Sheets</option>
-                <option value="mindmaps">Mind Maps</option>
-                <option value="dpps">DPPs</option>
-            </select>
-        </div>
-    </section>
+        <section class="p-5 pb-2 flex flex-col md:flex-row gap-3 shrink-0">
+            <div class="flex-1 relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-textMuted">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="admin-search" oninput="filterAndSearchData()" placeholder="Search topics, papers or links..." class="w-full bg-appCard border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-appPink transition-all">
+            </div>
+            <div class="flex gap-2">
+                <select id="filter-type" onchange="filterAndSearchData()" class="bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
+                    <option value="all">All Types</option>
+                    <option value="pdf">PDF</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="zoom">Zoom</option>
+                </select>
+                <select id="filter-category" onchange="filterAndSearchData()" class="bg-appCard border border-gray-800 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-appPink cursor-pointer">
+                    <option value="all">All Categories</option>
+                    <option value="notes">Notes</option>
+                    <option value="live">Live Classes</option>
+                    <option value="tests">Tests</option>
+                    <option value="pyq">PYQ</option>
+                </select>
+            </div>
+        </section>
 
-    <main class="flex-1 overflow-y-auto hide-scrollbar px-5 pb-6 grid grid-cols-1 xl:grid-cols-2 gap-4 content-start" id="admin-list">
-        <div class="col-span-1 xl:col-span-2 text-center py-12 text-textMuted w-full">
-            <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-appPink"></i>
-            <p class="text-sm">Retrieving active repository...</p>
-        </div>
-    </main>
+        <main class="flex-1 overflow-y-auto hide-scrollbar px-5 pb-6 space-y-3" id="admin-list">
+            <div class="text-center py-12 text-textMuted">
+                <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-appPink"></i>
+                <p class="text-sm">Retrieving active repository...</p>
+            </div>
+        </main>
+    </div>
 
-    <div id="modal-upload" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity p-2 sm:p-4">
-        <div class="bg-appCard w-full sm:max-w-xl sm:rounded-3xl rounded-3xl p-6 shadow-2xl border border-gray-800 fade-in max-h-[95dvh] overflow-y-auto hide-scrollbar">
+    <!-- TAB 2: STUDENT DIRECTORY -->
+    <div id="section-users" class="flex-1 flex flex-col overflow-hidden hidden fade-in">
+        <section class="px-5 pt-4 pb-2 shrink-0">
+            <div class="flex justify-between items-end mb-3">
+                <h3 class="text-white font-bold">Registered Users</h3>
+                <span class="text-xs bg-appPink/10 text-appPink px-2.5 py-1 rounded-full font-bold border border-appPink/20" id="total-users-badge">Total: 0</span>
+            </div>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-textMuted">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </span>
+                <input type="text" id="user-search" oninput="renderUserList()" placeholder="Search by name or phone..." class="w-full bg-appCard border border-gray-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-appPink transition-all">
+            </div>
+        </section>
+
+        <main class="flex-1 overflow-y-auto hide-scrollbar px-5 pb-6" id="user-list">
+            <!-- Populated dynamically via JS -->
+            <div class="text-center py-12 text-textMuted">
+                <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-appPink"></i>
+                <p class="text-sm">Retrieving student records...</p>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- Upload/Edit Modal -->
+    <div id="modal-upload" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity p-2 sm:p-0">
+        <div class="bg-appCard w-full sm:max-w-md sm:rounded-3xl rounded-3xl p-6 shadow-2xl border border-gray-800 fade-in max-h-[95dvh] overflow-y-auto hide-scrollbar">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-bold text-white" id="modal-title">Upload Asset</h3>
-                <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeUploadModal()" class="text-textMuted hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
             <form id="upload-form" onsubmit="handleUpload(event)" class="space-y-4">
                 <input type="hidden" id="edit-id" value="">
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Asset Placement Category</label>
-                        <select id="up-category" class="admin-input" required>
-                            <option value="notes">Notes</option>
-                            <option value="live">Live Classes</option>
-                            <option value="tests">Mock Tests</option>
-                            <option value="pyq">PYQ Bank</option>
-                            <option value="practice">Practice Sets</option>
-                            <option value="formula">Formula Sheet</option>
-                            <option value="mindmaps">Mind Maps</option>
-                            <option value="dpps">DPPs</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs text-textMuted mb-1 ml-1">Asset Placement Category</label>
+                    <select id="up-category" class="admin-input" required>
+                        <option value="notes">Notes</option>
+                        <option value="live">Live Classes</option>
+                        <option value="tests">Mock Tests</option>
+                        <option value="pyq">PYQ Bank</option>
+                        <option value="practice">Practice Sets</option>
+                        <option value="formula">Formula Sheet</option>
+                        <option value="mindmaps">Mind Maps</option>
+                        <option value="dpps">DPPs</option>
+                    </select>
+                </div>
 
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Academic Subject</label>
-                        <select id="up-subject" class="admin-input" required>
-                            <option value="Physics">Physics</option>
-                            <option value="Chemistry">Chemistry</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Biology">Biology</option>
-                            <option value="Inorganic Chemistry">Inorganic Chemistry</option>
-                            <option value="Organic Chemistry">Organic Chemistry</option>
-                            <option value="Full Syllabus">Full Syllabus / General</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs text-textMuted mb-1 ml-1">Academic Subject</label>
+                    <select id="up-subject" class="admin-input" required>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Inorganic Chemistry">Inorganic Chemistry</option>
+                        <option value="Organic Chemistry">Organic Chemistry</option>
+                        <option value="Full Syllabus">Full Syllabus / General</option>
+                    </select>
                 </div>
 
                 <div>
@@ -198,19 +233,13 @@
                     <label class="block text-xs text-textMuted mb-1 ml-1">Topic Title / Name</label>
                     <input type="text" id="up-topic" placeholder="e.g. Rotational Dynamics L-2" class="admin-input" required>
                 </div>
-
-                <div id="file-upload-container" class="bg-[#0d0e15] p-3 rounded-2xl border border-gray-800 mb-2 hidden">
-                    <label class="block text-xs text-textMuted mb-2 ml-1">Upload Local Document (Supabase Storage)</label>
-                    <input type="file" id="up-file" class="w-full text-sm text-textMuted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-appPink/20 file:text-appPink hover:file:bg-appPink/30 cursor-pointer transition-all">
-                    <div class="text-center text-[10px] text-textMuted mt-2 font-bold tracking-wider uppercase">- OR PASTE LINK BELOW -</div>
-                </div>
                 
-                <div id="link-input-container">
+                <div>
                     <label class="block text-xs text-textMuted mb-1 ml-1" id="link-label">Resource Link (PDF Link or Code)</label>
-                    <input type="text" id="up-code" placeholder="Resource link URL..." class="admin-input">
+                    <input type="text" id="up-code" placeholder="Resource link URL..." class="admin-input" required>
                 </div>
 
-                <div id="zoom-fields" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0d0e15] p-3 rounded-2xl border border-gray-800">
+                <div id="zoom-fields" class="hidden grid grid-cols-2 gap-3 bg-[#0d0e15] p-3 rounded-2xl border border-gray-800">
                     <div>
                         <label class="block text-xs text-textMuted mb-1 ml-1">Meeting ID</label>
                         <input type="text" id="up-zoom-id" placeholder="845 2332 9494" class="admin-input">
@@ -221,15 +250,14 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Display Metadata</label>
-                        <input type="text" id="up-size" placeholder="e.g. 1.8 MB or 90 Mins" class="admin-input">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-textMuted mb-1 ml-1">Timeline Target Date (Optional)</label>
-                        <input type="date" id="up-date" class="admin-input text-textMuted" title="Leave blank to use today's date for timeline sorting">
-                    </div>
+                <div>
+                    <label class="block text-xs text-textMuted mb-1 ml-1">Display Metadata</label>
+                    <input type="text" id="up-size" placeholder="e.g. 1.8 MB or 90 Mins" class="admin-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-textMuted mb-1 ml-1">Timeline Target Date (Optional)</label>
+                    <input type="date" id="up-date" class="admin-input text-textMuted" title="Leave blank to use today's date for timeline sorting">
                 </div>
 
                 <button type="submit" id="btn-submit" class="w-full mt-4 bg-appPink hover:bg-appPinkDark text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
@@ -239,6 +267,7 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
     <div id="modal-delete" class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm px-5">
         <div class="bg-appCard w-full max-w-sm rounded-3xl p-6 text-center border border-gray-800 shadow-2xl fade-in">
             <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
@@ -253,7 +282,8 @@
         </div>
     </div>
 
-    <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px] max-w-xs w-max">
+    <!-- Toast Banner -->
+    <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-full bg-appCard border border-gray-700 shadow-2xl text-sm font-medium text-white flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
         <i class="fa-solid fa-circle-check text-appPink" id="toast-icon"></i>
         <span id="toast-msg">Success</span>
     </div>
@@ -270,18 +300,12 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const refMaterials = db.ref('study_text_entries');
-
-        // --- 1.5. SUPABASE SETUP ---
-        const supabaseUrl = 'https://kwqlrxjvxyxajfhkuajj.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3cWxyeGp2eHl4YWpmaGt1YWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzA3NjcsImV4cCI6MjA5NzAwNjc2N30.rN24yvnTZbkqcJZBgDzqpN3Pt_ANhl_R-RyRIPf1Wso';
-        const supa = supabase.createClient(supabaseUrl, supabaseKey);
-        
-        // * Ensure you have a public bucket created in Supabase with this name *
-        const SUPABASE_BUCKET = 'materials'; 
+        const refUsers = db.ref('users');
 
         // --- 2. GLOBAL STATE ---
         let allData = [];
         let filteredData = [];
+        let allUsers = [];
         let pendingDeleteId = null;
 
         const categoryLabels = {
@@ -290,14 +314,42 @@
             "mindmaps": "Mind Map", "dpps": "DPP"
         };
 
-        // --- 3. FETCH AND STATISTICS ENGINE ---
+        // --- TAB NAVIGATION ---
+        const switchAdminTab = (tabName) => {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const isMatch = btn.dataset.tab === tabName;
+                btn.classList.toggle('active', isMatch);
+                btn.classList.toggle('text-white', isMatch);
+                btn.classList.toggle('text-textMuted', !isMatch);
+            });
+
+            if(tabName === 'materials') {
+                document.getElementById('section-materials').classList.remove('hidden');
+                document.getElementById('section-users').classList.add('hidden');
+                document.getElementById('header-action-container').classList.remove('hidden');
+            } else {
+                document.getElementById('section-materials').classList.add('hidden');
+                document.getElementById('section-users').classList.remove('hidden');
+                document.getElementById('header-action-container').classList.add('hidden');
+            }
+        };
+
+        // --- 3. FETCH AND STATISTICS ENGINE (MATERIALS) ---
         refMaterials.on('value', snap => {
             const data = snap.val() || {};
             allData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            
             calculateStats();
             filterAndSearchData();
+        });
+
+        // FETCH USER DATA
+        refUsers.on('value', snap => {
+            const data = snap.val() || {};
+            allUsers = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            allUsers.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+            document.getElementById('total-users-badge').innerText = `Total: ${allUsers.length}`;
+            renderUserList();
         });
 
         const calculateStats = () => {
@@ -307,36 +359,21 @@
             document.getElementById('stat-pdf').innerText = allData.filter(d => d.linkType === 'pdf' || !d.linkType).length;
         };
 
-        // --- DYNAMIC FORM PANEL CONTROLLER ---
         const toggleFormInputs = () => {
             const targetType = document.getElementById('up-link-type').value;
             const zoomFields = document.getElementById('zoom-fields');
-            const fileContainer = document.getElementById('file-upload-container');
             const linkLabel = document.getElementById('link-label');
             const linkInput = document.getElementById('up-code');
 
             if (targetType === 'zoom') {
-                zoomFields.classList.remove('hidden');
-                fileContainer.classList.add('hidden');
-                linkLabel.innerText = 'Zoom Meeting Launch Link';
-                linkInput.placeholder = 'https://zoom.us/j/84523329494...';
-                linkInput.required = true;
+                zoomFields.classList.remove('hidden'); linkLabel.innerText = 'Zoom Meeting Launch Link'; linkInput.placeholder = 'https://zoom.us/j/84523329494...';
             } else if (targetType === 'youtube') {
-                zoomFields.classList.add('hidden');
-                fileContainer.classList.add('hidden');
-                linkLabel.innerText = 'YouTube Video URL (Share or Browser Link)';
-                linkInput.placeholder = 'https://www.youtube.com/watch?v=...';
-                linkInput.required = true;
+                zoomFields.classList.add('hidden'); linkLabel.innerText = 'YouTube Video URL'; linkInput.placeholder = 'https://www.youtube.com/watch?v=...';
             } else {
-                zoomFields.classList.add('hidden');
-                fileContainer.classList.remove('hidden');
-                linkLabel.innerText = 'External Resource Link (Leave blank if uploading above)';
-                linkInput.placeholder = 'PDF url or BrightClass code';
-                linkInput.required = false; // Because they might upload a file instead
+                zoomFields.classList.add('hidden'); linkLabel.innerText = 'Resource Link (PDF Link or Code)'; linkInput.placeholder = 'PDF url or BrightClass code';
             }
         };
 
-        // --- 4. MULTI-LEVEL REAL-TIME FILTERING ---
         const filterAndSearchData = () => {
             const searchVal = document.getElementById('admin-search').value.toLowerCase().trim();
             const catVal = document.getElementById('filter-category').value;
@@ -345,80 +382,96 @@
             filteredData = allData.filter(item => {
                 const matchesSearch = item.topic ? item.topic.toLowerCase().includes(searchVal) : false;
                 const matchesCategory = (catVal === 'all') || (item.category === catVal);
-                
                 const normalizedType = item.linkType || 'pdf';
                 const matchesType = (typeVal === 'all') || (normalizedType === typeVal);
-                
                 return matchesSearch && matchesCategory && matchesType;
             });
-
             renderAdminList();
         };
 
-        // --- 5. COMPONENT RENDERER ---
         const renderAdminList = () => {
             const container = document.getElementById('admin-list');
             if (filteredData.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-1 xl:col-span-2 text-center py-16 text-textMuted bg-appCard border border-gray-800/80 rounded-2xl w-full">
-                        <i class="fa-solid fa-magnifying-glass-chart text-4xl mb-3 text-gray-700"></i>
-                        <p class="font-semibold text-white">No matching resources</p>
-                        <p class="text-xs mt-1 text-textMuted">Adjust your filters or add a new material.</p>
-                    </div>`;
-                return;
+                container.innerHTML = `<div class="text-center py-16 text-textMuted bg-appCard border border-gray-800/80 rounded-2xl"><i class="fa-solid fa-magnifying-glass-chart text-4xl mb-3 text-gray-700"></i><p class="font-semibold text-white">No matching resources</p></div>`; return;
             }
-
             container.innerHTML = filteredData.map(item => {
                 const badge = getLinkTypeBadge(item.linkType);
                 const timelineDate = item.timestamp ? new Date(item.timestamp).toLocaleDateString('en-CA') : 'N/A';
                 
                 return `
-                <div class="bg-appCard border border-gray-800/80 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:border-gray-700 transition-colors w-full">
-                    <div class="flex-1 min-w-0 w-full">
+                <div class="bg-appCard border border-gray-800/80 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:border-gray-700 transition-colors">
+                    <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2 mb-2">
                             <span class="text-[9px] uppercase tracking-wider font-extrabold text-white bg-appPink px-2.5 py-1 rounded-md shadow-sm shadow-appPink/10">${categoryLabels[item.category] || 'Notes'}</span>
                             <span class="text-[10px] text-gray-400 bg-gray-800/80 border border-gray-800 px-2 py-0.5 rounded-md font-medium">${escapeHtml(item.subject)}</span>
                             ${badge}
                             ${item.size ? `<span class="text-[10px] text-textMuted"><i class="fa-solid fa-circle-info text-[8px] mr-1"></i>${escapeHtml(item.size)}</span>` : ''}
                         </div>
-                        <h4 class="text-sm font-bold text-white truncate max-w-full md:max-w-md w-full">${escapeHtml(item.topic)}</h4>
-                        <div class="text-[10px] text-textMuted mt-1.5 flex gap-3 overflow-hidden">
-                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 font-mono truncate max-w-[150px] sm:max-w-[200px]">Target: ${escapeHtml(item.code)}</span>
-                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 text-appPink shrink-0"><i class="fa-regular fa-calendar mr-1"></i> ${timelineDate}</span>
+                        <h4 class="text-sm font-bold text-white truncate max-w-sm md:max-w-md">${escapeHtml(item.topic)}</h4>
+                        <div class="text-[10px] text-textMuted mt-1.5 flex gap-3 truncate max-w-xs md:max-w-md">
+                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 font-mono truncate">Target: ${escapeHtml(item.code)}</span>
+                            <span class="bg-[#090a10] px-2 py-1 rounded border border-gray-800/40 text-appPink"><i class="fa-regular fa-calendar mr-1"></i> ${timelineDate}</span>
                         </div>
                     </div>
-                    <div class="flex items-center justify-end gap-2 self-stretch md:self-auto pt-3 md:pt-0 border-t border-gray-800/40 md:border-none w-full md:w-auto shrink-0">
-                        <button onclick="testLink('${item.id}')" title="Test Link / Stream" class="flex-1 md:flex-none h-10 px-3.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-all text-xs font-bold flex items-center justify-center gap-1.5 border border-gray-700 shrink-0">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Preview
-                        </button>
-                        <button onclick="openEditModal('${item.id}')" title="Edit Properties" class="w-10 h-10 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-indigo-500/20 shrink-0">
-                            <i class="fa-solid fa-pencil text-sm"></i>
-                        </button>
-                        <button onclick="confirmDelete('${item.id}')" title="Remove Asset" class="w-10 h-10 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20 shrink-0">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
-                        </button>
+                    <div class="flex items-center gap-2 self-stretch md:self-auto pt-2 md:pt-0 border-t border-gray-800/40 md:border-none">
+                        <button onclick="testLink('${item.id}')" title="Test Link" class="flex-1 md:flex-none h-10 px-3.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-all text-xs font-bold flex items-center justify-center gap-1.5 border border-gray-700"><i class="fa-solid fa-arrow-up-right-from-square"></i> Preview</button>
+                        <button onclick="openEditModal('${item.id}')" title="Edit Properties" class="w-10 h-10 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-indigo-500/20"><i class="fa-solid fa-pencil text-sm"></i></button>
+                        <button onclick="confirmDelete('${item.id}')" title="Remove Asset" class="w-10 h-10 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-trash-can text-sm"></i></button>
                     </div>
-                </div>
-            `}).join('');
+                </div>`
+            }).join('');
         };
 
         const getLinkTypeBadge = (linkType) => {
             switch(linkType) {
-                case 'zoom':
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">Zoom</span>`;
-                case 'youtube':
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">YouTube</span>`;
-                case 'pdf':
-                default:
-                    return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded">PDF / FILE</span>`;
+                case 'zoom': return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">Zoom Meeting</span>`;
+                case 'youtube': return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">YouTube Embed</span>`;
+                case 'pdf': default: return `<span class="text-[9px] uppercase tracking-wider font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded">PDF Doc</span>`;
             }
         };
 
-        // --- 6. FORM DISPATCH ENGINE ---
+        // --- RENDER USER DIRECTORY ---
+        const renderUserList = () => {
+            const container = document.getElementById('user-list');
+            const searchVal = document.getElementById('user-search').value.toLowerCase().trim();
+            
+            const filteredUsers = allUsers.filter(u => {
+                const nameMatch = u.name ? u.name.toLowerCase().includes(searchVal) : false;
+                const phoneMatch = u.phone ? u.phone.includes(searchVal) : false;
+                return nameMatch || phoneMatch;
+            });
+
+            if (filteredUsers.length === 0) {
+                container.innerHTML = `<div class="text-center py-16 text-textMuted bg-appCard border border-gray-800/80 rounded-2xl"><i class="fa-solid fa-users-slash text-4xl mb-3 text-gray-700"></i><p class="font-semibold text-white">No users found</p></div>`; 
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    ${filteredUsers.map(user => {
+                        const joinDate = user.joinedAt ? new Date(user.joinedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'}) : 'Unknown';
+                        return `
+                        <div class="bg-appCard border border-gray-800 rounded-2xl p-4 flex gap-4 items-center">
+                            <div class="w-12 h-12 rounded-full bg-[#2a1738] text-appPink border border-appPink/30 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-white font-bold text-sm truncate">${escapeHtml(user.name)}</h4>
+                                <p class="text-[11px] text-textMuted mt-0.5"><i class="fa-solid fa-phone text-[9px] mr-1"></i> ${escapeHtml(user.phone)}</p>
+                                <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800/50">
+                                    <span class="text-[10px] font-bold text-gray-300">Class ${escapeHtml(user.class)}</span>
+                                    <span class="text-[9px] text-gray-500">Joined: ${joinDate}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            `;
+        };
+
         const openEditModal = (id) => {
             const item = allData.find(d => d.id === id);
             if (!item) return;
-
             document.getElementById('modal-title').innerText = "Edit Asset Properties";
             document.getElementById('edit-id').value = item.id;
             document.getElementById('up-category').value = item.category || 'notes';
@@ -427,22 +480,15 @@
             document.getElementById('up-topic').value = item.topic || '';
             document.getElementById('up-code').value = item.code || '';
             document.getElementById('up-size').value = item.size || '';
-            document.getElementById('up-file').value = ''; // Clear file input
-            
             document.getElementById('up-zoom-id').value = item.meetingId || '';
             document.getElementById('up-zoom-pass').value = item.passcode || '';
 
             if(item.timestamp) {
                 const itemDate = new Date(item.timestamp);
-                const localDateStr = `${itemDate.getFullYear()}-${String(itemDate.getMonth()+1).padStart(2,'0')}-${String(itemDate.getDate()).padStart(2,'0')}`;
-                document.getElementById('up-date').value = localDateStr;
-            } else {
-                document.getElementById('up-date').value = '';
-            }
+                document.getElementById('up-date').value = `${itemDate.getFullYear()}-${String(itemDate.getMonth()+1).padStart(2,'0')}-${String(itemDate.getDate()).padStart(2,'0')}`;
+            } else { document.getElementById('up-date').value = ''; }
 
             toggleFormInputs();
-            // Trigger toggle twice specifically to fix UI states if opening fresh
-            setTimeout(toggleFormInputs, 10);
             document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Changes';
             openUploadModal();
         };
@@ -450,46 +496,20 @@
         const testLink = (id) => {
             const item = allData.find(d => d.id === id);
             if (!item) return;
-            const code = item.code;
-
             if (item.linkType === 'youtube') {
-                let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                let match = code.match(regExp);
-                if (match && match[2].length === 11) {
-                    window.open(`https://www.youtube.com/embed/${match[2]}`, '_blank');
-                } else {
-                    window.open(code, '_blank');
-                }
+                let match = item.code.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                if (match && match[2].length === 11) window.open(`https://www.youtube.com/embed/${match[2]}`, '_blank');
+                else window.open(item.code, '_blank');
                 return;
             }
-
-            if (code.startsWith('http')) {
-                window.open(code, '_blank');
-                return;
-            }
-
+            if (item.code.startsWith('http')) { window.open(item.code, '_blank'); return; }
             showToast("Resolving brightclass proxy...");
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+code)}`;
-            fetch(proxyUrl).then(res => res.json()).then(data => {
-                if (data && data.cdnUrl) window.open(data.cdnUrl, '_blank');
-                else showToast("Code could not resolve", true);
-            }).catch(() => showToast("Proxy request failed", true));
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://server.brightclass.com/api/v1/file-storage/link-by-filecode?fileCode='+item.code)}`;
+            fetch(proxyUrl).then(res => res.json()).then(data => { if (data && data.cdnUrl) window.open(data.cdnUrl, '_blank'); else showToast("Code could not resolve", true); }).catch(() => showToast("Proxy request failed", true));
         };
 
-        // --- 7. MODERATION LOGICS ---
-        const openUploadModal = () => {
-            document.getElementById('modal-upload').classList.remove('hidden');
-        };
-        
-        const closeUploadModal = () => {
-            document.getElementById('modal-upload').classList.add('hidden');
-            document.getElementById('upload-form').reset();
-            document.getElementById('up-file').value = ''; 
-            document.getElementById('edit-id').value = "";
-            document.getElementById('modal-title').innerText = "Upload Asset";
-            document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Asset';
-            toggleFormInputs();
-        };
+        const openUploadModal = () => document.getElementById('modal-upload').classList.remove('hidden');
+        const closeUploadModal = () => { document.getElementById('modal-upload').classList.add('hidden'); document.getElementById('upload-form').reset(); document.getElementById('edit-id').value = ""; document.getElementById('modal-title').innerText = "Upload Asset"; document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Asset'; toggleFormInputs(); };
 
         const handleUpload = async (e) => {
             e.preventDefault();
@@ -498,133 +518,53 @@
             const subject = document.getElementById('up-subject').value;
             const linkType = document.getElementById('up-link-type').value;
             const topic = document.getElementById('up-topic').value.trim();
+            const code = document.getElementById('up-code').value.trim();
+            const size = document.getElementById('up-size').value.trim();
             
-            let code = document.getElementById('up-code').value.trim();
-            let size = document.getElementById('up-size').value.trim();
-            
-            const fileInput = document.getElementById('up-file');
-            const hasFileToUpload = linkType === 'pdf' && fileInput.files.length > 0;
-
-            // Form Validation Fallback
-            if (linkType === 'pdf' && !code && !hasFileToUpload) {
-                showToast("Please upload a file OR provide a valid link.", true);
-                return;
+            const customDateInput = document.getElementById('up-date').value;
+            let targetTimestamp = Date.now();
+            if (customDateInput) {
+                const [year, month, day] = customDateInput.split('-');
+                targetTimestamp = new Date(year, month - 1, day, 12, 0, 0).getTime();
             }
 
-            const btn = document.getElementById('btn-submit');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
+            const meetingId = document.getElementById('up-zoom-id').value.trim();
+            const passcode = document.getElementById('up-zoom-pass').value.trim();
+
+            const btn = document.getElementById('btn-submit'); const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Storing Transaction...'; btn.disabled = true;
+
+            const payload = { category, subject, linkType, topic, code, size, meetingId: linkType === 'zoom' ? meetingId : null, passcode: linkType === 'zoom' ? passcode : null };
 
             try {
-                // Handle Supabase File Storage First
-                if (hasFileToUpload) {
-                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading to Supabase...';
-                    const file = fileInput.files[0];
-                    const fileExt = file.name.split('.').pop();
-                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-                    
-                    const { data, error } = await supa.storage.from(SUPABASE_BUCKET).upload(fileName, file);
-                    if (error) {
-                        throw error;
-                    }
-                    
-                    // Generate public URL directly from Supabase
-                    const { data: publicUrlData } = supa.storage.from(SUPABASE_BUCKET).getPublicUrl(fileName);
-                    code = publicUrlData.publicUrl;
-                    
-                    // Auto-fill file size metadata if omitted by user
-                    if(!size) {
-                        size = (file.size / (1024*1024)).toFixed(2) + ' MB';
-                    }
-                }
-
-                // Timeline processing
-                const customDateInput = document.getElementById('up-date').value;
-                let targetTimestamp = Date.now();
-                if (customDateInput) {
-                    const [year, month, day] = customDateInput.split('-');
-                    targetTimestamp = new Date(year, month - 1, day, 12, 0, 0).getTime();
-                }
-
-                // Zoom payload values
-                const meetingId = document.getElementById('up-zoom-id').value.trim();
-                const passcode = document.getElementById('up-zoom-pass').value.trim();
-
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Storing Database Entry...';
-
-                const payload = {
-                    category, subject, linkType, topic, code, size,
-                    meetingId: linkType === 'zoom' ? meetingId : null,
-                    passcode: linkType === 'zoom' ? passcode : null,
-                };
-
                 if (editId) {
-                    payload.timestamp = targetTimestamp; 
-                    payload.lastModified = Date.now();
-                    await refMaterials.child(editId).update(payload);
-                    showToast("Asset properties updated");
+                    payload.timestamp = targetTimestamp; payload.lastModified = Date.now();
+                    await refMaterials.child(editId).update(payload); showToast("Asset properties updated");
                 } else {
-                    payload.timestamp = targetTimestamp;
-                    await refMaterials.push(payload);
-                    showToast("Asset saved to live repository");
+                    payload.timestamp = targetTimestamp; await refMaterials.push(payload); showToast("Asset saved to live repository");
                 }
                 closeUploadModal();
-
-            } catch(err) {
-                console.error("Upload Error:", err);
-                showToast(err.message || "Live transaction aborted", true);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            } catch(err) { showToast("Live transaction aborted", true); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
         };
 
-        // --- 8. REMOVAL LOGIC ---
-        const confirmDelete = (id) => {
-            pendingDeleteId = id;
-            document.getElementById('modal-delete').classList.remove('hidden');
-        };
-        const closeDeleteModal = () => {
-            pendingDeleteId = null;
-            document.getElementById('modal-delete').classList.add('hidden');
-        };
+        const confirmDelete = (id) => { pendingDeleteId = id; document.getElementById('modal-delete').classList.remove('hidden'); };
+        const closeDeleteModal = () => { pendingDeleteId = null; document.getElementById('modal-delete').classList.add('hidden'); };
         
         document.getElementById('btn-confirm-del').addEventListener('click', async () => {
             if(!pendingDeleteId) return;
-            try {
-                await refMaterials.child(pendingDeleteId).remove();
-                showToast("Asset deleted permanently");
-            } catch(e) {
-                showToast("Aborted deletion", true);
-            }
+            try { await refMaterials.child(pendingDeleteId).remove(); showToast("Asset deleted permanently"); } 
+            catch(e) { showToast("Aborted deletion", true); }
             closeDeleteModal();
         });
 
-        // --- 9. UTILITIES ---
-        const escapeHtml = (str) => {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m]));
-        };
-
+        const escapeHtml = (str) => { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m])); };
         const showToast = (msg, isError = false) => {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            const icon = document.getElementById('toast-icon');
-            icon.className = isError ? 'fa-solid fa-circle-exclamation text-red-500' : 'fa-solid fa-circle-check text-appPink';
-
-            toast.style.opacity = '1';
-            toast.style.transform = 'translate(-50%, 0)';
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translate(-50%, -20px)';
-            }, 2500);
+            const toast = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').className = isError ? 'fa-solid fa-circle-exclamation text-red-500' : 'fa-solid fa-circle-check text-appPink';
+            toast.style.opacity = '1'; toast.style.transform = 'translate(-50%, 0)';
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, -20px)'; }, 2500);
         };
-        
-        // Ensure UI toggles correctly on boot
-        setTimeout(toggleFormInputs, 100);
     </script>
 </body>
 </html>
-
