@@ -246,7 +246,6 @@
                 
                 <div>
                     <label class="block text-xs text-textMuted mb-1 ml-1" id="link-label">Resource Link (PDF Link or Code)</label>
-                    <!-- Removed 'required' attribute since users might just upload a file -->
                     <input type="text" id="up-code" placeholder="Resource link URL..." class="admin-input">
                 </div>
 
@@ -316,7 +315,7 @@
         // Supabase Constants
         const SUPABASE_URL = "https://kwqlrxjvxyxajfhkuajj.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3cWxyeGp2eHl4YWpmaGt1YWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzA3NjcsImV4cCI6MjA5NzAwNjc2N30.rN24yvnTZbkqcJZBgDzqpN3Pt_ANhl_R-RyRIPf1Wso";
-        const SUPABASE_BUCKET = "pdfs"; // MUST CREATE THIS BUCKET IN SUPABASE AS PUBLIC
+        const SUPABASE_BUCKET = "pdfs";
 
         // --- 2. GLOBAL STATE ---
         let allData = [];
@@ -359,11 +358,31 @@
             filterAndSearchData();
         });
 
-        // FETCH USER DATA
+        // --- FETCH USER DATA (WITH UNIQUE DEDUPLICATION) ---
         refUsers.on('value', snap => {
             const data = snap.val() || {};
-            allUsers = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-            allUsers.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+            let rawUsers = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            
+            // 1. Sort users by join date, newest first. 
+            // This guarantees the latest submitted name is processed first.
+            rawUsers.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+            
+            // 2. Filter out duplicates based on phone numbers using a Map
+            const uniqueUsersMap = new Map();
+            
+            rawUsers.forEach(user => {
+                // If they don't have a phone, use their ID so we don't accidentally overwrite them
+                const uniqueKey = (user.phone && user.phone.trim() !== '') ? user.phone.trim() : user.id;
+                
+                // Because it's sorted newest first, we only keep the first occurrence
+                if (!uniqueUsersMap.has(uniqueKey)) {
+                    uniqueUsersMap.set(uniqueKey, user);
+                }
+            });
+
+            // 3. Convert Map back to array
+            allUsers = Array.from(uniqueUsersMap.values());
+            
             document.getElementById('total-users-badge').innerText = `Total: ${allUsers.length}`;
             renderUserList();
         });
@@ -393,7 +412,6 @@
                 linkLabel.innerText = 'YouTube Video URL'; 
                 linkInput.placeholder = 'https://www.youtube.com/watch?v=...';
             } else {
-                // PDF Document Mode
                 zoomFields.classList.add('hidden'); 
                 pdfUploadSection.classList.remove('hidden');
                 linkLabel.innerText = 'Manual Resource Link (If not uploading)'; 
@@ -487,7 +505,7 @@
                                 <p class="text-[11px] text-textMuted mt-0.5"><i class="fa-solid fa-phone text-[9px] mr-1"></i> ${escapeHtml(user.phone)}</p>
                                 <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800/50">
                                     <span class="text-[10px] font-bold text-gray-300">Class ${escapeHtml(user.class)}</span>
-                                    <span class="text-[9px] text-gray-500">Joined: ${joinDate}</span>
+                                    <span class="text-[9px] text-gray-500">Last Setup: ${joinDate}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -541,7 +559,6 @@
             document.getElementById('modal-upload').classList.add('hidden'); 
             document.getElementById('upload-form').reset(); 
             document.getElementById('edit-id').value = ""; 
-            // Also reset the file input manually to ensure it's empty
             document.getElementById('up-file').value = "";
             document.getElementById('modal-title').innerText = "Upload Asset"; 
             document.getElementById('btn-submit').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Asset'; 
@@ -577,11 +594,9 @@
             btn.disabled = true;
 
             try {
-                // 1. Handle Supabase File Upload first if a PDF was selected
                 if (linkType === 'pdf' && file) {
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading PDF to Supabase...';
                     
-                    // Create safe filename
                     const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
                     const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${fileName}`;
 
@@ -601,24 +616,20 @@
                         throw new Error("File Upload Failed. Make sure the 'pdfs' bucket exists and is public.");
                     }
 
-                    // On Success: generate the public URL
                     code = `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${fileName}`;
                     
-                    // Auto-fill file size if user left it blank
                     if (!size) {
                         size = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
                     }
                     showToast("PDF securely hosted");
                 }
 
-                // Validation: Prevent empty submissions
                 if (linkType !== 'zoom' && !code) {
                     throw new Error("Please upload a PDF file or provide a direct link.");
                 }
 
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Storing into Firebase...';
 
-                // 2. Prepare Firebase Payload
                 const payload = { 
                     category, 
                     subject, 
@@ -630,7 +641,6 @@
                     passcode: linkType === 'zoom' ? passcode : null 
                 };
 
-                // 3. Save to Firebase Database
                 if (editId) {
                     payload.timestamp = targetTimestamp; 
                     payload.lastModified = Date.now();
@@ -674,7 +684,7 @@
             setTimeout(() => { 
                 toast.style.opacity = '0'; 
                 toast.style.transform = 'translate(-50%, -20px)'; 
-            }, 3000); // slightly longer read time
+            }, 3000); 
         };
     </script>
 </body>
