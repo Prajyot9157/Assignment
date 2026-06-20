@@ -277,14 +277,14 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Generic Delete Confirmation Modal -->
     <div id="modal-delete" class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm px-5">
         <div class="bg-appCard w-full max-w-sm rounded-3xl p-6 text-center border border-gray-800 shadow-2xl fade-in">
             <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
                 <i class="fa-solid fa-trash"></i>
             </div>
-            <h3 class="text-xl font-bold text-white mb-2">Delete Item?</h3>
-            <p class="text-textMuted text-sm mb-6">This item will be instantly removed from the Student app.</p>
+            <h3 class="text-xl font-bold text-white mb-2" id="delete-modal-title">Delete Item?</h3>
+            <p class="text-textMuted text-sm mb-6" id="delete-modal-text">This action is permanent and cannot be undone.</p>
             <div class="flex gap-3">
                 <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-800 rounded-xl text-white font-medium">Cancel</button>
                 <button id="btn-confirm-del" class="flex-1 py-3 bg-red-500 rounded-xl text-white font-medium shadow-lg shadow-red-500/20">Delete</button>
@@ -321,7 +321,10 @@
         let allData = [];
         let filteredData = [];
         let allUsers = [];
+        
+        // Deletion State
         let pendingDeleteId = null;
+        let deleteType = 'material'; // Can be 'material' or 'user'
 
         const categoryLabels = {
             "notes": "Notes", "live": "Live Class", "tests": "Mock Test", 
@@ -461,7 +464,7 @@
                     <div class="flex items-center gap-2 self-stretch md:self-auto pt-2 md:pt-0 border-t border-gray-800/40 md:border-none">
                         <button onclick="testLink('${item.id}')" title="Test Link" class="flex-1 md:flex-none h-10 px-3.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-all text-xs font-bold flex items-center justify-center gap-1.5 border border-gray-700"><i class="fa-solid fa-arrow-up-right-from-square"></i> Preview</button>
                         <button onclick="openEditModal('${item.id}')" title="Edit Properties" class="w-10 h-10 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-indigo-500/20"><i class="fa-solid fa-pencil text-sm"></i></button>
-                        <button onclick="confirmDelete('${item.id}')" title="Remove Asset" class="w-10 h-10 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                        <button onclick="confirmDeleteMaterial('${item.id}')" title="Remove Asset" class="w-10 h-10 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-trash-can text-sm"></i></button>
                     </div>
                 </div>`
             }).join('');
@@ -504,8 +507,11 @@
                                 <h4 class="text-white font-bold text-sm truncate">${escapeHtml(user.name)}</h4>
                                 <p class="text-[11px] text-textMuted mt-0.5"><i class="fa-solid fa-phone text-[9px] mr-1"></i> ${escapeHtml(user.phone)}</p>
                                 <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-800/50">
-                                    <span class="text-[10px] font-bold text-gray-300">Class ${escapeHtml(user.class)}</span>
-                                    <span class="text-[9px] text-gray-500">Last Setup: ${joinDate}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold text-gray-300 bg-gray-800 px-2 py-0.5 rounded">Class ${escapeHtml(user.class)}</span>
+                                        <span class="text-[9px] text-gray-500">Joined: ${joinDate}</span>
+                                    </div>
+                                    <button onclick="confirmDeleteUser('${user.id}')" title="Delete Student" class="w-8 h-8 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-all flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-trash-can text-[11px]"></i></button>
                                 </div>
                             </div>
                         </div>`;
@@ -663,16 +669,44 @@
             }
         };
 
-        const confirmDelete = (id) => { pendingDeleteId = id; document.getElementById('modal-delete').classList.remove('hidden'); };
-        const closeDeleteModal = () => { pendingDeleteId = null; document.getElementById('modal-delete').classList.add('hidden'); };
+        // --- DELETION LOGIC (Multi-purpose Modal) ---
+        const confirmDeleteMaterial = (id) => { 
+            pendingDeleteId = id; 
+            deleteType = 'material';
+            document.getElementById('delete-modal-title').innerText = "Delete Material Asset?";
+            document.getElementById('delete-modal-text').innerText = "This file will be instantly removed from the Student app.";
+            document.getElementById('modal-delete').classList.remove('hidden'); 
+        };
+
+        const confirmDeleteUser = (id) => { 
+            pendingDeleteId = id; 
+            deleteType = 'user';
+            document.getElementById('delete-modal-title').innerText = "Delete Student Account?";
+            document.getElementById('delete-modal-text').innerText = "This student's saved data and XP progress will be permanently erased.";
+            document.getElementById('modal-delete').classList.remove('hidden'); 
+        };
+
+        const closeDeleteModal = () => { 
+            pendingDeleteId = null; 
+            document.getElementById('modal-delete').classList.add('hidden'); 
+        };
         
         document.getElementById('btn-confirm-del').addEventListener('click', async () => {
             if(!pendingDeleteId) return;
-            try { await refMaterials.child(pendingDeleteId).remove(); showToast("Asset deleted permanently"); } 
+            try { 
+                if (deleteType === 'material') {
+                    await refMaterials.child(pendingDeleteId).remove(); 
+                    showToast("Material asset deleted permanently"); 
+                } else if (deleteType === 'user') {
+                    await refUsers.child(pendingDeleteId).remove(); 
+                    showToast("Student account deleted permanently"); 
+                }
+            } 
             catch(e) { showToast("Aborted deletion", true); }
             closeDeleteModal();
         });
 
+        // Utilities
         const escapeHtml = (str) => { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[m])); };
         
         const showToast = (msg, isError = false) => {
